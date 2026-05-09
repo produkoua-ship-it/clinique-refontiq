@@ -157,7 +157,7 @@
         padding-top: calc(var(--mobile-header-height) + 8px) !important;
         padding-left: 12px !important;
         padding-right: 12px !important;
-        padding-bottom: calc(var(--mobile-bottom-nav-height) + 12px) !important;
+        padding-bottom: 24px !important;
     }
 
     /* ---------- BOTTOM NAV SIMPLIFIÉE (5 icônes) ---------- */
@@ -342,6 +342,42 @@
     @keyframes slideIn {
         from { transform: translateX(-100%); }
         to { transform: translateX(0); }
+    }
+
+    /* Sidebar overlay */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1999;
+        backdrop-filter: blur(2px);
+    }
+    
+    .sidebar-overlay.active {
+        display: block !important;
+    }
+
+    /* Mobile Close Button in Sidebar */
+    .mobile-close-btn {
+        display: none;
+    }
+    .sidebar.active .mobile-close-btn {
+        display: flex;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        margin-left: auto;
     }
 
     /* ---------- ADAPTATIONS ---------- */
@@ -631,6 +667,39 @@
     }
 
     .mobile-bottom-nav {
+        display: none !important;
+    }
+
+    /* Force la sidebar et le layout desktop */
+    .sidebar {
+        display: block !important;
+        position: sticky !important;
+        top: 0 !important;
+        height: 100vh !important;
+        overflow-y: auto !important;
+        z-index: 100 !important;
+        transform: none !important;
+        width: 260px !important;
+    }
+
+    .dashboard-container {
+        display: grid !important;
+        grid-template-columns: 260px 1fr !important;
+        min-height: 100vh !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .main-content {
+        padding-top: 24px !important;
+        padding-left: 32px !important;
+        padding-right: 32px !important;
+        padding-bottom: 24px !important;
+        margin-top: 0 !important;
+    }
+
+    /* L'overlay ne doit jamais bloquer le desktop */
+    .sidebar-overlay, .mobile-close-btn {
         display: none !important;
     }
 }
