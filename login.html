@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Clinique Refontiq</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Palette Médicale Adaptée */
+            --primary: #0077b6;
+            --primary-dark: #023e8a;
+            --primary-light: #caf0f8;
+            --secondary: #2a9d8f;
+            --secondary-dark: #264653;
+            --accent: #e76f51;
+            --success: #2a9d8f;
+            --warning: #e9c46a;
+            --danger: #e76f51;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 20px rgba(0, 119, 182, 0.08);
+            --shadow-lg: 0 20px 60px rgba(0, 119, 182, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .login-left {
+            padding: 40px;
+        }
+
+        .logo-section {
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .logo-text h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+        }
+
+        .logo-text p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 119, 182, 0.1);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .feature-content h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .feature-content p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        .login-right {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: var(--text-light);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: var(--bg);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 119, 182, 0.1);
+            background: white;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 119, 182, 0.4);
+        }
+
+        .form-divider {
+            text-align: center;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .form-divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .form-divider span {
+            background: var(--card);
+            padding: 0 16px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .remember-me input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        .forgot-password {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .demo-accounts {
+            margin-top: 32px;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .demo-accounts h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .demo-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+
+        .demo-btn {
+            padding: 12px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .demo-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .demo-btn i {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 4px;
+            color: var(--primary);
+        }
+
+        .demo-btn span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .login-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .login-left {
+                display: none;
+            }
+
+            .login-right {
+                padding: 32px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-right {
+                padding: 24px;
+            }
+
+            .demo-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-left">
+            <div class="logo-section">
+                <a href="index.html" style="text-decoration: none; color: var(--text-light); font-size: 0.9rem; margin-bottom: 20px; display: inline-block;">
+                    <i class="fa-solid fa-arrow-left"></i> Retour à l'accueil
+                </a>
+                <div class="logo-icon">
+                    <i class="fa-solid fa-hospital"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Clinique Refontiq</h1>
+                    <p>Système de Gestion Médicale</p>
+                </div>
+            </div>
+
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Sécurité Avancée</h3>
+                        <p>Données patients cryptées et protégées selon les normes médicales</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Rapidité d'Accès</h3>
+                        <p>Interface intuitive pour un accès rapide aux informations critiques</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Multi-Rôles</h3>
+                        <p>Adapté pour médecins, infirmières et réceptionnistes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="login-right">
+            <div class="login-header">
+                <h2>Bienvenue</h2>
+                <p>Connectez-vous à votre espace Clinique Refontiq</p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="email">Email professionnel</label>
+                    <input type="email" id="email" placeholder="exemple@refontiq.ci" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="role">Rôle</label>
+                    <select id="role" required>
+                        <option value="">Sélectionnez votre rôle</option>
+                        <option value="medecin">Médecin</option>
+                        <option value="infirmiere">Infirmière</option>
+                        <option value="receptionniste">Réceptionniste</option>
+                    </select>
+                </div>
+
+                <div class="remember-forgot">
+                    <label class="remember-me">
+                        <input type="checkbox" id="remember">
+                        <span>Se souvenir de moi</span>
+                    </label>
+                    <a href="#" class="forgot-password">Mot de passe oublié ?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    Se connecter
+                </button>
+            </form>
+
+            <div class="form-divider">
+                <span>Comptes de démonstration</span>
+            </div>
+
+            <div class="demo-accounts">
+                <h4>Accès Rapide (Démo)</h4>
+                <div class="demo-buttons">
+                    <button class="demo-btn" onclick="fillDemo('medecin')">
+                        <i class="fa-solid fa-user-doctor"></i>
+                        <span>Médecin</span>
+                    </button>
+                    <button class="demo-btn" onclick="fillDemo('infirmiere')">
+                        <i class="fa-solid fa-user-nurse"></i>
+                        <span>Infirmière</span>
+                    </button>
+                    <button class="demo-btn" onclick="fillDemo('receptionniste')">
+                        <i class="fa-solid fa-headset"></i>
+                        <span>Réception</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.1/dist/umd/supabase.js"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        // Données de démonstration
+        const demoAccounts = {
+            medecin: {
+                email: 'dr.duval@refontiq.ci',
+                password: 'medecin2024',
+                role: 'medecin'
+            },
+            infirmiere: {
+                email: 'infirmiere.martin@refontiq.ci',
+                password: 'infirmiere2024',
+                role: 'infirmiere'
+            },
+            receptionniste: {
+                email: 'reception@refontiq.ci',
+                password: 'reception2024',
+                role: 'receptionniste'
+            }
+        };
+
+        // Remplir le formulaire avec un compte de démonstration
+        function fillDemo(role) {
+            const account = demoAccounts[role];
+            document.getElementById('email').value = account.email;
+            document.getElementById('password').value = account.password;
+            document.getElementById('role').value = account.role;
+        }
+
+        // Gérer la connexion
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            // 1. On initialise la connexion à Supabase
+            const supabase = await window.SupabaseAPI.initSupabase();
+            
+            if (!supabase) {
+                alert("Impossible de se connecter à la base de données. Vérifiez votre configuration.");
+                return;
+            }
+
+            // 2. On cherche l'utilisateur dans la table 'users'
+            const user = await window.SupabaseAPI.loginUser(supabase, email);
+
+            if (user) {
+                // Si l'utilisateur existe, on enregistre ses vraies infos
+                const userData = {
+                    email: user.email,
+                    role: user.role,
+                    name: user.nom,
+                    timestamp: new Date().toISOString()
+                };
+
+                localStorage.setItem('currentUser', JSON.stringify(userData));
+
+                // Rediriger vers le dashboard
+                window.location.href = 'dashboard.html';
+            } else {
+                // Si l'email n'est pas dans la table 'users' de Supabase
+                alert("Accès refusé : cet email n'est pas enregistré dans la base de données de la clinique.");
+            }
+        }
+
+        // Vérifier si déjà connecté
+        window.onload = function () {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                window.location.href = 'dashboard.html';
+            }
+        };
+    </script>
+</body>
+
+</html>
