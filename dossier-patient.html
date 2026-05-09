@@ -1,372 +1,152 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dossier Patient | Clinique Refontiq</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <title>Dossier Patient - Refontiq</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <link href="assets/premium-style.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #0077b6;
-            --primary-dark: #023e8a;
-            --primary-light: #caf0f8;
-            --secondary: #2a9d8f;
-            --accent: #e76f51;
-            --success: #2a9d8f;
-            --danger: #e76f51;
-            --warning: #e9c46a;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --border: #e2e8f0;
-            --shadow: 0 4px 20px rgba(0, 119, 182, 0.08);
-            --sidebar-width: 260px;
-        }
+        /* Dossier Layout Spécifique */
+        .dossier-grid { display: grid; grid-template-columns: 350px 1fr; gap: 24px; }
+        .patient-card { background: var(--card); border-radius: 20px; padding: 32px; box-shadow: var(--shadow); border: 1px solid var(--border); text-align: center; }
+        .patient-avatar { width: 100px; height: 100px; border-radius: 50%; background: var(--primary-light); color: var(--primary); font-size: 2.5rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .info-card { background: var(--card); border-radius: 20px; padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 24px; }
+        .info-title { font-family: 'Space Grotesk'; font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        
+        .data-row { display: grid; grid-template-columns: 150px 1fr; padding: 12px 0; border-bottom: 1px solid var(--bg); }
+        .data-label { color: var(--text-light); font-size: 0.9rem; font-weight: 500; }
+        .data-value { font-weight: 600; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        .history-item { padding: 16px; border-radius: 12px; background: var(--bg); margin-bottom: 12px; border-left: 4px solid var(--primary); }
+        .history-date { font-size: 0.8rem; color: var(--text-light); margin-bottom: 4px; }
+        .history-diag { font-weight: 700; margin-bottom: 4px; }
+        .history-trait { font-size: 0.9rem; color: var(--secondary); font-weight: 500; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
+        @media (max-width: 768px) {
+            .dossier-grid { grid-template-columns: 1fr; }
         }
-
-        .dashboard-container {
-            display: grid;
-            grid-template-columns: var(--sidebar-width) 1fr;
-            min-height: 100vh;
-        }
-
-        /* Sidebar (Matching Dashboard) */
-        .sidebar {
-            background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary) 100%);
-            color: white;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 100;
-        }
-
-        .sidebar-header { padding: 24px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-        .logo-icon {
-            width: 48px; height: 48px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px;
-        }
-        .logo-text h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700; line-height: 1.2; }
-        .logo-text p { font-size: 0.7rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
-
-        .user-info {
-            display: flex; align-items: center; gap: 12px;
-            padding: 16px; background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px; margin-bottom: 20px;
-        }
-        .user-avatar {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: var(--secondary);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 1rem;
-        }
-        .user-details h3 { font-size: 0.9rem; font-weight: 600; }
-        .user-details p { font-size: 0.75rem; opacity: 0.8; }
-
-        /* Universal Search Box */
-        .sidebar-search { padding: 0 16px 20px; }
-        .search-box { position: relative; }
-        .search-box i {
-            position: absolute; left: 12px; top: 50%;
-            transform: translateY(-50%); color: rgba(255,255,255,0.6);
-            font-size: 0.9rem;
-        }
-        .search-box input {
-            width: 100%; padding: 10px 12px 10px 38px;
-            border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.1); color: white;
-            font-size: 0.9rem; transition: 0.2s;
-        }
-        .search-box input::placeholder { color: rgba(255,255,255,0.5); }
-        .search-box input:focus { outline: none; background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
-
-        .search-results-dropdown {
-            position: absolute; top: 100%; left: 0; right: 0;
-            background: white; border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            z-index: 1000; margin-top: 5px;
-            display: none; max-height: 300px; overflow: hidden;
-            border: 1px solid #e2e8f0;
-        }
-        .result-item {
-            display: block !important;
-            padding: 12px 20px !important;
-            cursor: pointer;
-            border-bottom: 1px solid #f1f5f9;
-            transition: all 0.2s;
-        }
-        .result-item:last-child { border-bottom: none; }
-        .result-item:hover {
-            background-color: #f8fafc;
-            padding-left: 25px !important;
-            color: var(--primary);
-        }
-        .result-item span {
-            color: #1e293b;
-            font-weight: 500;
-            font-size: 1rem;
-            display: block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Notifications */
-        .notification-wrapper { position: relative; cursor: pointer; }
-        .notification-bell { position: relative; }
-        .notification-badge {
-            position: absolute; top: -8px; right: -8px;
-            background: var(--accent); color: white;
-            font-size: 0.65rem; font-weight: 700;
-            padding: 2px 6px; border-radius: 10px;
-            border: 2px solid white;
-        }
-        .notif-dropdown {
-            position: absolute; top: 50px; right: 0; width: 280px;
-            background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            display: none; z-index: 1000; border: 1px solid #eee;
-            color: var(--text); cursor: default;
-        }
-        .notif-dropdown.active { display: block; animation: slideDown 0.3s ease; }
-        .notif-header { padding: 12px; font-weight: bold; border-bottom: 1px solid #f0f0f0; }
-        .notif-item { padding: 12px; border-bottom: 1px solid #f8f8f8; font-size: 0.85rem; transition: 0.2s; }
-        .notif-item:hover { background: #f0f9ff; color: var(--primary); }
-        @keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
-
-        @keyframes shake {
-            0% { transform: rotate(0); }
-            15% { transform: rotate(15deg); }
-            30% { transform: rotate(-15deg); }
-            45% { transform: rotate(10deg); }
-            60% { transform: rotate(-10deg); }
-            100% { transform: rotate(0); }
-        }
-        .shake-animation { animation: shake 0.5s ease-in-out; }
-
-        .nav-menu { padding: 16px 12px; }
-        .nav-section { margin-bottom: 24px; }
-        .nav-section-title {
-            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 1px; opacity: 0.6; margin-bottom: 12px; padding: 0 8px;
-        }
-        .nav-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 16px; border-radius: 10px;
-            text-decoration: none; color: rgba(255, 255, 255, 0.9);
-            transition: all 0.2s; font-size: 0.9rem; font-weight: 500; margin-bottom: 4px;
-        }
-        .nav-item:hover { background: rgba(255, 255, 255, 0.15); color: white; }
-        .nav-item.active { background: rgba(255, 255, 255, 0.2); color: white; font-weight: 600; }
-
-        /* Main Content */
-        .main-content { padding: 32px; overflow-y: auto; }
-
-        .page-header { margin-bottom: 32px; }
-        .page-header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; color: var(--text); }
-        .page-header p { color: var(--text-light); font-size: 0.95rem; margin-top: 4px; }
-
-        .patient-header-card {
-            background: var(--card);
-            border-radius: 16px; padding: 24px;
-            display: flex; align-items: center; gap: 24px;
-            box-shadow: var(--shadow); margin-bottom: 32px;
-            border: 1px solid var(--border);
-        }
-        .patient-avatar-large {
-            width: 80px; height: 80px;
-            background: var(--primary-light); color: var(--primary);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 2rem; font-family: 'Space Grotesk', sans-serif; font-weight: 700;
-        }
-        .patient-badges { display: flex; gap: 8px; margin-top: 8px; }
-        .badge {
-            background: var(--bg); color: var(--text-light);
-            padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
-        }
-
-        .patient-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; }
-        .info-card {
-            background: var(--card); border-radius: 16px; padding: 24px;
-            box-shadow: var(--shadow); border: 1px solid var(--border);
-        }
-        .info-card h3 {
-            font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem;
-            margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
-            color: var(--primary-dark);
-        }
-        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .info-row:last-child { border-bottom: none; }
-        .info-label { color: var(--text-light); font-size: 0.9rem; }
-        .info-value { font-weight: 600; color: var(--text); font-size: 0.95rem; }
-
-        .notes-box {
-            background: var(--bg); padding: 16px; border-radius: 12px;
-            font-size: 0.9rem; color: var(--text); min-height: 100px;
-            border: 1px solid var(--border); margin-top: 10px;
-        }
-
-        .actions-bar { margin-top: 32px; display: flex; gap: 16px; }
-        .btn {
-            padding: 12px 24px; border-radius: 12px; font-weight: 600; cursor: pointer;
-            border: none; transition: 0.2s; display: flex; align-items: center; gap: 8px;
-            font-size: 0.9rem; text-decoration: none;
-        }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 119, 182, 0.2); }
-        .btn-outline { background: white; color: var(--primary); border: 1px solid var(--border); }
-        .btn-outline:hover { background: var(--bg); }
-
     </style>
 </head>
+
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
                     <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
-                    <a href="index.html" style="text-decoration: none; color: inherit;">
-                    <div class="logo-text">
-                        <h1>Clinique Refontiq</h1>
-                        <p>Système Médical</p>
-                    </div>
-                    </a>
+                    <div class="logo-text"><h1>Clinique Refontiq</h1><p>Espace Médical</p></div>
                 </div>
-                
+
+                <div class="sidebar-search">
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Rechercher un patient...">
+                    </div>
+                </div>
+
                 <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">--</div>
-                    <div class="user-details">
-                        <h3 id="userName">Chargement...</h3>
-                        <p id="userRole">--</p>
-                    </div>
-                </div>
-
-                <!-- Universal Search Box -->
-                <div class="search-box">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="global-search" placeholder="Rechercher un patient..." onkeyup="rechercheRapide(this.value)" autocomplete="off">
-                    <div id="search-results" class="search-results-dropdown"></div>
-                </div>
-
-                <!-- Notifications Dropdown -->
-                <div style="margin-top: 20px; padding: 0 16px;">
-                    <div class="notification-wrapper">
-                        <div class="notification-bell" onclick="toggleNotifications()">
-                            <i class="fa-solid fa-bell" style="font-size: 1.2rem; color: rgba(255,255,255,0.8);"></i>
-                            <span class="notification-badge">5</span>
-                        </div>
-                        <div id="notification-dropdown" class="notif-dropdown" style="left: 0; right: auto;">
-                            <div class="notif-header">Notifications</div>
-                            <div id="notif-list" class="notif-body">
-                                <p style="padding:15px; font-size:0.8rem; color:gray;">Chargement...</p>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="user-avatar" id="side-avatar">DR</div>
+                    <div class="user-details"><h3 id="side-name">Dr. Duval <span class="online-indicator" style="margin-left: 5px;"></span></h3><p id="side-role">Médecin</p></div>
                 </div>
             </div>
-
             <nav class="nav-menu">
-                <div class="nav-section">
-                    <div class="nav-section-title">Principal</div>
-                    <a href="dashboard.html" class="nav-item">
-                        <i class="fa-solid fa-chart-line"></i> Tableau de bord
-                    </a>
-                    <a href="patients.html" class="nav-item">
-                        <i class="fa-solid fa-users"></i> Patients
-                    </a>
-                    <a href="consultations.html" class="nav-item">
-                        <i class="fa-solid fa-stethoscope"></i> Consultations
-                    </a>
-                    <a href="rendez-vous.html" class="nav-item">
-                        <i class="fa-solid fa-calendar-check"></i> Rendez-vous
-                    </a>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Gestion</div>
-                    <a href="finance.html" class="nav-item"><i class="fa-solid fa-coins"></i> Finance</a>
-                    <a href="stocks.html" class="nav-item"><i class="fa-solid fa-boxes-stacked"></i> Stocks</a>
-                    <a href="messagerie.html" class="nav-item"><i class="fa-solid fa-comments"></i> Messagerie</a>
-                </div>
+
+                <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
+                <a href="patients.html" class="nav-item"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
+                <a href="consultations.html" class="nav-item"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
+                <a href="rendez-vous.html" class="nav-item"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
+                
+                <hr class="nav-separator">
+                
+                <a href="finance.html" class="nav-item"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
+                <a href="stocks.html" class="nav-item"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
+                
+                <hr class="nav-separator">
+                
+                <a href="messagerie.html" class="nav-item"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
+                <a href="alertes.html" class="nav-item"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
+                <a href="parametres.html" class="nav-item"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
+            
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <div class="page-header">
-                <h1>Dossier Patient</h1>
-                <p>Consultez les informations médicales complètes du patient.</p>
-            </div>
+            <header class="mobile-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="header-btn" onclick="toggleMobileSidebar()" style="background:none; border:none; font-size:1.5rem; color:white; cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
+                    <div style="width: 35px; height: 35px; background: rgba(255,255,255,0.2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                        <i class="fa-solid fa-hospital"></i>
+                    </div>
+                    <div style="font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">Clinique Refontiq</div>
+                </div>
+                <div style="font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 8px; text-transform: uppercase;">Dossier</div>
+            </header>
 
-            <div id="loader" style="text-align: center; padding: 60px;">
-                <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color: var(--primary); opacity: 0.5;"></i>
-                <p style="margin-top: 16px; color: var(--text-light);">Accès au dossier sécurisé...</p>
+
+            <div id="loader" style="text-align: center; padding: 100px;">
+                <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color: var(--primary);"></i>
+                <p style="margin-top: 20px; color: var(--text-light);">Récupération du dossier médical...</p>
             </div>
 
             <div id="dossier-content" style="display: none;">
-                <div class="patient-header-card">
-                    <div class="patient-avatar-large" id="p-avatar">--</div>
-                    <div class="patient-info">
-                        <h2 id="p-nom-complet" style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 700;">--</h2>
-                        <div class="patient-badges">
-                            <span class="badge" id="p-id-card">ID: --</span>
-                            <span class="badge" id="p-age">-- ans</span>
-                            <span class="badge" id="p-genre">--</span>
-                            <span class="badge" id="p-sang" style="background: var(--primary-light); color: var(--primary);">Groupe --</span>
-                        </div>
+                <div class="top-bar">
+                    <div class="page-title">
+                        <h1>Dossier Médical</h1>
+                        <p id="p-ref">Référence: --</p>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <a href="patients.html" class="btn" style="background: var(--border); color: var(--text);"><i class="fa-solid fa-arrow-left"></i> Retour</a>
+                        <a id="btn-nouvelle-consult" href="#" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouvelle Consultation</a>
                     </div>
                 </div>
 
-                <div class="patient-grid">
-                    <div class="info-card">
-                        <h3><i class="fa-solid fa-address-book"></i> Coordonnées Personnelles</h3>
-                        <div class="info-row">
-                            <span class="info-label">Numéro de Téléphone</span>
-                            <span class="info-value" id="p-tel">--</span>
+                <div class="dossier-grid">
+                    <!-- Colonne Gauche: Résumé -->
+                    <div>
+                        <div class="patient-card">
+                            <div class="patient-avatar" id="p-avatar">?</div>
+                            <h2 id="p-nom-complet" style="font-family:'Space Grotesk'; margin-bottom: 8px;">--</h2>
+                            <p id="p-status" style="color: var(--secondary); font-weight: 600; font-size: 0.9rem;"><i class="fa-solid fa-circle-check"></i> Patient Actif</p>
+                            
+                            <div style="margin-top: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div style="padding: 12px; background: var(--bg); border-radius: 12px;">
+                                    <div style="font-size: 0.75rem; color: var(--text-light);">Âge</div>
+                                    <div id="p-age" style="font-weight: 700;">--</div>
+                                </div>
+                                <div style="padding: 12px; background: var(--bg); border-radius: 12px;">
+                                    <div style="font-size: 0.75rem; color: var(--text-light);">Groupe</div>
+                                    <div id="p-sang" style="font-weight: 700; color: var(--danger);">--</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="info-row">
-                            <span class="info-label">Adresse Email</span>
-                            <span class="info-value" id="p-email">--</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">Lieu de Résidence</span>
-                            <span class="info-value" id="p-adresse">--</span>
+
+                        <div class="info-card" style="margin-top: 24px;">
+                            <div class="info-title"><i class="fa-solid fa-phone"></i> Contact</div>
+                            <div class="data-row"><span class="data-label">Téléphone</span><span class="data-value" id="p-tel">--</span></div>
+                            <div class="data-row" style="border:none;"><span class="data-label">Adresse</span><span class="data-value" id="p-adresse">--</span></div>
                         </div>
                     </div>
 
-                    <div class="info-card">
-                        <h3><i class="fa-solid fa-notes-medical"></i> Observations Médicales</h3>
-                        <div class="info-row">
-                            <span class="info-label">Dernière mise à jour</span>
-                            <span class="info-value" id="p-last-update">Aujourd'hui</span>
+                    <!-- Colonne Droite: Détails et Historique -->
+                    <div>
+                        <div class="info-card">
+                            <div class="info-title"><i class="fa-solid fa-file-medical"></i> Antécédents Médicaux</div>
+                            <p id="p-antecedents" style="line-height: 1.6; color: var(--text-light);">Aucun antécédent particulier déclaré.</p>
                         </div>
-                        <div style="margin-top: 12px;">
-                            <span class="info-label">Antécédents & Notes</span>
-                            <div id="p-antecedents" class="notes-box">--</div>
+
+                        <div class="info-card">
+                            <div class="info-title"><i class="fa-solid fa-history"></i> Historique des Consultations</div>
+                            <div id="consultations-list">
+                                <p style="text-align: center; color: var(--text-light); padding: 40px;">Aucune consultation enregistrée pour ce patient.</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="actions-bar">
-                    <a href="#" class="btn btn-primary" id="btn-nouvelle-consult">
-                        <i class="fa-solid fa-plus-circle"></i> Ouvrir une Consultation
-                    </a>
-                    <a href="#" class="btn btn-outline" id="btn-voir-factures">
-                        <i class="fa-solid fa-file-invoice-dollar"></i> Facturation & Paiements
-                    </a>
                 </div>
             </div>
         </main>
@@ -376,58 +156,100 @@
     <script src="supabase-config.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // Initialisation profil utilisateur
-            if (window.updateDrawerUser) window.updateDrawerUser();
-            
-            // Chargement dossier
-            await chargerDossierComplet();
+            initUser();
+            await chargerDossier();
         });
 
-        async function chargerDossierComplet() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const patientId = urlParams.get('id');
+        function initUser() {
+            const u = localStorage.getItem('currentUser');
+            if (u) {
+                const user = JSON.parse(u);
+                document.getElementById('side-name').textContent = user.name || 'Utilisateur';
+                document.getElementById('side-role').textContent = user.role;
+                document.getElementById('side-avatar').textContent = (user.name || 'U').substring(0, 2).toUpperCase();
+            }
+        }
 
-            if (!patientId) {
-                document.getElementById('loader').innerHTML = '<p style="color:var(--danger)">Identifiant patient manquant.</p>';
+        async function chargerDossier() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (!id) {
+                document.getElementById('loader').innerHTML = '<p style="color:var(--danger)">Aucun patient sélectionné.</p>';
                 return;
             }
 
             const supabase = await window.SupabaseAPI.initSupabase();
-            if (!supabase) return;
-
-            const { data: p, error } = await supabase
-                .from('patients')
-                .select('*')
-                .eq('id', patientId)
-                .single();
-
-            if (error || !p) {
-                document.getElementById('loader').innerHTML = '<p style="color:var(--danger)">Dossier introuvable ou erreur réseau.</p>';
+            
+            // 1. Infos Patient
+            const { data: p, error: e1 } = await supabase.from('patients').select('*').eq('id', id).single();
+            if (e1 || !p) {
+                document.getElementById('loader').innerHTML = '<p style="color:var(--danger)">Erreur lors de la récupération du dossier.</p>';
                 return;
             }
 
-            // Remplissage des données
+            // Remplissage UI
             document.getElementById('p-nom-complet').textContent = `${p.nom} ${p.prenom || ''}`;
-            document.getElementById('p-id-card').textContent = `ID: ${p.id.substring(0,8).toUpperCase()}`;
-            document.getElementById('p-age').textContent = `${p.age || '?'} ans`;
-            document.getElementById('p-genre').textContent = p.genre || 'N/C';
-            document.getElementById('p-tel').textContent = p.telephone || 'Non renseigné';
-            document.getElementById('p-email').textContent = p.email || 'Non renseigné';
-            document.getElementById('p-adresse').textContent = p.adresse || 'Non renseignée';
-            document.getElementById('p-sang').textContent = `Groupe ${p.groupe_sanguin || '?'}`;
-            document.getElementById('p-antecedents').textContent = p.antecedents || 'Aucun antécédent médical enregistré.';
+            document.getElementById('p-avatar').textContent = (p.nom[0] + (p.prenom ? p.prenom[0] : '')).toUpperCase();
+            document.getElementById('p-ref').textContent = `Référence: ${p.id.substring(0,8).toUpperCase()}`;
             
-            // Initiales avatar
-            const initials = (p.nom[0] || '') + (p.prenom ? p.prenom[0] : '');
-            document.getElementById('p-avatar').textContent = initials.toUpperCase();
-
-            // Liens d'actions
+            // Calcul de l'âge
+            let ageDisplay = '?';
+            if (p.date_naissance) {
+                const dob = new Date(p.date_naissance);
+                const ageDifMs = Date.now() - dob.getTime();
+                const ageDate = new Date(ageDifMs);
+                ageDisplay = Math.abs(ageDate.getUTCFullYear() - 1970);
+            }
+            document.getElementById('p-age').textContent = `${ageDisplay} ans`;
+            
+            document.getElementById('p-sang').textContent = p.groupe_sanguin || '--';
+            document.getElementById('p-tel').textContent = p.telephone || '--';
+            document.getElementById('p-adresse').textContent = p.adresse || '--';
+            
+            // Traitement des allergies et maladies pour les tags
+            const allergies = p.allergies ? p.allergies.split(',').map(a => a.trim()).filter(a => a) : [];
+            const maladies = p.maladies ? p.maladies.split(',').map(m => m.trim()).filter(m => m) : [];
+            const antContainer = document.getElementById('p-antecedents');
+            
+            if (allergies.length === 0 && maladies.length === 0) {
+                antContainer.innerHTML = '<span style="color: var(--text-light);">Aucun antécédent particulier déclaré.</span>';
+            } else {
+                let tagsHTML = '';
+                allergies.forEach(txt => {
+                    tagsHTML += `<span class="tag tag-danger" style="margin-right: 8px; margin-bottom: 8px;"><i class="fa-solid fa-triangle-exclamation" style="margin-right: 4px;"></i> ${txt}</span>`;
+                });
+                maladies.forEach(txt => {
+                    tagsHTML += `<span class="tag tag-warning" style="margin-right: 8px; margin-bottom: 8px;"><i class="fa-solid fa-notes-medical" style="margin-right: 4px;"></i> ${txt}</span>`;
+                });
+                antContainer.innerHTML = tagsHTML;
+            }
+            
             document.getElementById('btn-nouvelle-consult').href = `consultations.html?patient_id=${p.id}`;
-            document.getElementById('btn-voir-factures').href = `finance.html?patient_id=${p.id}`;
 
-            // Affichage final
+            // 2. Historique Consultations
+            const { data: consults } = await supabase.from('consultations').select('*').eq('patient_id', id).order('date', { ascending: false });
+            
+            const listDiv = document.getElementById('consultations-list');
+            if (consults && consults.length > 0) {
+                listDiv.innerHTML = consults.map(c => `
+                    <div class="history-item">
+                        <div class="history-date">${new Date(c.date).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' })}${c.heure ? ' à ' + c.heure.substring(0,5) : ''}</div>
+                        <div class="history-diag"><strong>Motif :</strong> ${c.motif || 'Consultation de routine'}</div>
+                        <div class="history-diag">${c.notes || '--'}</div>
+                        <div class="history-trait"><strong>Traitement :</strong> ${c.historique || '--'}</div>
+                    </div>
+                `).join('');
+            }
+
             document.getElementById('loader').style.display = 'none';
             document.getElementById('dossier-content').style.display = 'block';
+        }
+
+        function toggleMobileSidebar() {
+            const s = document.querySelector('.sidebar');
+            const o = document.getElementById('sidebarOverlay');
+            s.classList.toggle('active');
+            o.classList.toggle('active');
         }
     </script>
 </body>

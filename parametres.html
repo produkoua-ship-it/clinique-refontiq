@@ -4,916 +4,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paramètres - Clinique Refontiq</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <title>Paramètres - Refontiq</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/mobile.css">
-    <style>
-        :root {
-            --primary: #0077b6;
-            --primary-dark: #023e8a;
-            --primary-light: #caf0f8;
-            --secondary: #2a9d8f;
-            --accent: #e76f51;
-            --success: #2a9d8f;
-            --warning: #e9c46a;
-            --danger: #e76f51;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 20px rgba(0, 119, 182, .08)
-        }
-
-        [data-theme="dark"] {
-            --primary: #4dabf7;
-            --primary-dark: #1c7ed6;
-            --primary-light: #1a2a3a;
-            --secondary: #51cf66;
-            --accent: #ff6b6b;
-            --success: #51cf66;
-            --warning: #fcc419;
-            --danger: #ff6b6b;
-            --bg: #0f1923;
-            --card: #1a2a3a;
-            --text: #e9ecef;
-            --text-light: #adb5bd;
-            --border: #2d3a4a;
-            --shadow: 0 4px 20px rgba(0, 0, 0, .3)
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh
-        }
-
-        .dashboard-container {
-            display: grid;
-            grid-template-columns: 260px 1fr;
-            min-height: 100vh
-        }
-
-        .sidebar {
-            background: linear-gradient(180deg, var(--primary-dark)0%, var(--primary)100%);
-            color: white;
-            padding: 0;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 100
-        }
-
-        .sidebar-header {
-            padding: 24px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, .1)
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px
-        }
-
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(255, 255, 255, .2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px
-        }
-
-        .logo-text h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700
-        }
-
-        .logo-text p {
-            font-size: .7rem;
-            opacity: .8;
-            text-transform: uppercase;
-            letter-spacing: 1px
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            background: rgba(255, 255, 255, .1);
-            border-radius: 12px
-        }
-
-        .user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem
-        }
-
-        .user-details h3 {
-            font-size: .95rem;
-            font-weight: 600
-        }
-
-        .user-details p {
-            font-size: .8rem;
-            opacity: .8
-        }
-
-        .nav-menu {
-            padding: 16px 12px
-        }
-
-        .nav-section {
-            margin-bottom: 24px
-        }
-
-        .nav-section-title {
-            font-size: .7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: .6;
-            margin-bottom: 12px;
-            padding: 0 8px
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            color: rgba(255, 255, 255, .9);
-            font-size: .9rem;
-            font-weight: 500;
-            margin-bottom: 4px;
-            transition: all .2s
-        }
-
-        .nav-item:hover {
-            background: rgba(255, 255, 255, .15)
-        }
-
-        .nav-item.active {
-            background: rgba(255, 255, 255, .2);
-            font-weight: 600
-        }
-
-        .nav-item i {
-            width: 20px;
-            text-align: center
-        }
-
-        .sidebar-footer {
-            padding: 16px;
-            border-top: 1px solid rgba(255, 255, 255, .1)
-        }
-
-        .logout-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            background: rgba(231, 111, 81, .2);
-            color: #fca5a5;
-            text-decoration: none;
-            font-size: .9rem
-        }
-
-        .main-content {
-            padding: 24px 32px;
-            overflow-y: auto
-        }
-
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px
-        }
-
-        .page-title h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700
-        }
-
-        .page-title p {
-            color: var(--text-light);
-            margin-top: 4px
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-family: inherit;
-            font-weight: 600;
-            font-size: .9rem;
-            cursor: pointer;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all .2s
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 119, 182, .4)
-        }
-
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 2px
-        }
-
-        .tab {
-            padding: 12px 20px;
-            background: transparent;
-            border: none;
-            border-radius: 8px 8px 0 0;
-            font-family: inherit;
-            font-weight: 600;
-            cursor: pointer;
-            color: var(--text-light)
-        }
-
-        .tab:hover {
-            color: var(--primary);
-            background: var(--bg)
-        }
-
-        .tab.active {
-            color: var(--primary);
-            background: white;
-            border-bottom: 2px solid var(--primary);
-            margin-bottom: -4px
-        }
-
-        .tab-content {
-            display: none
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn .3s ease
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px)
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0)
-            }
-        }
-
-        .card {
-            background: var(--card);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            margin-bottom: 20px
-        }
-
-        .card-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 20px
-        }
-
-        .form-group {
-            margin-bottom: 20px
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text);
-            font-size: .9rem
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: .95rem;
-            transition: all .2s;
-            background: var(--bg);
-            color: var(--text)
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(0, 119, 182, .1);
-            background: white
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px
-        }
-
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: var(--bg);
-            border-radius: 12px;
-            margin-bottom: 12px
-        }
-
-        .setting-info h4 {
-            font-size: .95rem;
-            font-weight: 600;
-            margin-bottom: 4px
-        }
-
-        .setting-info p {
-            font-size: .85rem;
-            color: var(--text-light)
-        }
-
-        input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--primary)
-        }
-
-        .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-            margin-bottom: 32px;
-            padding: 20px;
-            background: var(--bg);
-            border-radius: 16px
-        }
-
-        .profile-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 2rem;
-            flex-shrink: 0;
-            border: 4px solid white;
-            box-shadow: var(--shadow)
-        }
-
-        @media(max-width:1200px) {
-            .dashboard-container {
-                grid-template-columns: 1fr
-            }
-
-            .sidebar {
-                display: none
-            }
-        }
-
-        @media(max-width:768px) {
-            .main-content {
-                padding: 16px
-            }
-
-            .top-bar {
-                flex-direction: column;
-                gap: 16px;
-                align-items: flex-start
-            }
-
-            .form-row {
-                grid-template-columns: 1fr
-            }
-        }
-    </style>
+    
+    <link href="assets/premium-style.css" rel="stylesheet">
 </head>
 
 <body>
-    <!-- Mobile Header -->
-    <header class="mobile-header">
-        <div class="header-left">
-            <div class="header-logo">
-                <i class="fa-solid fa-hospital"></i>
-            </div>
-            <div>
-                <div class="header-title">Clinique Refontiq</div>
-                <div class="header-subtitle">Système Médical</div>
-            </div>
-        </div>
-        <div class="header-right">
-            <button class="header-btn" onclick="window.location.href='alertes.html'">
-                <i class="fa-solid fa-bell"></i>
-                <span class="badge">3</span>
-            </button>
-            
-        </div>
-    </header>
-
-
     <div class="dashboard-container">
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
                     <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
-                    <a href="index.html" style="text-decoration: none; color: inherit;">
-                    <div class="logo-text">
-                        <h1>Clinique Refontiq</h1>
-                        <p>Système Médical</p>
-                    </div>
-                    </a>
+                    <div class="logo-text"><h1>Clinique Refontiq</h1><p>Espace Médical</p></div>
                 </div>
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">DR</div>
-                    <div class="user-details">
-                        <h3 id="userName">Dr. Duval</h3>
-                        <p id="userRole">Médecin</p>
+
+                <div class="sidebar-search">
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Rechercher un patient...">
                     </div>
+                </div>
+
+                <div class="user-info">
+                    <div class="user-avatar" id="side-avatar">DR</div>
+                    <div class="user-details"><h3 id="side-name">Dr. Duval <span class="online-indicator" style="margin-left: 5px;"></span></h3><p id="side-role">Médecin</p></div>
                 </div>
             </div>
             <nav class="nav-menu">
-                <div class="nav-section">
-                    <div class="nav-section-title">Principal</div>
-                    <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-line"></i>Tableau de bord</a>
-                    <a href="patients.html" class="nav-item"><i class="fa-solid fa-users"></i>Patients</a>
-                    <a href="consultations.html" class="nav-item"><i
-                            class="fa-solid fa-stethoscope"></i>Consultations</a>
-                    <a href="rendez-vous.html" class="nav-item"><i
-                            class="fa-solid fa-calendar-check"></i>Rendez-vous</a>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Gestion</div>
-                    <a href="finance.html" class="nav-item"><i class="fa-solid fa-coins"></i>Finance</a>
-                    <a href="stocks.html" class="nav-item"><i class="fa-solid fa-boxes-stacked"></i>Stocks</a>
-                    <a href="messagerie.html" class="nav-item"><i class="fa-solid fa-comments"></i>Messagerie</a>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Système</div>
-                    <a href="alertes.html" class="nav-item"><i class="fa-solid fa-bell"></i>Alertes</a>
-                    <a href="parametres.html" class="nav-item active"><i class="fa-solid fa-cog"></i>Paramètres</a>
-                </div>
+
+                <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
+                <a href="patients.html" class="nav-item"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
+                <a href="consultations.html" class="nav-item"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
+                <a href="rendez-vous.html" class="nav-item"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
+                
+                <hr class="nav-separator">
+                
+                <a href="finance.html" class="nav-item"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
+                <a href="stocks.html" class="nav-item"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
+                
+                <hr class="nav-separator">
+                
+                <a href="messagerie.html" class="nav-item"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
+                <a href="alertes.html" class="nav-item"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
+                <a href="parametres.html" class="nav-item active"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
+            
             </nav>
-            <div class="sidebar-footer"><a href="login.html" class="logout-btn" onclick="logout()"><i
-                        class="fa-solid fa-right-from-bracket"></i>Déconnexion</a></div>
         </aside>
+
         <main class="main-content">
+            <header class="mobile-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="header-btn" onclick="toggleMobileSidebar()" style="background:none; border:none; font-size:1.5rem; color:white; cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
+                    <div style="width: 35px; height: 35px; background: rgba(255,255,255,0.2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                        <i class="fa-solid fa-hospital"></i>
+                    </div>
+                    <div style="font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">Clinique Refontiq</div>
+                </div>
+                <div style="font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 8px; text-transform: uppercase;">Réglages</div>
+            </header>
+
+
             <div class="top-bar">
                 <div class="page-title">
-                    <h1 id="pageTitle">Paramètres</h1>
-                    <p id="pageDesc">Configurez votre profil et les préférences de la clinique</p>
+                    <h1>Paramètres</h1>
+                    <p>Gérez votre compte et les préférences de la clinique</p>
                 </div>
             </div>
 
-            <div class="tabs">
-                <button class="tab active" data-tab="profile" onclick="switchTab('profile')" id="tabProfileBtn"><i
-                        class="fa-solid fa-user"></i> Profil</button>
-                <button class="tab" data-tab="preferences" onclick="switchTab('preferences')" id="tabPreferencesBtn"><i
-                        class="fa-solid fa-palette"></i> Préférences</button>
-                <button class="tab" data-tab="clinic" onclick="switchTab('clinic')" id="tabClinicBtn"><i
-                        class="fa-solid fa-hospital"></i> Clinique</button>
-                <button class="tab" data-tab="security" onclick="switchTab('security')" id="tabSecurityBtn"><i
-                        class="fa-solid fa-shield"></i> Sécurité</button>
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-user-circle"></i> Mon Profil</div>
+                <div class="form-group">
+                    <label>Nom complet</label>
+                    <input type="text" id="u-name" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Rôle</label>
+                    <input type="text" id="u-role" readonly>
+                </div>
+                <button class="btn btn-danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Se déconnecter</button>
             </div>
 
-            <!-- TAB 1: Profil -->
-            <div class="tab-content active" id="tab-profile">
-                <div class="card">
-                    <div class="profile-header">
-                        <div class="profile-avatar" id="profileAvatar">DR</div>
-                        <div>
-                            <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;"
-                                id="profileName">Dr. Jean Duval</h2>
-                            <p style="color:var(--text-light);" id="profileRole">Médecin généraliste</p>
-                            <p style="color:var(--text-light);font-size:.85rem;" id="profileEmail">dr.duval@refontiq.ci
-                                • +225 01 02 03 04 00</p>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group"><label id="labelNom">Nom</label><input type="text" value="Duval"
-                                placeholder="Votre nom" id="inputNom"></div>
-                        <div class="form-group"><label id="labelPrenom">Prénom</label><input type="text" value="Jean"
-                                placeholder="Votre prénom" id="inputPrenom"></div>
-                        <div class="form-group"><label id="labelSpecialite">Spécialité</label>
-                            <select id="specialiteSelect">
-                                <option id="optMedecineGenerale">Médecine générale</option>
-                                <option id="optPediatrie">Pédiatrie</option>
-                                <option id="optCardiologie">Cardiologie</option>
-                                <option id="optGynecologie">Gynécologie</option>
-                                <option id="optChirurgie">Chirurgie</option>
-                            </select>
-                        </div>
-                        <div class="form-group"><label id="labelNumOrdre">Numéro d'ordre</label><input type="text"
-                                value="CI-2020-01234" placeholder="Numéro professionnel" id="inputNumOrdre"></div>
-                        <div class="form-group"><label id="labelEmail">Email</label><input type="email"
-                                value="dr.duval@refontiq.ci" placeholder="Email professionnel" id="inputEmail"></div>
-                        <div class="form-group"><label id="labelTelephone">Téléphone</label><input type="tel"
-                                value="+225 01 02 03 04 00" placeholder="Téléphone" id="inputTel"></div>
-                    </div>
-                    <div style="margin-top:24px;"><button class="btn btn-primary" id="btnSaveModif"><i
-                                class="fa-solid fa-save"></i> Enregistrer les modifications</button></div>
-                </div>
-            </div>
-
-            <!-- TAB 2: Préférences -->
-            <div class="tab-content" id="tab-preferences">
-                <div class="card">
-                    <h3 class="card-title" id="titleLangRegion">Langue et région</h3>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4 id="titleLangue">Langue de l'interface</h4>
-                            <p id="descLangue">Choisissez la langue d'affichage du tableau de bord</p>
-                        </div>
-                        <select id="langSelect" onchange="changeLanguage(this.value)"
-                            style="padding:8px 16px;border:2px solid var(--border);border-radius:8px;font-family:inherit;background:var(--bg);color:var(--text);">
-                            <option value="fr" id="optFrancais">Français</option>
-                            <option value="en" id="optEnglish">English</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4 id="titleFuseau">Fuseau horaire</h4>
-                            <p id="descFuseau">Fuseau horaire actuel de la clinique</p>
-                        </div>
-                        <span id="spanFuseau"
-                            style="padding:8px 16px;background:var(--border);border-radius:8px;font-size:.85rem;">UTC+00:00
-                            (Abidjan)</span>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4 id="titleDateFormat">Format de date</h4>
-                            <p id="descDateFormat">Format d'affichage des dates dans l'application</p>
-                        </div>
-                        <span id="spanDateFormat"
-                            style="padding:8px 16px;background:var(--border);border-radius:8px;font-size:.85rem;">JJ/MM/AAAA</span>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3 class="card-title" id="titleApparence">Apparence</h3>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4 id="titleTheme">Thème de l'interface</h4>
-                            <p id="descTheme">Choisissez entre le mode clair et le mode sombre</p>
-                        </div>
-                        <div style="display:flex;gap:12px;">
-                            <button class="theme-btn active" data-theme="light" onclick="setTheme('light')"
-                                style="padding:10px 20px;border-radius:12px;border:2px solid;cursor:pointer;font-family:inherit;font-weight:600;display:flex;align-items:center;gap:8px;background:var(--card);color:var(--text);border-color:var(--primary);"><i
-                                    class="fa-solid fa-sun" style="color:var(--warning);"></i> <span
-                                    id="btnClair">Clair</span></button>
-                            <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')"
-                                style="padding:10px 20px;border-radius:12px;border:2px solid var(--border);cursor:pointer;font-family:inherit;font-weight:600;display:flex;align-items:center;gap:8px;background:var(--card);color:var(--text);"><i
-                                    class="fa-solid fa-moon" style="color:#748ffc;"></i> <span
-                                    id="btnSombre">Sombre</span></button>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4 id="titleDensite">Densité de l'affichage</h4>
-                            <p id="descDensite">Contrôle l'espacement et la taille des éléments</p>
-                        </div>
-                        <span id="spanDensite"
-                            style="padding:8px 16px;background:var(--border);border-radius:8px;font-size:.85rem;">Confortable</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB 3: Clinique -->
-            <div class="tab-content" id="tab-clinic">
-                <div class="card">
-                    <h3 class="card-title" id="titleInfosClinique">Informations de la clinique</h3>
-                    <div class="form-row">
-                        <div class="form-group"><label id="labelNomClinique">Nom de la clinique</label><input
-                                type="text" value="Clinique Refontiq" id="inputNomClinique"></div>
-                        <div class="form-group"><label id="labelSlogan">Slogan</label><input type="text"
-                                value="Excellence & Compassion" id="inputSlogan"></div>
-                        <div class="form-group"><label id="labelAdresse">Adresse</label><input type="text"
-                                value="23ème Avenue, Koumassi, Abidjan" id="inputAdresse"></div>
-                        <div class="form-group"><label id="labelTelClinique">Téléphone</label><input type="tel"
-                                value="+225 01 02 03 04 05" id="inputTelClinique"></div>
-                        <div class="form-group"><label id="labelEmailClinique">Email</label><input type="email"
-                                value="contact@refontiq.ci" id="inputEmailClinique"></div>
-                        <div class="form-group"><label id="labelSiteWeb">Site web</label><input type="url"
-                                value="https://refontiq.ci" id="inputSiteWeb"></div>
-                    </div>
-                    <div style="margin-top:24px;"><button class="btn btn-primary" id="btnEnregistrer"><i
-                                class="fa-solid fa-save"></i> Enregistrer</button></div>
-                </div>
-
-                <div class="card">
-                    <h3 class="card-title" id="titleHoraires">Horaires d'ouverture</h3>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4 id="titleLunVen">Lundi - Vendredi</h4>
-                            <p id="descLunVen">Consultations standard</p>
-                        </div><span style="font-weight:600;">08:00 - 18:00</span>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4 id="titleSam">Samedi</h4>
-                            <p id="descSam">Consultations réduites</p>
-                        </div><span style="font-weight:600;">09:00 - 13:00</span>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4 id="titleDimFerie">Dimanche & Jours fériés</h4>
-                            <p id="descDimFerie">Fermé</p>
-                        </div><span id="spanFerme"
-                            style="padding:4px 12px;background:rgba(231,111,81,.15);color:var(--danger);border-radius:8px;font-size:.85rem;font-weight:600;">FERMÉ</span>
-                    </div>
-                    <div style="margin-top:16px;"><button class="btn btn-primary" id="btnSaveHours"><i
-                                class="fa-solid fa-save"></i> Enregistrer les horaires</button></div>
-                </div>
-            </div>
-
-            <!-- TAB 4: Sécurité -->
-            <div class="tab-content" id="tab-security">
-                <div class="card">
-                    <h3 class="card-title" id="titleChangeMdp">Changer le mot de passe</h3>
-                    <div class="form-row">
-                        <div class="form-group"><label id="labelMdpActuel">Mot de passe actuel</label><input
-                                type="password" placeholder="••••••••" id="inputMdpActuel"></div>
-                        <div class="form-group"><label id="labelNouveauMdp">Nouveau mot de passe</label><input
-                                type="password" placeholder="••••••••" id="inputNouveauMdp"></div>
-                        <div class="form-group"><label id="labelConfirmerMdp">Confirmer le mot de passe</label><input
-                                type="password" placeholder="••••••••" id="inputConfirmerMdp"></div>
-                    </div>
-                    <button class="btn btn-primary" id="btnMaj"><i class="fa-solid fa-key"></i> Mettre à jour</button>
-                </div>
-
-                <div class="card">
-                    <h3 class="card-title" id="titlePrefSecurite">Préférences de sécurité</h3>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4 id="title2fa">Authentification à deux facteurs (2FA)</h4>
-                            <p id="desc2fa">Ajoutez une couche de sécurité supplémentaire</p>
-                        </div><input type="checkbox">
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4 id="titleNotifConnexion">Notifications de connexion</h4>
-                            <p id="descNotifConnexion">Recevez une alerte en cas de nouvelle connexion</p>
-                        </div><input type="checkbox" checked>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4 id="titleDecoAuto">Déconnexion automatique</h4>
-                            <p id="descDecoAuto">Déconnexion après 30 minutes d'inactivité</p>
-                        </div><input type="checkbox" checked>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-info">
-                            <h4 id="titleSauvegardeAuto">Sauvegarde automatique</h4>
-                            <p id="descSauvegardeAuto">Sauvegarder les données quotidiennement</p>
-                        </div><input type="checkbox" checked>
-                    </div>
-                </div>
+            <div class="card">
+                <div class="card-title"><i class="fa-solid fa-shield-halved"></i> Sécurité</div>
+                <p style="color: var(--text-light); margin-bottom: 20px; font-size: 0.9rem;">Pour changer votre mot de passe, veuillez contacter l'administrateur système.</p>
+                <button class="btn" style="background: var(--bg); color: var(--text);" disabled>Changer le mot de passe</button>
             </div>
         </main>
-    </div>
-
-    <script>
-        const i18n = {
-            fr: {
-                'pageTitle': 'Paramètres', 'pageDesc': 'Configurez votre profil et les préférences de la clinique',
-                'tabProfileBtn': 'Profil', 'tabPreferencesBtn': 'Préférences', 'tabClinicBtn': 'Clinique', 'tabSecurityBtn': 'Sécurité',
-                'profileName': 'Dr. Jean Duval', 'profileRole': 'Médecin généraliste', 'profileEmail': 'dr.duval@refontiq.ci • +225 01 02 03 04 00',
-                'labelNom': 'Nom', 'labelPrenom': 'Prénom', 'labelSpecialite': 'Spécialité',
-                'optMedecineGenerale': 'Médecine générale', 'optPediatrie': 'Pédiatrie', 'optCardiologie': 'Cardiologie', 'optGynecologie': 'Gynécologie', 'optChirurgie': 'Chirurgie',
-                'labelNumOrdre': "Numéro d'ordre", 'labelEmail': 'Email', 'labelTelephone': 'Téléphone',
-                'btnSaveModif': 'Enregistrer les modifications',
-                'inputNom': 'Votre nom', 'inputPrenom': 'Votre prénom', 'inputNumOrdre': 'Numéro professionnel', 'inputEmail': 'Email professionnel', 'inputTel': 'Téléphone',
-                'titleLangRegion': 'Langue et région', 'titleLangue': "Langue de l'interface", 'descLangue': "Choisissez la langue d'affichage du tableau de bord",
-                'titleFuseau': 'Fuseau horaire', 'descFuseau': 'Fuseau horaire actuel de la clinique', 'spanFuseau': 'UTC+00:00 (Abidjan)',
-                'titleDateFormat': 'Format de date', 'descDateFormat': "Format d'affichage des dates dans l'application", 'spanDateFormat': 'JJ/MM/AAAA',
-                'titleApparence': 'Apparence', 'titleTheme': "Thème de l'interface", 'descTheme': 'Choisissez entre le mode clair et le mode sombre',
-                'btnClair': 'Clair', 'btnSombre': 'Sombre',
-                'titleDensite': "Densité de l'affichage", 'descDensite': "Contrôle l'espacement et la taille des éléments", 'spanDensite': 'Confortable',
-                'optFrancais': 'Français', 'optEnglish': 'English',
-                'titleInfosClinique': 'Informations de la clinique',
-                'labelNomClinique': 'Nom de la clinique', 'labelSlogan': 'Slogan', 'labelAdresse': 'Adresse', 'labelTelClinique': 'Téléphone', 'labelEmailClinique': 'Email', 'labelSiteWeb': 'Site web',
-                'inputNomClinique': '', 'inputSlogan': '', 'inputAdresse': '', 'inputTelClinique': '', 'inputEmailClinique': '', 'inputSiteWeb': '',
-                'btnEnregistrer': 'Enregistrer',
-                'titleHoraires': "Horaires d'ouverture",
-                'titleLunVen': 'Lundi - Vendredi', 'descLunVen': 'Consultations standard',
-                'titleSam': 'Samedi', 'descSam': 'Consultations réduites',
-                'titleDimFerie': "Dimanche & Jours fériés", 'descDimFerie': 'Fermé', 'spanFerme': 'FERMÉ',
-                'btnSaveHours': 'Enregistrer les horaires',
-                'titleChangeMdp': 'Changer le mot de passe',
-                'labelMdpActuel': 'Mot de passe actuel', 'labelNouveauMdp': 'Nouveau mot de passe', 'labelConfirmerMdp': 'Confirmer le mot de passe',
-                'inputMdpActuel': '', 'inputNouveauMdp': '', 'inputConfirmerMdp': '',
-                'btnMaj': 'Mettre à jour',
-                'titlePrefSecurite': 'Préférences de sécurité',
-                'title2fa': 'Authentification à deux facteurs (2FA)', 'desc2fa': 'Ajoutez une couche de sécurité supplémentaire',
-                'titleNotifConnexion': 'Notifications de connexion', 'descNotifConnexion': 'Recevez une alerte en cas de nouvelle connexion',
-                'titleDecoAuto': 'Déconnexion automatique', 'descDecoAuto': "Déconnexion après 30 minutes d'inactivité",
-                'titleSauvegardeAuto': 'Sauvegarde automatique', 'descSauvegardeAuto': 'Sauvegarder les données quotidiennement',
-                'toastLang': 'Langue changée en français'
-            },
-            en: {
-                'pageTitle': 'Settings', 'pageDesc': 'Configure your profile and clinic preferences',
-                'tabProfileBtn': 'Profile', 'tabPreferencesBtn': 'Preferences', 'tabClinicBtn': 'Clinic', 'tabSecurityBtn': 'Security',
-                'profileName': 'Dr. Jean Duval', 'profileRole': 'General Practitioner', 'profileEmail': 'dr.duval@refontiq.ci • +225 01 02 03 04 00',
-                'labelNom': 'Last Name', 'labelPrenom': 'First Name', 'labelSpecialite': 'Specialty',
-                'optMedecineGenerale': 'General Medicine', 'optPediatrie': 'Pediatrics', 'optCardiologie': 'Cardiology', 'optGynecologie': 'Gynecology', 'optChirurgie': 'Surgery',
-                'labelNumOrdre': 'License Number', 'labelEmail': 'Email', 'labelTelephone': 'Phone',
-                'btnSaveModif': 'Save Changes',
-                'inputNom': 'Your last name', 'inputPrenom': 'Your first name', 'inputNumOrdre': 'Professional number', 'inputEmail': 'Professional email', 'inputTel': 'Phone number',
-                'titleLangRegion': 'Language & Region', 'titleLangue': 'Interface Language', 'descLangue': 'Choose the display language of the dashboard',
-                'titleFuseau': 'Timezone', 'descFuseau': 'Current clinic timezone', 'spanFuseau': 'UTC+00:00 (Abidjan)',
-                'titleDateFormat': 'Date Format', 'descDateFormat': 'Date display format in the application', 'spanDateFormat': 'DD/MM/YYYY',
-                'titleApparence': 'Appearance', 'titleTheme': 'Interface Theme', 'descTheme': 'Choose between light and dark mode',
-                'btnClair': 'Light', 'btnSombre': 'Dark',
-                'titleDensite': 'Display Density', 'descDensite': 'Controls spacing and element size', 'spanDensite': 'Comfortable',
-                'optFrancais': 'French', 'optEnglish': 'English',
-                'titleInfosClinique': 'Clinic Information',
-                'labelNomClinique': 'Clinic Name', 'labelSlogan': 'Slogan', 'labelAdresse': 'Address', 'labelTelClinique': 'Phone', 'labelEmailClinique': 'Email', 'labelSiteWeb': 'Website',
-                'inputNomClinique': '', 'inputSlogan': '', 'inputAdresse': '', 'inputTelClinique': '', 'inputEmailClinique': '', 'inputSiteWeb': '',
-                'btnEnregistrer': 'Save',
-                'titleHoraires': 'Opening Hours',
-                'titleLunVen': 'Monday - Friday', 'descLunVen': 'Standard consultations',
-                'titleSam': 'Saturday', 'descSam': 'Reduced consultations',
-                'titleDimFerie': 'Sunday & Holidays', 'descDimFerie': 'Closed', 'spanFerme': 'CLOSED',
-                'btnSaveHours': 'Save Hours',
-                'titleChangeMdp': 'Change Password',
-                'labelMdpActuel': 'Current Password', 'labelNouveauMdp': 'New Password', 'labelConfirmerMdp': 'Confirm Password',
-                'inputMdpActuel': '', 'inputNouveauMdp': '', 'inputConfirmerMdp': '',
-                'btnMaj': 'Update',
-                'titlePrefSecurite': 'Security Preferences',
-                'title2fa': 'Two-Factor Authentication (2FA)', 'desc2fa': 'Add an extra layer of security',
-                'titleNotifConnexion': 'Login Notifications', 'descNotifConnexion': 'Receive alerts on new logins',
-                'titleDecoAuto': 'Auto Logout', 'descDecoAuto': 'Logout after 30 minutes of inactivity',
-                'titleSauvegardeAuto': 'Auto Backup', 'descSauvegardeAuto': 'Backup data daily',
-                'toastLang': 'Language changed to English'
-            }
-        };
-
-        function changeLanguage(lang) {
-            localStorage.setItem('language', lang);
-            const dict = i18n[lang];
-            Object.keys(dict).forEach(key => {
-                const el = document.getElementById(key);
-                if (el) {
-                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                        if (dict[key]) el.placeholder = dict[key];
-                    } else if (el.tagName === 'SELECT') {
-                        Array.from(el.options).forEach(opt => {
-                            if (opt.id && dict[opt.id]) opt.textContent = dict[opt.id];
-                        });
-                    } else {
-                        if (dict[key]) el.textContent = dict[key];
-                    }
-                }
-            });
-            const toast = document.createElement('div');
-            toast.style.cssText = 'position:fixed;bottom:30px;right:30px;z-index:9999;background:var(--text);color:white;padding:14px 24px;border-radius:14px;font-weight:500;box-shadow:0 20px 60px rgba(0,0,0,0.12);animation:fadeIn 0.3s ease;display:flex;align-items:center;gap:10px;';
-            toast.innerHTML = '<i class="fa-solid fa-check-circle" style="color:var(--success);"></i> ' + dict['toastLang'];
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        function setTheme(t) {
-            document.documentElement.setAttribute('data-theme', t);
-            localStorage.setItem('theme', t);
-            document.querySelectorAll('.theme-btn').forEach(b => { b.classList.remove('active'); b.style.borderColor = 'var(--border)'; });
-            const ab = document.querySelector(`.theme-btn[data-theme="${t}"]`);
-            if (ab) { ab.classList.add('active'); ab.style.borderColor = 'var(--primary)'; }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() { if(window.updateDrawerUser) window.updateDrawerUser(); });
-window.onload = function () {
-            const u = localStorage.getItem('currentUser');
-            if (!u) { window.location.href = 'login.html'; return }
-            const user = JSON.parse(u);
-            document.getElementById('userName').textContent = getDisplayName(user);
-            document.getElementById('userRole').textContent = getRoleName(user.role);
-            document.getElementById('userAvatar').textContent = getInitials(user);
-            document.getElementById('profileAvatar').textContent = getInitials(user);
-            document.getElementById('profileName').textContent = getDisplayName(user);
-            document.getElementById('profileRole').textContent = getRoleName(user.role) + ' généraliste';
-            const st = localStorage.getItem('theme') || 'light';
-            setTheme(st);
-            const sl = localStorage.getItem('language') || 'fr';
-            document.getElementById('langSelect').value = sl;
-            changeLanguage(sl);
-        };
-
-        function getDisplayName(u) { if (u.role === 'medecin') return 'Dr. Jean Duval'; if (u.role === 'infirmiere') return 'Infirm. Marie Martin'; if (u.role === 'receptionniste') return 'M. Koffi'; return u.name || 'Utilisateur' }
-        function getRoleName(r) { const n = { 'medecin': 'Médecin', 'infirmiere': 'Infirmière', 'receptionniste': 'Réceptionniste' }; return n[r] || r }
-        function getInitials(u) { const n = getDisplayName(u).split(' '); return n.length >= 2 ? (n[0][0] + n[1][0]).toUpperCase() : n.substring(0, 2).toUpperCase() }
-        function switchTab(t) { document.querySelectorAll('.tab').forEach(e => e.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active')); document.querySelector(`[data-tab="${t}"]`).classList.add('active'); document.getElementById(`tab-${t}`).classList.add('active') }
-    </script>
-    
-
-    
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script>
-        // --- Fonctions mobiles ---
-        
-        
-        function toggleMorePopup() {
-            const p = document.getElementById('morePopup');
-            const o = document.getElementById('moreOverlay');
-            if (p && o) {
-                if(p.classList.contains('active')) {
-                    p.classList.remove('active');
-                    o.classList.remove('active');
-                } else {
-                    p.classList.add('active');
-                    o.classList.add('active');
-                }
-            }
-        }
-        function closeMorePopup() {
-            const p = document.getElementById('morePopup');
-            const o = document.getElementById('moreOverlay');
-            if (p && o) {
-                p.classList.remove('active');
-                o.classList.remove('active');
-            }
-        }
-        
-        // Initialisation mobile
         document.addEventListener('DOMContentLoaded', () => {
-            const menuBtn = document.querySelector('.header-logo');
-            if (menuBtn) menuBtn.onclick = openDrawer;
-            
-            // S'assurer que updateDrawerUser est appelé
-            if (window.updateDrawerUser) window.updateDrawerUser();
+            initUser();
+            const u = localStorage.getItem('currentUser');
+            if (u) {
+                const user = JSON.parse(u);
+                document.getElementById('u-name').value = user.name || 'Utilisateur';
+                document.getElementById('u-role').value = user.role || 'Personnel';
+            }
         });
-    </script>
-    <!-- Mobile Bottom Navigation -->
-    <nav class="mobile-bottom-nav">
-        <a href="dashboard.html" class="mobile-nav-item "><i class="fa-solid fa-chart-line"></i><span>Accueil</span></a>
-        <a href="patients.html" class="mobile-nav-item "><i class="fa-solid fa-users"></i><span>Patients</span></a>
-        <a href="consultations.html" class="mobile-nav-item "><i class="fa-solid fa-stethoscope"></i><span>Consult.</span></a>
-        <a href="rendez-vous.html" class="mobile-nav-item "><i class="fa-solid fa-calendar-check"></i><span>RDV</span></a>
-        <button class="mobile-nav-item more-btn" onclick="toggleMorePopup()"><i class="fa-solid fa-ellipsis-h"></i><span>Plus</span></button>
-    </nav>
-    <!-- Popup Plus -->
-    <div class="more-popup-overlay" id="moreOverlay" onclick="closeMorePopup()"></div>
-    <div class="more-popup" id="morePopup">
-        <div class="popup-grid">
-            <a href="messagerie.html" class="popup-item"><i class="fa-solid fa-comments"></i>Messages</a>
-            <a href="finance.html" class="popup-item"><i class="fa-solid fa-coins"></i>Finance</a>
-            <a href="stocks.html" class="popup-item"><i class="fa-solid fa-boxes-stacked"></i>Stocks</a>
-            <a href="alertes.html" class="popup-item"><i class="fa-solid fa-bell"></i>Alertes</a>
-            <a href="parametres.html" class="popup-item" style="grid-column: span 2;"><i class="fa-solid fa-cog"></i>Paramètres</a>
-        </div>
-    </div>
 
+        function initUser() {
+            const u = localStorage.getItem('currentUser');
+            if (u) {
+                const user = JSON.parse(u);
+                document.getElementById('side-name').textContent = user.name || 'Utilisateur';
+                document.getElementById('side-role').textContent = user.role;
+                document.getElementById('side-avatar').textContent = (user.name || 'U').substring(0, 2).toUpperCase();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+
+        function toggleMobileSidebar() {
+            const s = document.querySelector('.sidebar');
+            const o = document.getElementById('sidebarOverlay');
+            s.classList.toggle('active');
+            o.classList.toggle('active');
+        }
+    </script>
 </body>
 </html>

@@ -5,859 +5,301 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finance - Clinique Refontiq</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/mobile.css">
+    
+    <link href="assets/premium-style.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #0077b6;
-            --primary-dark: #023e8a;
-            --primary-light: #caf0f8;
-            --secondary: #2a9d8f;
-            --accent: #e76f51;
-            --success: #2a9d8f;
-            --warning: #e9c46a;
-            --danger: #e76f51;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 20px rgba(0, 119, 182, 0.08);
-            --shadow-lg: 0 20px 60px rgba(0, 119, 182, 0.12);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .dashboard-container {
-            display: grid;
-            grid-template-columns: 260px 1fr;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary) 100%);
-            color: white;
-            padding: 0;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 100;
-        }
-
-        .sidebar-header {
-            padding: 24px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        .logo-text h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-
-        .logo-text p {
-            font-size: 0.7rem;
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-        }
-
-        .user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-
-        .user-details h3 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .user-details p {
-            font-size: 0.8rem;
-            opacity: 0.8;
-        }
-
-        .nav-menu {
-            padding: 16px 12px;
-        }
-
-        .nav-section {
-            margin-bottom: 24px;
-        }
-
-        .nav-section-title {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.6;
-            margin-bottom: 12px;
-            padding: 0 8px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            color: rgba(255, 255, 255, 0.9);
-            transition: all 0.2s;
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-        }
-
-        .nav-item.active {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            font-weight: 600;
-        }
-
-        .nav-item i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .sidebar-footer {
-            padding: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .logout-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            background: rgba(231, 111, 81, 0.2);
-            color: #fca5a5;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .logout-btn:hover {
-            background: rgba(231, 111, 81, 0.3);
-        }
-
-        .main-content {
-            padding: 24px 32px;
-            overflow-y: auto;
-        }
-
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-
-        .page-title h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .page-title p {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-family: inherit;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 119, 182, 0.4);
-        }
-
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 2px;
-        }
-
-        .tab {
-            padding: 12px 20px;
-            background: transparent;
-            border: none;
-            border-radius: 8px 8px 0 0;
-            font-family: inherit;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--text-light);
-            top: 2px;
-        }
-
-        .tab:hover {
-            color: var(--primary);
-            background: var(--bg);
-        }
-
-        .tab.active {
-            color: var(--primary);
-            background: white;
-            border-bottom: 2px solid var(--primary);
-            margin-bottom: -4px;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .card {
-            background: var(--card);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .card-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-
-        .stats-grid-finance {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card-finance {
-            background: var(--card);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
-        .stat-icon-finance {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .stat-icon-finance.blue {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .stat-icon-finance.green {
-            background: rgba(42, 157, 143, 0.15);
-            color: var(--secondary);
-        }
-
-        .stat-icon-finance.orange {
-            background: rgba(233, 140, 105, 0.15);
-            color: var(--accent);
-        }
-
-        .stat-icon-finance.purple {
-            background: rgba(124, 58, 237, 0.15);
-            color: #7c3aed;
-        }
-
-        .stat-value-finance {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        .stat-label-finance {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            padding: 16px;
-            font-weight: 600;
-            color: var(--text-light);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--border);
-        }
-
-        td {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.95rem;
-        }
-
-        tr:hover td {
-            background: var(--bg);
-            cursor: pointer;
-        }
-
-        .amount {
-            font-weight: 700;
-            font-family: 'Space Grotesk', sans-serif;
-        }
-
-        .amount.positive {
-            color: var(--success);
-        }
-
-        .amount.negative {
-            color: var(--danger);
-        }
-
-        .payment-status {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .payment-pending {
-            background: rgba(233, 140, 105, 0.15);
-            color: var(--accent);
-        }
-
-        .payment-paid {
-            background: rgba(42, 157, 143, 0.15);
-            color: var(--success);
-        }
-
-        .payment-overdue {
-            background: rgba(231, 111, 81, 0.15);
-            color: var(--danger);
-        }
-
-        @media (max-width: 1200px) {
-            .dashboard-container {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                display: none;
-            }
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 32px; }
+        .stat-card { background: var(--card); padding: 24px; border-radius: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .stat-label { font-size: 0.85rem; color: var(--text-light); margin-bottom: 8px; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; font-family: 'Space Grotesk'; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .calendar-nav { display: flex; align-items: center; gap: 20px; }
+        .nav-btn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); transition: 0.2s; }
+        .nav-btn:hover { background: var(--bg); color: var(--primary); }
+        .calendar-actions { display: flex; gap: 10px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 32px; border-radius: 20px; width: 100%; max-width: 500px; }
 
         @media (max-width: 768px) {
-            .main-content {
-                padding: 16px;
-            }
-
-            .top-bar {
-                flex-direction: column;
-                gap: 16px;
-                align-items: flex-start;
-            }
-
-            .tabs {
-                flex-wrap: wrap;
-            }
+            .calendar-header { flex-direction: column; align-items: stretch; }
+            .calendar-nav { justify-content: center; }
+            .calendar-actions { display: grid; grid-template-columns: 1fr 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 
 <body>
-    <!-- Mobile Header -->
-    <header class="mobile-header">
-        <div class="header-left">
-            <div class="header-logo">
-                <i class="fa-solid fa-hospital"></i>
-            </div>
-            <div>
-                <div class="header-title">Clinique Refontiq</div>
-                <div class="header-subtitle">Système Médical</div>
-            </div>
-        </div>
-        <div class="header-right">
-            <button class="header-btn" onclick="window.location.href='alertes.html'">
-                <i class="fa-solid fa-bell"></i>
-                <span class="badge">3</span>
-            </button>
-            
-        </div>
-    </header>
-
-
     <div class="dashboard-container">
-        <!-- Sidebar -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
                     <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
-                    <a href="index.html" style="text-decoration: none; color: inherit;">
-                    <div class="logo-text">
-                        <h1>Clinique Refontiq</h1>
-                        <p>Système Médical</p>
-                    </div>
-                    </a>
+                    <div class="logo-text"><h1>Clinique Refontiq</h1><p>Espace Médical</p></div>
                 </div>
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">DR</div>
-                    <div class="user-details">
-                        <h3 id="userName">Dr. Duval</h3>
-                        <p id="userRole">Médecin</p>
+
+                <div class="sidebar-search">
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Rechercher un patient...">
                     </div>
+                </div>
+
+                <div class="user-info">
+                    <div class="user-avatar" id="side-avatar">DR</div>
+                    <div class="user-details"><h3 id="side-name">Dr. Duval <span class="online-indicator" style="margin-left: 5px;"></span></h3><p id="side-role">Médecin</p></div>
                 </div>
             </div>
             <nav class="nav-menu">
-                <div class="nav-section">
-                    <div class="nav-section-title">Principal</div>
-                    <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-line"></i>Tableau de bord</a>
-                    <a href="patients.html" class="nav-item"><i class="fa-solid fa-users"></i>Patients</a>
-                    <a href="consultations.html" class="nav-item"><i
-                            class="fa-solid fa-stethoscope"></i>Consultations</a>
-                    <a href="rendez-vous.html" class="nav-item"><i
-                            class="fa-solid fa-calendar-check"></i>Rendez-vous</a>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Gestion</div>
-                    <a href="finance.html" class="nav-item active"><i class="fa-solid fa-coins"></i>Finance</a>
-                    <a href="stocks.html" class="nav-item"><i class="fa-solid fa-boxes-stacked"></i>Stocks</a>
-                    <a href="messagerie.html" class="nav-item"><i class="fa-solid fa-comments"></i>Messagerie</a>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Système</div>
-                    <a href="alertes.html" class="nav-item"><i class="fa-solid fa-bell"></i>Alertes</a>
-                    <a href="parametres.html" class="nav-item"><i class="fa-solid fa-cog"></i>Paramètres</a>
-                </div>
+
+                <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
+                <a href="patients.html" class="nav-item"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
+                <a href="consultations.html" class="nav-item"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
+                <a href="rendez-vous.html" class="nav-item"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
+                
+                <hr class="nav-separator">
+                
+                <a href="finance.html" class="nav-item active"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
+                <a href="stocks.html" class="nav-item"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
+                
+                <hr class="nav-separator">
+                
+                <a href="messagerie.html" class="nav-item"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
+                <a href="alertes.html" class="nav-item"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
+                <a href="parametres.html" class="nav-item"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
+            
             </nav>
-            <div class="sidebar-footer">
-                <a href="login.html" class="logout-btn" onclick="logout()"><i
-                        class="fa-solid fa-right-from-bracket"></i>Déconnexion</a>
-            </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
+            <header class="mobile-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="header-btn" onclick="toggleMobileSidebar()" style="background:none; border:none; font-size:1.5rem; color:white; cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
+                    <div style="width: 35px; height: 35px; background: rgba(255,255,255,0.2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                        <i class="fa-solid fa-hospital"></i>
+                    </div>
+                    <div style="font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">Clinique Refontiq</div>
+                </div>
+                <div style="font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 8px; text-transform: uppercase;">Finance</div>
+            </header>
+
+
             <div class="top-bar">
                 <div class="page-title">
                     <h1>Gestion Financière</h1>
-                    <p>Suivez les revenus, paiements et factures</p>
+                    <p>Suivi des revenus et dépenses</p>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="toggleModal(true)"><i class="fa-solid fa-plus"></i> Nouvelle Transaction</button>
                 </div>
             </div>
 
-            <!-- Tabs -->
-            <div class="tabs">
-                <button class="tab active" data-tab="overview" onclick="switchTab('overview')">
-                    <i class="fa-solid fa-chart-pie"></i> Revenus & Statistiques
-                </button>
-                <button class="tab" data-tab="payments" onclick="switchTab('payments')">
-                    <i class="fa-solid fa-clock"></i> Paiements en attente
-                </button>
-                <button class="tab" data-tab="invoices" onclick="switchTab('invoices')">
-                    <i class="fa-solid fa-file-invoice"></i> Facturation
-                </button>
-            </div>
-
-            <!-- Tab 1: Overview -->
-            <div class="tab-content active" id="tab-overview">
-                <div class="stats-grid-finance">
-                    <div class="stat-card-finance">
-                        <div class="stat-header">
-                            <div class="stat-icon-finance blue"><i class="fa-solid fa-coins"></i></div>
-                            <span style="font-size:0.85rem;color:var(--success);">+15%</span>
-                        </div>
-                        <div class="stat-value-finance">12.4M FCFA</div>
-                        <div class="stat-label-finance">Revenus du mois</div>
+            <div class="calendar-header" style="background: var(--card); padding: 24px; border-radius: 20px; margin-bottom: 32px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div class="agenda-date" style="display: flex; align-items: center; gap: 20px;">
+                    <button class="nav-btn" onclick="precedent()"><i class="fa-solid fa-chevron-left"></i></button>
+                    <div>
+                        <p style="text-transform: uppercase; letter-spacing: 1px; font-weight: 600; color: var(--text-light); font-size: 0.8rem; margin:0;">PÉRIODE</p>
+                        <h2 id="currentMonth" style="margin:0; font-size: 1.8rem; font-family:'Space Grotesk'; color: var(--primary);">Mai 2026</h2>
                     </div>
-                    <div class="stat-card-finance">
-                        <div class="stat-header">
-                            <div class="stat-icon-finance green"><i class="fa-solid fa-wallet"></i></div>
-                            <span style="font-size:0.85rem;color:var(--text-light);">Ce jour</span>
-                        </div>
-                        <div class="stat-value-finance">2.4M FCFA</div>
-                        <div class="stat-label-finance">Revenus du jour</div>
-                    </div>
-                    <div class="stat-card-finance">
-                        <div class="stat-header">
-                            <div class="stat-icon-finance orange"><i class="fa-solid fa-hourglass-half"></i></div>
-                        </div>
-                        <div class="stat-value-finance">850k FCFA</div>
-                        <div class="stat-label-finance">Paiements en attente</div>
-                    </div>
-                    <div class="stat-card-finance">
-                        <div class="stat-header">
-                            <div class="stat-icon-finance purple"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                            <span style="font-size:0.85rem;color:var(--success);">+8%</span>
-                        </div>
-                        <div class="stat-value-finance">48.2M FCFA</div>
-                        <div class="stat-label-finance">Revenus annuels</div>
-                    </div>
+                    <button class="nav-btn" onclick="suivant()"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Historique des transactions (Janvier 2026)</h2>
-                    </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Patient</th>
-                                    <th>Type</th>
-                                    <th>Montant</th>
-                                    <th>Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>13/01/2026</td>
-                                    <td>Mme Kouassi Adèle</td>
-                                    <td>Consultation</td>
-                                    <td class="amount positive">+ 75 000 FCFA</td>
-                                    <td><span class="payment-status payment-paid">Payé</span></td>
-                                </tr>
-                                <tr>
-                                    <td>13/01/2026</td>
-                                    <td>M. Konan Amani</td>
-                                    <td>Urgence</td>
-                                    <td class="amount positive">+ 120 000 FCFA</td>
-                                    <td><span class="payment-status payment-pending">En attente</span></td>
-                                </tr>
-                                <tr>
-                                    <td>12/01/2026</td>
-                                    <td>Mme Diabaté Fatou</td>
-                                    <td>Suivi diabète</td>
-                                    <td class="amount positive">+ 50 000 FCFA</td>
-                                    <td><span class="payment-status payment-paid">Payé</span></td>
-                                </tr>
-                                <tr>
-                                    <td>11/01/2026</td>
-                                    <td>M. Yao Koffi</td>
-                                    <td>Bilan cardio</td>
-                                    <td class="amount positive">+ 100 000 FCFA</td>
-                                    <td><span class="payment-status payment-overdue">En retard</span></td>
-                                </tr>
-                                <tr>
-                                    <td>10/01/2026</td>
-                                    <td>M. Touré Ibrahim</td>
-                                    <td>Consultation</td>
-                                    <td class="amount positive">+ 75 000 FCFA</td>
-                                    <td><span class="payment-status payment-paid">Payé</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="calendar-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: auto; min-width: max-content;">
+                    <button class="btn" style="background: var(--primary-light); color: var(--primary); justify-content: center;" onclick="filtrerDate('today')">Aujourd'hui</button>
+                    <button class="btn btn-primary" style="justify-content: center;" onclick="filtrerDate('month')">Ce mois</button>
                 </div>
             </div>
 
-            <!-- Tab 2: Paiements -->
-            <div class="tab-content" id="tab-payments">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Paiements en attente</h2>
-                        <span style="color:var(--accent);font-weight:600;">Total: 850 000 FCFA</span>
-                    </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Patient</th>
-                                    <th>Montant</th>
-                                    <th>Date échéance</th>
-                                    <th>Jours de retard</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>M. Konan Amani</strong></td>
-                                    <td class="amount negative">120 000 FCFA</td>
-                                    <td>15/01/2026</td>
-                                    <td>2 jours</td>
-                                    <td><button class="btn btn-primary"
-                                            style="padding:8px 16px;font-size:0.85rem;">Relancer</button></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>M. Yao Koffi</strong></td>
-                                    <td class="amount negative">100 000 FCFA</td>
-                                    <td>11/01/2026</td>
-                                    <td>5 jours</td>
-                                    <td><button class="btn"
-                                            style="background:var(--danger);color:white;padding:8px 16px;font-size:0.85rem;">En
-                                            retard</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Revenus du Jour</div>
+                    <div class="stat-value" id="stat-day" style="color: var(--secondary);">0 FCFA</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Revenus du Mois</div>
+                    <div class="stat-value" id="stat-month" style="color: var(--primary);">0 FCFA</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">En attente</div>
+                    <div class="stat-value" id="stat-pending" style="color: var(--danger);">0 FCFA</div>
                 </div>
             </div>
 
-            <!-- Tab 3: Facturation -->
-            <div class="tab-content" id="tab-invoices">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Factures émises</h2>
-                        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouvelle facture</button>
-                    </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>N° Facture</th>
-                                    <th>Patient</th>
-                                    <th>Date</th>
-                                    <th>Montant</th>
-                                    <th>Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>F-2026-001</td>
-                                    <td>Mme Kouassi Adèle</td>
-                                    <td>13/01/2026</td>
-                                    <td class="amount">75 000 FCFA</td>
-                                    <td><span class="payment-status payment-paid">Payée</span></td>
-                                </tr>
-                                <tr>
-                                    <td>F-2026-002</td>
-                                    <td>M. Konan Amani</td>
-                                    <td>13/01/2026</td>
-                                    <td class="amount">120 000 FCFA</td>
-                                    <td><span class="payment-status payment-pending">En attente</span></td>
-                                </tr>
-                                <tr>
-                                    <td>F-2026-003</td>
-                                    <td>Mme Diabaté Fatou</td>
-                                    <td>12/01/2026</td>
-                                    <td class="amount">50 000 FCFA</td>
-                                    <td><span class="payment-status payment-paid">Payée</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Patient</th>
+                                <th>Motif</th>
+                                <th>Montant</th>
+                                <th>Statut</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-body">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 60px;">
+                                    <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: var(--primary);"></i>
+                                    <p style="margin-top: 15px; color: var(--text-light);">Chargement des finances...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() { if(window.updateDrawerUser) window.updateDrawerUser(); });
-window.onload = function () {
-            const currentUser = localStorage.getItem('currentUser');
-            if (!currentUser) { window.location.href = 'login.html'; return; }
-            const user = JSON.parse(currentUser);
-            document.getElementById('userName').textContent = getDisplayName(user);
-            document.getElementById('userRole').textContent = getRoleName(user.role);
-            document.getElementById('userAvatar').textContent = getInitials(user);
-        };
-
-        function getDisplayName(user) {
-            if (user.role === 'medecin') return 'Dr. Duval';
-            if (user.role === 'infirmiere') return 'Infirm. Martin';
-            if (user.role === 'receptionniste') return 'M. Koffi';
-            return user.name || 'Utilisateur';
-        }
-
-        function getRoleName(role) {
-            const roles = { 'medecin': 'Médecin', 'infirmiere': 'Infirmière', 'receptionniste': 'Réceptionniste' };
-            return roles[role] || role;
-        }
-
-        function getInitials(user) {
-            const name = getDisplayName(user);
-            const parts = name.split(' ');
-            if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-            return name.substring(0, 2).toUpperCase();
-        }
-
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            const t = document.querySelector(`[data-tab="${tabName}"]`); if(t) t.classList.add('active');
-            const c = document.getElementById(`tab-${tabName}`); if(c) c.classList.add('active');
-        }
-    </script>
-    
-
-    
+    <!-- Modal Paiement -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom:24px; font-family:'Space Grotesk';">Encaisser un paiement</h2>
+            <form onsubmit="savePayment(event)">
+                <div class="form-group">
+                    <label>Patient *</label>
+                    <select id="pay-patient" required><option value="">Chargement...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Motif *</label>
+                    <input type="text" id="pay-reason" placeholder="Ex: Consultation" required>
+                </div>
+                <div class="form-group">
+                    <label>Montant (FCFA) *</label>
+                    <input type="number" id="pay-amount" required>
+                </div>
+                <div class="form-group">
+                    <label>Statut</label>
+                    <select id="pay-status">
+                        <option value="Payé">Payé</option>
+                        <option value="En attente">En attente</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:12px; margin-top:24px;">
+                    <button type="button" class="btn" onclick="toggleModal(false)" style="flex:1;">Annuler</button>
+                    <button type="submit" class="btn btn-primary" style="flex:1;" id="btn-save">Enregistrer</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script>
-        // --- Fonctions mobiles ---
-        
-        
-        function toggleMorePopup() {
-            const p = document.getElementById('morePopup');
-            const o = document.getElementById('moreOverlay');
-            if (p && o) {
-                if(p.classList.contains('active')) {
-                    p.classList.remove('active');
-                    o.classList.remove('active');
-                } else {
-                    p.classList.add('active');
-                    o.classList.add('active');
-                }
-            }
-        }
-        function closeMorePopup() {
-            const p = document.getElementById('morePopup');
-            const o = document.getElementById('moreOverlay');
-            if (p && o) {
-                p.classList.remove('active');
-                o.classList.remove('active');
-            }
-        }
-        
-        // Initialisation mobile
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuBtn = document.querySelector('.header-logo');
-            if (menuBtn) menuBtn.onclick = openDrawer;
-            
-            // S'assurer que updateDrawerUser est appelé
-            if (window.updateDrawerUser) window.updateDrawerUser();
+        document.addEventListener('DOMContentLoaded', async () => {
+            initUser();
+            await chargerPatients();
+            await chargerFinances();
         });
-    </script>
-    <!-- Mobile Bottom Navigation -->
-    <nav class="mobile-bottom-nav">
-        <a href="dashboard.html" class="mobile-nav-item "><i class="fa-solid fa-chart-line"></i><span>Accueil</span></a>
-        <a href="patients.html" class="mobile-nav-item "><i class="fa-solid fa-users"></i><span>Patients</span></a>
-        <a href="consultations.html" class="mobile-nav-item "><i class="fa-solid fa-stethoscope"></i><span>Consult.</span></a>
-        <a href="rendez-vous.html" class="mobile-nav-item "><i class="fa-solid fa-calendar-check"></i><span>RDV</span></a>
-        <button class="mobile-nav-item more-btn" onclick="toggleMorePopup()"><i class="fa-solid fa-ellipsis-h"></i><span>Plus</span></button>
-    </nav>
-    <!-- Popup Plus -->
-    <div class="more-popup-overlay" id="moreOverlay" onclick="closeMorePopup()"></div>
-    <div class="more-popup" id="morePopup">
-        <div class="popup-grid">
-            <a href="messagerie.html" class="popup-item"><i class="fa-solid fa-comments"></i>Messages</a>
-            <a href="finance.html" class="popup-item"><i class="fa-solid fa-coins"></i>Finance</a>
-            <a href="stocks.html" class="popup-item"><i class="fa-solid fa-boxes-stacked"></i>Stocks</a>
-            <a href="alertes.html" class="popup-item"><i class="fa-solid fa-bell"></i>Alertes</a>
-            <a href="parametres.html" class="popup-item" style="grid-column: span 2;"><i class="fa-solid fa-cog"></i>Paramètres</a>
-        </div>
-    </div>
 
+        function initUser() {
+            const u = localStorage.getItem('currentUser');
+            if (u) {
+                const user = JSON.parse(u);
+                document.getElementById('side-name').textContent = user.name || 'Utilisateur';
+                document.getElementById('side-role').textContent = user.role;
+                document.getElementById('side-avatar').textContent = (user.name || 'U').substring(0, 2).toUpperCase();
+            }
+        }
+
+        async function chargerPatients() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data } = await supabase.from('patients').select('id, nom, prenom').order('nom');
+            const select = document.getElementById('pay-patient');
+            if (data) {
+                select.innerHTML = '<option value="">Choisir un patient...</option>';
+                data.forEach(p => select.innerHTML += `<option value="${p.id}">${p.nom} ${p.prenom || ''}</option>`);
+            }
+        }
+
+        async function chargerFinances() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data: payments } = await supabase.from('paiements').select('*, patients(nom, prenom)').order('created_at', { ascending: false });
+            
+            const tbody = document.getElementById('transaction-body');
+            if (!payments || payments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Aucune transaction.</td></tr>';
+                return;
+            }
+
+            let dayTotal = 0, monthTotal = 0, pendingTotal = 0;
+            const today = new Date().toISOString().split('T')[0];
+            const currentMonth = new Date().getMonth();
+
+            tbody.innerHTML = payments.map(p => {
+                const date = new Date(p.created_at);
+                const isToday = date.toISOString().split('T')[0] === today;
+                const isThisMonth = date.getMonth() === currentMonth;
+
+                if (p.statut === 'Payé') {
+                    if (isToday) dayTotal += p.montant;
+                    if (isThisMonth) monthTotal += p.montant;
+                } else {
+                    pendingTotal += p.montant;
+                }
+
+                return `
+                    <tr>
+                        <td>${date.toLocaleDateString('fr-FR')}</td>
+                        <td style="font-weight:600;">${p.patients?.nom || 'N/A'} ${p.patients?.prenom || ''}</td>
+                        <td>${p.motif}</td>
+                        <td style="font-weight:700;">${p.montant.toLocaleString()} FCFA</td>
+                        <td><span class="status-badge ${p.statut === 'Payé' ? 'status-paid' : 'status-pending'}">${p.statut}</span></td>
+                        <td>
+                            ${p.statut === 'En attente' ? `<button onclick="validerPaiement('${p.id}')" class="btn" style="padding:4px 8px; font-size:0.75rem; background:var(--secondary); color:white;">Encaisser</button>` : '<i class="fa-solid fa-check-circle" style="color:var(--secondary)"></i>'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('stat-day').textContent = dayTotal.toLocaleString() + ' FCFA';
+            document.getElementById('stat-month').textContent = monthTotal.toLocaleString() + ' FCFA';
+            document.getElementById('stat-pending').textContent = pendingTotal.toLocaleString() + ' FCFA';
+        }
+
+        async function savePayment(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save');
+            btn.disabled = true;
+            btn.textContent = "Traitement...";
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const pay = {
+                patient_id: document.getElementById('pay-patient').value,
+                motif: document.getElementById('pay-reason').value,
+                montant: parseInt(document.getElementById('pay-amount').value),
+                statut: document.getElementById('pay-status').value
+            };
+
+            const { error } = await supabase.from('paiements').insert([pay]);
+            if (!error) {
+                window.notifier("Transaction enregistrée avec succès !");
+                toggleModal(false);
+                await chargerFinances();
+            } else window.notifier("Erreur : " + error.message, 'error');
+            
+            btn.disabled = false;
+            btn.textContent = "Enregistrer";
+        }
+
+        async function validerPaiement(id) {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            await supabase.from('paiements').update({ statut: 'Payé' }).eq('id', id);
+            await chargerFinances();
+        }
+
+        function toggleModal(show) { document.getElementById('paymentModal').classList.toggle('active', show); }
+
+        function toggleMobileSidebar() {
+            const s = document.querySelector('.sidebar');
+            const o = document.getElementById('sidebarOverlay');
+            s.classList.toggle('active');
+            o.classList.toggle('active');
+        }
+    </script>
 </body>
 </html>

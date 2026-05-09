@@ -266,7 +266,7 @@ async function actualiserNotifications() {
         .from(SUPABASE_CONFIG.tables.appointments)
         .select('*, patients(nom, prenom)')
         .eq('date', today)
-        .eq('statut', 'prevu')
+        .in('statut', ['en_attente', 'confirme'])
         .order('heure', { ascending: true });
 
     if (error || !rdvs || rdvs.length === 0) {
@@ -315,11 +315,222 @@ window.SupabaseAPI = {
     config: SUPABASE_CONFIG
 };
 
+/**
+ * Met à jour tous les badges d'alertes de l'application (Sidebar & Mobile Header)
+ */
+async function updateGlobalAlertBadges() {
+    const badges = document.querySelectorAll('.nav-badge, .badge');
+    const supabase = await initSupabase();
+    if (!supabase) return;
+
+    try {
+        const { count, error } = await supabase
+            .from('alertes')
+            .select('*', { count: 'exact', head: true })
+            .eq('lu', false);
+
+        if (error) throw error;
+
+        badges.forEach(badge => {
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+    } catch (err) {
+        console.warn("Erreur mise à jour badges:", err.message);
+    }
+}
+
+// Initialisation globale au chargement de chaque page
+document.addEventListener('DOMContentLoaded', () => {
+    updateGlobalAlertBadges();
+    initSmartSearch();
+    initLogoNavigation();
+});
+
+/**
+ * Rend le logo de la sidebar et le nom dans le mobile header cliquables
+ * vers la page d'accueil (index.html)
+ */
+function initLogoNavigation() {
+    // 1. Logo dans la sidebar (desktop + mobile ouvert)
+    const logo = document.querySelector('.sidebar .logo');
+    if (logo) {
+        logo.style.cursor = 'pointer';
+        logo.style.transition = 'opacity 0.2s, transform 0.2s';
+        logo.title = "Retour à l'accueil";
+        logo.addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+        logo.addEventListener('mouseenter', () => {
+            logo.style.opacity = '0.8';
+            logo.style.transform = 'scale(0.97)';
+        });
+        logo.addEventListener('mouseleave', () => {
+            logo.style.opacity = '1';
+            logo.style.transform = 'scale(1)';
+        });
+    }
+
+    // 2. Nom de la clinique dans le mobile header
+    const mobileHeader = document.querySelector('.mobile-header');
+    if (mobileHeader) {
+        // Trouver le texte "Clinique Refontiq" et l'icône hôpital dans le header mobile
+        const headerItems = mobileHeader.querySelectorAll('div');
+        headerItems.forEach(div => {
+            if (div.textContent.trim().includes('Clinique Refontiq') && !div.querySelector('button')) {
+                // C'est le conteneur avec l'icône + le nom
+                div.style.cursor = 'pointer';
+                div.title = "Retour à l'accueil";
+                div.addEventListener('click', (e) => {
+                    // Ne pas déclencher si on clique sur le bouton hamburger
+                    if (e.target.closest('button')) return;
+                    window.location.href = 'index.html';
+                });
+            }
+        });
+    }
+}
+
+/**
+ * Initialise la recherche intelligente dans la sidebar.
+ * Se connecte automatiquement à l'input existant dans .search-wrapper
+ */
+function initSmartSearch() {
+    const searchWrapper = document.querySelector('.sidebar-search .search-wrapper');
+    if (!searchWrapper) return;
+
+    const input = searchWrapper.querySelector('input');
+    if (!input) return;
+
+    // Créer le conteneur de résultats
+    const resultsDiv = document.createElement('div');
+    resultsDiv.id = 'smart-search-results';
+    searchWrapper.style.position = 'relative';
+    searchWrapper.appendChild(resultsDiv);
+
+    // Injecter le CSS du dropdown
+    const style = document.createElement('style');
+    style.textContent = `
+        #smart-search-results {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0; right: 0;
+            background: var(--card, #fff);
+            border-radius: 14px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            z-index: 9999;
+            max-height: 320px;
+            overflow-y: auto;
+            border: 1px solid var(--border, #e2e8f0);
+        }
+        #smart-search-results .search-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; cursor: pointer;
+            transition: all 0.15s ease;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            color: var(--text, #1e293b);
+        }
+        #smart-search-results .search-item:last-child { border-bottom: none; }
+        #smart-search-results .search-item:hover {
+            background: var(--primary-light, #caf0f8);
+            padding-left: 20px;
+        }
+        #smart-search-results .search-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary, #0077b6), #0ea5e9);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
+        }
+        #smart-search-results .search-name { font-weight: 600; font-size: 0.9rem; }
+        #smart-search-results .search-tel { font-size: 0.75rem; color: var(--text-light, #64748b); }
+        #smart-search-results .search-empty {
+            padding: 20px; text-align: center; color: var(--text-light, #64748b); font-size: 0.85rem;
+        }
+        #smart-search-results .search-highlight { color: var(--primary, #0077b6); font-weight: 700; }
+    `;
+    document.head.appendChild(style);
+
+    // Debounce timer
+    let debounceTimer = null;
+
+    // Événement de saisie
+    input.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        const query = input.value.trim();
+
+        if (query.length < 2) {
+            resultsDiv.style.display = 'none';
+            return;
+        }
+
+        debounceTimer = setTimeout(async () => {
+            const supabase = await initSupabase();
+            if (!supabase) return;
+
+            const { data: patients } = await supabase
+                .from(SUPABASE_CONFIG.tables.patients)
+                .select('id, nom, prenom, telephone')
+                .or(`nom.ilike.%${query}%,prenom.ilike.%${query}%`)
+                .order('nom')
+                .limit(6);
+
+            if (!patients || patients.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="search-empty">
+                        <i class="fa-solid fa-user-slash" style="font-size: 1.3rem; margin-bottom: 8px; display: block; opacity: 0.5;"></i>
+                        Aucun patient trouvé pour « <strong>${query}</strong> »
+                    </div>`;
+                resultsDiv.style.display = 'block';
+                return;
+            }
+
+            resultsDiv.innerHTML = patients.map(p => {
+                const fullName = `${p.nom} ${p.prenom || ''}`;
+                const initials = (p.nom[0] + (p.prenom ? p.prenom[0] : '')).toUpperCase();
+                // Highlight matching text
+                const regex = new RegExp(`(${query})`, 'gi');
+                const highlighted = fullName.replace(regex, '<span class="search-highlight">$1</span>');
+                return `
+                    <div class="search-item" onclick="window.location.href='dossier-patient.html?id=${p.id}'">
+                        <div class="search-avatar">${initials}</div>
+                        <div>
+                            <div class="search-name">${highlighted}</div>
+                            <div class="search-tel"><i class="fa-solid fa-phone" style="margin-right: 4px; font-size: 0.65rem;"></i>${p.telephone || 'Pas de téléphone'}</div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right" style="margin-left: auto; opacity: 0.3; font-size: 0.7rem;"></i>
+                    </div>`;
+            }).join('');
+            resultsDiv.style.display = 'block';
+        }, 300); // Délai de 300ms pour éviter trop de requêtes
+    });
+
+    // Fermer les résultats quand on clique ailleurs
+    document.addEventListener('click', (e) => {
+        if (!searchWrapper.contains(e.target)) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+
+    // Fermer avec Escape
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            resultsDiv.style.display = 'none';
+            input.blur();
+        }
+    });
+}
+
 // Exposer globalement aussi pour compatibilité
 window.updateDrawerUser = updateDrawerUser;
 window.rechercheRapide = rechercheRapide;
 window.toggleNotifications = toggleNotifications;
 window.actualiserNotifications = actualiserNotifications;
+window.updateGlobalAlertBadges = updateGlobalAlertBadges;
 
 /**
  * Déconnecte l'utilisateur et redirige vers la page d'accueil

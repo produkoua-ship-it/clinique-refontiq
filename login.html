@@ -507,7 +507,7 @@
             const supabase = await window.SupabaseAPI.initSupabase();
             
             if (!supabase) {
-                alert("Impossible de se connecter à la base de données. Vérifiez votre configuration.");
+                window.notifier("Impossible de se connecter à la base de données. Vérifiez votre configuration.", 'error');
                 return;
             }
 
@@ -529,7 +529,7 @@
                 window.location.href = 'dashboard.html';
             } else {
                 // Si l'email n'est pas dans la table 'users' de Supabase
-                alert("Accès refusé : cet email n'est pas enregistré dans la base de données de la clinique.");
+                window.notifier("Accès refusé : cet email n'est pas enregistré dans la base de données de la clinique.", 'error');
             }
         }
 

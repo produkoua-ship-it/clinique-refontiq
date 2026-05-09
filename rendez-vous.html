@@ -4,2037 +4,368 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rendez-vous - Clinique Refontiq</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <title>Agenda Médical - Refontiq</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/mobile.css">
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css' rel='stylesheet' />
+    
+    <link href="assets/premium-style.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #0077b6;
-            --primary-dark: #023e8a;
-            --primary-light: #caf0f8;
-            --secondary: #2a9d8f;
-            --accent: #e76f51;
-            --success: #2a9d8f;
-            --warning: #e9c46a;
-            --danger: #e76f51;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 20px rgba(0, 119, 182, 0.08);
-            --shadow-lg: 0 20px 60px rgba(0, 119, 182, 0.12);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .dashboard-container {
-            display: grid;
-            grid-template-columns: 260px 1fr;
-            min-height: 100vh;
-        }
-
-        /* Sidebar (cohérence) */
-        .sidebar {
-            background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary) 100%);
-            color: white;
-            padding: 0;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 100;
-        }
-
-        .sidebar-header {
-            padding: 24px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        .logo-text h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-
-        .logo-text p {
-            font-size: 0.7rem;
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-        }
-
-        .user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-
-        .user-details h3 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .user-details p {
-            font-size: 0.8rem;
-            opacity: 0.8;
-        }
-
-        .nav-menu {
-            padding: 16px 12px;
-        }
-
-        .nav-section {
-            margin-bottom: 24px;
-        }
-
-        .nav-section-title {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.6;
-            margin-bottom: 12px;
-            padding: 0 8px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            color: rgba(255, 255, 255, 0.9);
-            transition: all 0.2s;
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-        }
-
-        .nav-item.active {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            font-weight: 600;
-        }
-
-        .nav-item i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .sidebar-footer {
-            padding: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: auto;
-        }
-
-        .logout-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 10px;
-            background: rgba(231, 111, 81, 0.2);
-            color: #fca5a5;
-            text-decoration: none;
-            transition: all 0.2s;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .logout-btn:hover {
-            background: rgba(231, 111, 81, 0.3);
-            color: #fca5a5;
-        }
-
-        /* Main Content */
-        .main-content {
-            padding: 24px 32px;
-            overflow-y: auto;
-        }
-
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-
-        .page-title h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .page-title p {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }
-
-        .top-actions {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-family: inherit;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 119, 182, 0.4);
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 2px;
-        }
-
-        .tab {
-            padding: 12px 20px;
-            background: transparent;
-            border: none;
-            border-radius: 8px 8px 0 0;
-            font-family: inherit;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--text-light);
-            position: relative;
-            top: 2px;
-        }
-
-        .tab:hover {
-            color: var(--primary);
-            background: var(--bg);
-        }
-
-        .tab.active {
-            color: var(--primary);
-            background: white;
-            border-bottom: 2px solid var(--primary);
-            margin-bottom: -4px;
-        }
-
-        /* Tab Content */
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Card */
-        .card {
-            background: var(--card);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-        }
-
-        /* Calendar */
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            margin-bottom: 24px;
-        }
-
-        .calendar-header {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-            margin-bottom: 8px;
-        }
-
-        .calendar-day {
-            text-align: center;
-            padding: 8px;
-            font-weight: 600;
-            color: var(--text-light);
-            font-size: 0.85rem;
-        }
-
-        .calendar-date {
-            min-height: 80px;
-            padding: 8px;
-            background: var(--bg);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-        }
-
-        .calendar-date:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .calendar-date.today {
-            border-color: var(--primary);
-            background: rgba(0, 119, 182, 0.1);
-        }
-
-        .calendar-date.has-appointment {
-            background: rgba(42, 157, 143, 0.1);
-            border-color: var(--secondary);
-        }
-
-        .date-number {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            font-size: 0.9rem;
-            margin-bottom: 4px;
-        }
-
-        .appointment-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--primary);
-            display: inline-block;
-        }
-
-        /* Appointment List */
-        .appointment-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .appointment-card {
-            display: flex;
-            gap: 16px;
-            padding: 20px;
-            background: var(--bg);
-            border-radius: 12px;
-            border-left: 4px solid var(--primary);
-            transition: all 0.2s;
-        }
-
-        .appointment-card:hover {
-            background: var(--primary-light);
-            cursor: pointer;
-        }
-
-        .appointment-time {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            min-width: 80px;
-        }
-
-        .time {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .duration {
-            font-size: 0.8rem;
-            color: var(--text-light);
-        }
-
-        .appointment-info {
-            flex: 1;
-        }
-
-        .appointment-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-        }
-
-        .patient-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .appointment-status {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-confirmed {
-            background: rgba(42, 157, 143, 0.15);
-            color: var(--success);
-        }
-
-        .status-pending {
-            background: rgba(233, 140, 105, 0.15);
-            color: var(--accent);
-        }
-
-        .status-cancelled {
-            background: rgba(100, 116, 139, 0.15);
-            color: var(--text-light);
-        }
-
-        .appointment-reason {
-            font-size: 0.95rem;
-            color: var(--text-light);
-            margin-bottom: 8px;
-        }
-
-        /* Form */
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text);
-            font-size: 0.9rem;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 0.95rem;
-            transition: all 0.2s;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(0, 119, 182, 0.1);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .full-width {
-            grid-column: span 2;
-        }
-
-        /* Tableau de liste RDV */
-        .patients-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-
-        .patients-table thead tr {
-            background: var(--bg);
-            border-bottom: 2px solid var(--border);
-        }
-
-        .patients-table th {
-            padding: 12px 16px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-light);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .patients-table td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
-
-        .patients-table tbody tr:hover {
-            background: var(--bg);
-        }
-
-        .patients-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .badge-prevu {
-            background: rgba(0, 119, 182, 0.12);
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 600;
-        }
-
-        .badge-confirme {
-            background: rgba(42, 157, 143, 0.15);
-            color: var(--success);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 600;
-        }
-
-        .badge-annule {
-            background: rgba(100, 116, 139, 0.15);
-            color: var(--text-light);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 600;
-        }
-
-        .badge-effectue {
-            background: rgba(42, 157, 143, 0.15);
-            color: var(--success);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 600;
-        }
-
-        .btn-action {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            padding: 6px 10px;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-
-        .btn-action:hover {
-            background: var(--bg);
-        }
-
-        /* Responsive */
-
-        @media (max-width: 1200px) {
-            .dashboard-container {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                display: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 16px;
-            }
-
-            .top-bar {
-                flex-direction: column;
-                gap: 16px;
-                align-items: flex-start;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .full-width {
-                grid-column: span 1;
-            }
-
-            .tabs {
-                flex-wrap: wrap;
-            }
-        }
-
-        /* Calendrier Strip Premium */
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .month-selector {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--primary-light);
-            padding: 8px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-            position: relative;
-        }
-        .month-selector:hover { background: #bde0fe; }
-        .month-selector h2 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.1rem;
-            color: var(--primary-dark);
-            margin: 0;
-        }
-        .select-icon { font-size: 0.9rem; color: var(--primary); }
-
-        .btn-today {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-today:hover { background: var(--primary-dark); }
-
-        .calendar-strip {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 5px 2px 12px;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            scroll-behavior: smooth;
-        }
-        .calendar-strip::-webkit-scrollbar { display: none; }
-
-        .day-item {
-            min-width: 58px;
-            flex-shrink: 0;
-            padding: 12px 8px;
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.25s;
-        }
-        .day-item:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-        .day-item.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            box-shadow: 0 4px 10px rgba(0, 119, 182, 0.3);
-        }
-        .day-name { font-size: 0.7rem; display: block; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; }
-        .day-num  { font-size: 1.1rem; font-weight: 700; font-family: 'Space Grotesk', sans-serif; display: block; }
-
-        .has-rdv-dot {
-            width: 5px;
-            height: 5px;
-            background: var(--accent);
-            border-radius: 50%;
-            margin: 4px auto 0;
-        }
-        .day-item.active .has-rdv-dot { background: rgba(255,255,255,0.7); }
-
-        #rdv-section-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        /* Sidebar Search Universel */
-        .sidebar-search { padding: 0 16px 20px; }
-        .search-box { position: relative; }
-        .search-box i {
-            position: absolute; left: 12px; top: 50%;
-            transform: translateY(-50%); color: rgba(255,255,255,0.6);
-            font-size: 0.9rem;
-        }
-        .search-box input {
-            width: 100%; padding: 10px 12px 10px 38px;
-            border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.1); color: white;
-            font-size: 0.9rem; transition: 0.2s;
-        }
-        .search-box input::placeholder { color: rgba(255,255,255,0.5); }
-        .search-box input:focus { outline: none; background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
-
-        .search-results-dropdown {
-            position: absolute; top: 100%; left: 0; right: 0;
-            background: white; border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            z-index: 1000; margin-top: 5px;
-            display: none; max-height: 300px; overflow: hidden;
-            border: 1px solid #e2e8f0;
-        }
-        .result-item {
-            display: block !important;
-            padding: 12px 20px !important;
-            cursor: pointer;
-            border-bottom: 1px solid #f1f5f9;
-            transition: all 0.2s;
-        }
-        .result-item:last-child { border-bottom: none; }
-        .result-item:hover {
-            background-color: #f8fafc;
-            padding-left: 25px !important;
-            color: var(--primary);
-        }
-        .result-item span {
-            color: #1e293b;
-            font-weight: 500;
-            font-size: 1rem;
-            display: block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Notifications */
-        .notification-wrapper { position: relative; cursor: pointer; }
-        .notification-bell { position: relative; }
-        .notification-badge {
-            position: absolute; top: -8px; right: -8px;
-            background: var(--accent); color: white;
-            font-size: 0.65rem; font-weight: 700;
-            padding: 2px 6px; border-radius: 10px;
-            border: 2px solid white;
-        }
-        .notif-dropdown {
-            position: absolute; top: 50px; right: 0; width: 280px;
-            background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            display: none; z-index: 1000; border: 1px solid #eee;
-            color: var(--text); cursor: default;
-        }
-        .notif-dropdown.active { display: block; animation: slideDown 0.3s ease; }
-        .notif-header { padding: 12px; font-weight: bold; border-bottom: 1px solid #f0f0f0; }
-        .notif-item { padding: 12px; border-bottom: 1px solid #f8f8f8; font-size: 0.85rem; transition: 0.2s; }
-        .notif-item:hover { background: #f0f9ff; color: var(--primary); }
-        @keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
-
-        @keyframes shake {
-            0% { transform: rotate(0); }
-            15% { transform: rotate(15deg); }
-            30% { transform: rotate(-15deg); }
-            45% { transform: rotate(10deg); }
-            60% { transform: rotate(-10deg); }
-            100% { transform: rotate(0); }
-        }
-        .shake-animation { animation: shake 0.5s ease-in-out; }
-
-        /* --- Style du Menu Déroulant (Dropdown) --- */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropdown-btn {
-            width: 44px;
-            height: 44px;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--text-light);
-        }
-
-        .dropdown-btn:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background-color: white;
-            min-width: 200px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            z-index: 1000;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            margin-top: 8px;
-            overflow: hidden;
-            animation: fadeInScale 0.2s ease;
-        }
-
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.95) translateY(-10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        .dropdown-content a {
-            color: var(--text);
-            padding: 12px 16px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.9rem;
-            transition: 0.2s;
-            font-weight: 500;
-        }
-
-        .dropdown-content a i {
-            width: 20px;
-            text-align: center;
-            color: var(--primary);
-            font-size: 1rem;
-        }
-
-        .dropdown-content a:hover {
-            background-color: var(--primary-light);
-            color: var(--primary);
-            padding-left: 20px;
+        body { overflow: hidden; }
+        .main-content { display: grid; grid-template-columns: 350px 1fr; height: 100vh; }
+        .calendar-section { background: var(--card); border-right: 1px solid var(--border); padding: 24px; overflow-y: auto; }
+        .mini-calendar-container { margin-bottom: 32px; }
+        #mini-calendar { font-size: 0.85rem; }
+        .fc .fc-toolbar-title { font-size: 1rem !important; font-weight: 700; }
+        .fc .fc-button { padding: 4px 8px !important; font-size: 0.8rem !important; }
+        .agenda-section { padding: 32px; overflow-y: auto; background: var(--bg); }
+        .agenda-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; gap: 16px; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 0 10px; gap: 16px; }
+        .agenda-date h2 { font-family: 'Space Grotesk'; font-size: 1.8rem; font-weight: 700; color: var(--primary); }
+        .rdv-list { display: flex; flex-direction: column; gap: 16px; }
+        .rdv-item { background: var(--card); padding: 20px; border-radius: 16px; display: flex; align-items: center; gap: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: 0.2s; }
+        .rdv-item:hover { transform: translateX(10px); border-color: var(--primary); }
+        .rdv-time { min-width: 80px; font-weight: 700; font-size: 1.1rem; color: var(--primary); text-align: center; border-right: 2px solid var(--primary-light); }
+        .patient-info { flex: 1; }
+        .patient-name { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+        .rdv-reason { font-size: 0.85rem; color: var(--text-light); display: flex; align-items: center; gap: 6px; }
+        .status-confirmed { background: rgba(42, 157, 143, 0.1); color: var(--secondary); }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 32px; border-radius: 20px; width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+
+        @media (max-width: 1024px) {
+            .main-content { display: block; padding: 16px; }
+            .calendar-section { display: none; }
+            .agenda-header, .calendar-header { flex-direction: column; align-items: stretch; margin-bottom: 24px; }
+            .agenda-header > div:last-child, .calendar-actions { display: grid; grid-template-columns: 1fr; gap: 12px; width: 100%; }
+            .btn { width: 100%; justify-content: center; }
         }
     </style>
 </head>
 
 <body>
-    <!-- Mobile Header -->
-    <header class="mobile-header">
-        <div class="header-left">
-            <div class="header-logo">
-                <i class="fa-solid fa-hospital"></i>
-            </div>
-            <div>
-                <div class="header-title">Clinique Refontiq</div>
-                <div class="header-subtitle">Système Médical</div>
-            </div>
-        </div>
-        <div class="header-right">
-            <div class="notification-wrapper">
-                <div class="notification-bell" onclick="toggleNotifications()">
-                    <i class="fa-solid fa-bell" style="font-size: 1.2rem; color: var(--primary);"></i>
-                    <span class="notification-badge">5</span>
-                </div>
-                <div id="notification-dropdown" class="notif-dropdown">
-                    <div class="notif-header">Notifications</div>
-                    <div id="notif-list" class="notif-body">
-                        <p style="padding:15px; font-size:0.8rem; color:gray;">Chargement...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-
     <div class="dashboard-container">
-        <!-- Sidebar -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
-                    <div class="logo-icon">
-                        <i class="fa-solid fa-hospital"></i>
-                    </div>
-                    <a href="index.html" style="text-decoration: none; color: inherit;">
-                    <div class="logo-text">
-                        <h1>Clinique Refontiq</h1>
-                        <p>Système Médical</p>
-                    </div>
-                    </a>
-                </div>
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">DR</div>
-                    <div class="user-details">
-                        <h3 id="userName">Dr. Duval</h3>
-                        <p id="userRole">Médecin</p>
-                    </div>
+                    <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
+                    <div class="logo-text"><h1>Clinique Refontiq</h1><p>Espace Médical</p></div>
                 </div>
 
-                <!-- Universal Search -->
                 <div class="sidebar-search">
-                    <div class="search-box">
+                    <div class="search-wrapper">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="global-search" placeholder="Rechercher un patient..." onkeyup="rechercheRapide(this.value)" autocomplete="off">
-                        <div id="search-results" class="search-results-dropdown"></div>
+                        <input type="text" placeholder="Rechercher un patient...">
                     </div>
                 </div>
-            </div>
 
+                <div class="user-info">
+                    <div class="user-avatar" id="side-avatar">DR</div>
+                    <div class="user-details"><h3 id="side-name">Dr. Duval <span class="online-indicator" style="margin-left: 5px;"></span></h3><p id="side-role">Médecin</p></div>
+                </div>
+            </div>
             <nav class="nav-menu">
-                <div class="nav-section">
-                    <div class="nav-section-title">Principal</div>
-                    <a href="dashboard.html" class="nav-item">
-                        <i class="fa-solid fa-chart-line"></i>
-                        Tableau de bord
-                    </a>
-                    <a href="patients.html" class="nav-item">
-                        <i class="fa-solid fa-users"></i>
-                        Patients
-                    </a>
-                    <a href="consultations.html" class="nav-item">
-                        <i class="fa-solid fa-stethoscope"></i>
-                        Consultations
-                    </a>
-                    <a href="rendez-vous.html" class="nav-item active">
-                        <i class="fa-solid fa-calendar-check"></i>
-                        Rendez-vous
-                    </a>
-                </div>
 
-                <div class="nav-section">
-                    <div class="nav-section-title">Gestion</div>
-                    <a href="finance.html" class="nav-item">
-                        <i class="fa-solid fa-coins"></i>
-                        Finance
-                    </a>
-                    <a href="stocks.html" class="nav-item">
-                        <i class="fa-solid fa-boxes-stacked"></i>
-                        Stocks
-                    </a>
-                    <a href="messagerie.html" class="nav-item">
-                        <i class="fa-solid fa-comments"></i>
-                        Messagerie
-                    </a>
-                </div>
-
-                <div class="nav-section">
-                    <div class="nav-section-title">Système</div>
-                    <a href="alertes.html" class="nav-item">
-                        <i class="fa-solid fa-bell"></i>
-                        Alertes
-                    </a>
-                    <a href="parametres.html" class="nav-item">
-                        <i class="fa-solid fa-cog"></i>
-                        Paramètres
-                    </a>
-                </div>
+                <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
+                <a href="patients.html" class="nav-item"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
+                <a href="consultations.html" class="nav-item"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
+                <a href="rendez-vous.html" class="nav-item active"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
+                
+                <hr class="nav-separator">
+                
+                <a href="finance.html" class="nav-item"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
+                <a href="stocks.html" class="nav-item"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
+                
+                <hr class="nav-separator">
+                
+                <a href="messagerie.html" class="nav-item"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
+                <a href="alertes.html" class="nav-item"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
+                <a href="parametres.html" class="nav-item"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
+            
             </nav>
-
-            <div class="sidebar-footer">
-                <a href="login.html" class="logout-btn" onclick="logout()">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    Déconnexion
-                </a>
-            </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <div class="top-bar">
-                <div class="page-title">
-                    <h1>Gestion des Rendez-vous</h1>
-                    <p>Planifiez et suivez tous les rendez-vous de la clinique</p>
-                </div>
-                <div class="top-actions">
-                    <button class="btn btn-primary" onclick="switchTab('new')">
-                        <i class="fa-solid fa-plus"></i>
-                        Nouveau Rendez-vous
-                    </button>
-
-                    <div class="notification-wrapper">
-                        <div class="notification-bell" onclick="toggleNotifications()">
-                            <i class="fa-solid fa-bell" style="font-size: 1.2rem; color: var(--text-light);"></i>
-                            <span class="notification-badge">5</span>
-                        </div>
-                        <div id="notification-dropdown" class="notif-dropdown">
-                            <div class="notif-header">Notifications</div>
-                            <div id="notif-list" class="notif-body">
-                                <p style="padding:15px; font-size:0.8rem; color:gray;">Chargement...</p>
-                            </div>
-                        </div>
+            <header class="mobile-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="header-btn" onclick="toggleMobileSidebar()" style="background:none; border:none; font-size:1.5rem; color:white; cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
+                    <div style="width: 35px; height: 35px; background: rgba(255,255,255,0.2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                        <i class="fa-solid fa-hospital"></i>
                     </div>
+                    <div style="font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">Clinique Refontiq</div>
+                </div>
+                <div style="font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 8px; text-transform: uppercase;">Agenda</div>
+            </header>
 
-                    <div class="dropdown">
-                        <div class="dropdown-btn">
-                            <i class="fa-solid fa-ellipsis-vertical"></i>
-                        </div>
-                        <div class="dropdown-content">
-                            <a href="messagerie.html"><i class="fa-solid fa-comments"></i> Messages</a>
-                            <a href="finance.html"><i class="fa-solid fa-coins"></i> Finance</a>
-                            <a href="stocks.html"><i class="fa-solid fa-boxes-stacked"></i> Stocks</a>
-                            <a href="alertes.html"><i class="fa-solid fa-bell"></i> Alertes</a>
-                            <a href="parametres.html"><i class="fa-solid fa-gear"></i> Paramètres</a>
-                        </div>
+            <section class="calendar-section">
+                <div class="mini-calendar-container">
+                    <div id="mini-calendar"></div>
+                </div>
+                <div style="margin-top: 24px;">
+                    <h3 style="font-size: 0.9rem; margin-bottom: 16px; color: var(--text-light);">Légende</h3>
+                    <div style="display:flex; flex-direction:column; gap:10px; font-size:0.8rem;">
+                        <div style="display:flex; align-items:center; gap:8px;"><div style="width:12px; height:12px; border-radius:3px; background:var(--primary);"></div> Consultation</div>
+                        <div style="display:flex; align-items:center; gap:8px;"><div style="width:12px; height:12px; border-radius:3px; background:var(--secondary);"></div> Examen</div>
+                        <div style="display:flex; align-items:center; gap:8px;"><div style="width:12px; height:12px; border-radius:3px; background:var(--danger);"></div> Urgence</div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Tabs -->
-            <div class="tabs">
-                <button class="tab active" data-tab="calendar" onclick="switchTab('calendar')">
-                    <i class="fa-solid fa-calendar-days"></i>
-                    Calendrier
-                </button>
-                <button class="tab" data-tab="new" onclick="switchTab('new')">
-                    <i class="fa-solid fa-calendar-plus"></i>
-                    Créer RDV
-                </button>
-                <button class="tab" data-tab="confirmed" onclick="switchTab('confirmed')">
-                    <i class="fa-solid fa-check-circle"></i>
-                    Confirmations
-                </button>
-            </div>
-
-            <!-- Tab 1: Calendrier -->
-            <div class="tab-content active" id="tab-calendar">
-                <div class="card calendar-container">
-
-                    <!-- En-tête avec sélecteur de mois -->
-                    <div class="calendar-header">
-                        <div class="month-selector" onclick="document.getElementById('date-picker').showPicker ? document.getElementById('date-picker').showPicker() : document.getElementById('date-picker').click()">
-                            <h2 id="current-month-display">Chargement...</h2>
-                            <i class="fa-solid fa-chevron-down select-icon"></i>
-                            <input type="date" id="date-picker"
-                                style="position:absolute; opacity:0; pointer-events:none; width:1px; height:1px;"
-                                onchange="reinitialiserCalendrier(this.value)">
-                        </div>
-                        <button class="btn-today" onclick="reinitialiserCalendrier(new Date().toISOString().split('T')[0])">
-                            <i class="fa-solid fa-calendar-day"></i> Aujourd'hui
-                        </button>
+            <section class="agenda-section">
+                <div class="agenda-header" style="display: flex; flex-direction: column; gap: 20px;">
+                    <div class="agenda-date">
+                        <p id="day-name" style="text-transform: uppercase; letter-spacing: 1px; font-weight: 600; color: var(--text-light); font-size: 0.8rem; margin:0;">AUJOURD'HUI</p>
+                        <h2 id="current-date-display" style="margin:0; font-size: 1.8rem; font-family:'Space Grotesk';">Chargement...</h2>
                     </div>
-
-                    <!-- Bande des 14 jours scrollable -->
-                    <div class="calendar-strip" id="calendar-strip"></div>
-
-                    <!-- Liste des RDV du jour sélectionné -->
-                    <div style="margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--border);">
-                        <h3 id="rdv-section-title">Rendez-vous du jour</h3>
-                        <div id="list-rdv-dynamique">
-                            <p style="color:var(--text-light); padding:16px 0;">
-                                <i class="fa-solid fa-spinner fa-spin"></i> Chargement...
-                            </p>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            <!-- Tab 2: Créer RDV -->
-            <div class="tab-content" id="tab-new">
-                <div class="card">
-                    <form id="form-rendez-vous" onsubmit="enregistrerRendezVous(event)">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="patient">Patient *</label>
-                                <select id="patient_id" required>
-                                     <option value="">Chargement des patients...</option>
-                                 </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="medecin">Médecin *</label>
-                                <select id="medecin" required>
-                                    <option value="">Sélectionner un médecin</option>
-                                    <option value="1">Dr. Duval</option>
-                                    <option value="2">Dr. Martin</option>
-                                    <option value="3">Dr. Kouassi</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="date">Date *</label>
-                                <input type="date" id="date_rdv" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="time">Heure *</label>
-                                <input type="time" id="heure_rdv" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="duration">Durée *</label>
-                                <select id="duration" required>
-                                    <option value="15">15 minutes</option>
-                                    <option value="30" selected>30 minutes</option>
-                                    <option value="45">45 minutes</option>
-                                    <option value="60">1 heure</option>
-                                    <option value="90">1h30</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="type">Type de RDV *</label>
-                                <select id="type" required>
-                                    <option value="">Sélectionner</option>
-                                    <option value="consultation">Consultation standard</option>
-                                    <option value="suivi">Suivi / Contrôle</option>
-                                    <option value="bilan">Bilan de santé</option>
-                                    <option value="vaccination">Vaccination</option>
-                                    <option value="urgence">Urgence</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label for="reason">Motif du rendez-vous *</label>
-                            <input type="text" id="reason" required
-                                placeholder="Ex: Consultation de suivi, bilan annuel...">
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label for="notes">Notes additionnelles</label>
-                            <textarea id="notes_rdv"
-                                placeholder="Motif de consultation ou notes..."></textarea>
-                        </div>
-
-                        <div class="form-group full-width">
-                            <label for="reminder">Rappel patient</label>
-                            <select id="reminder">
-                                <option value="none">Aucun rappel</option>
-                                <option value="1day">1 jour avant</option>
-                                <option value="2days" selected>2 jours avant</option>
-                                <option value="1week">1 semaine avant</option>
-                            </select>
-                        </div>
-
-                        <div style="display: flex; gap: 12px; margin-top: 24px;">
-                            <button type="button" class="btn" onclick="switchTab('calendar')"
-                                style="background: var(--bg); color: var(--text-light);">
-                                <i class="fa-solid fa-times"></i>
-                                Annuler
-                            </button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fa-solid fa-calendar-check"></i>
-                                Confirmer le rendez-vous
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Tableau de liste des RDV -->
-                <div class="card" style="margin-top: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                        <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--primary);">
-                            <i class="fa-solid fa-list-ul" style="margin-right: 8px;"></i>Liste des rendez-vous enregistrés
-                        </h3>
-                        <button onclick="chargerListeRDV()" class="btn" style="background: var(--bg); color: var(--text-light); padding: 8px 16px; font-size: 0.85rem;">
-                            <i class="fa-solid fa-rotate-right"></i> Actualiser
-                        </button>
-                    </div>
-                    <div style="overflow-x: auto;">
-                        <table class="patients-table">
-                            <thead>
-                                <tr>
-                                    <th>Patient</th>
-                                    <th>Date &amp; Heure</th>
-                                    <th>Statut</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-rdv-body">
-                                <tr>
-                                    <td colspan="4" style="text-align: center; padding: 24px; color: var(--text-light);">
-                                        <i class="fa-solid fa-spinner fa-spin"></i> Chargement...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="header-actions" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; width: 100%;">
+                        <input type="date" id="jump-to-date" onchange="jumpToDate(this.value)" style="padding: 12px; border-radius: 10px; border: 2px solid var(--border); font-family: inherit; width: 100%;">
+                        <button class="btn" onclick="chargerAvenir()" style="background: var(--primary-light); color: var(--primary); justify-content: center; width: 100%;"><i class="fa-solid fa-forward"></i> 7 Jours</button>
+                        <button class="btn btn-primary" onclick="openModal()" style="justify-content: center; width: 100%;"><i class="fa-solid fa-plus"></i> Nouveau RDV</button>
                     </div>
                 </div>
-            </div>
 
-            <!-- Tab 3: Confirmations -->
-            <div class="tab-content" id="tab-confirmed">
-                <div class="card">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700;">
-                            Rendez-vous en attente de confirmation
-                        </h2>
-                        <span class="appointment-status status-pending" style="padding: 8px 16px; font-size: 0.9rem;">
-                            3 en attente
-                        </span>
-                    </div>
-
-                    <div class="appointment-list">
-                        <div class="appointment-card">
-                            <div class="appointment-time">
-                                <span class="time">10:30</span>
-                                <span class="duration">45 min</span>
-                            </div>
-                            <div class="appointment-info">
-                                <div class="appointment-header">
-                                    <div class="patient-name">M. Yao Koffi</div>
-                                    <span class="appointment-status status-pending">En attente</span>
-                                </div>
-                                <div class="appointment-reason">Bilan cardio-réculatoire annuel</div>
-                                <div style="margin-top: 12px; display: flex; gap: 12px;">
-                                    <button class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem;">
-                                        <i class="fa-solid fa-check"></i>
-                                        Confirmer
-                                    </button>
-                                    <button class="btn"
-                                        style="background: var(--danger); color: white; padding: 8px 16px; font-size: 0.85rem;">
-                                        <i class="fa-solid fa-times"></i>
-                                        Refuser
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="appointment-card">
-                            <div class="appointment-time">
-                                <span class="time">14:00</span>
-                                <span class="duration">30 min</span>
-                            </div>
-                            <div class="appointment-info">
-                                <div class="appointment-header">
-                                    <div class="patient-name">M. Touré Ibrahim</div>
-                                    <span class="appointment-status status-pending">En attente</span>
-                                </div>
-                                <div class="appointment-reason">Bilan de santé complet</div>
-                                <div style="margin-top: 12px; display: flex; gap: 12px;">
-                                    <button class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem;">
-                                        <i class="fa-solid fa-check"></i>
-                                        Confirmer
-                                    </button>
-                                    <button class="btn"
-                                        style="background: var(--danger); color: white; padding: 8px 16px; font-size: 0.85rem;">
-                                        <i class="fa-solid fa-times"></i>
-                                        Refuser
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="appointment-card">
-                            <div class="appointment-time">
-                                <span class="time">16:30</span>
-                                <span class="duration">30 min</span>
-                            </div>
-                            <div class="appointment-info">
-                                <div class="appointment-header">
-                                    <div class="patient-name">Mme Kouassi Adèle</div>
-                                    <span class="appointment-status status-pending">En attente</span>
-                                </div>
-                                <div class="appointment-reason">Suivi migraine - Résultats examens</div>
-                                <div style="margin-top: 12px; display: flex; gap: 12px;">
-                                    <button class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem;">
-                                        <i class="fa-solid fa-check"></i>
-                                        Confirmer
-                                    </button>
-                                    <button class="btn"
-                                        style="background: var(--danger); color: white; padding: 8px 16px; font-size: 0.85rem;">
-                                        <i class="fa-solid fa-times"></i>
-                                        Refuser
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div id="rdv-loader" style="text-align: center; padding: 60px; display: none;">
+                    <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: var(--primary);"></i>
                 </div>
-            </div>
+
+                <div class="rdv-list" id="rdv-list-container">
+                    <!-- Les RDV s'afficheront ici -->
+                </div>
+            </section>
         </main>
     </div>
 
+    <!-- Modal Nouveau RDV -->
+    <div class="modal" id="rdvModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 24px; font-family: 'Space Grotesk';">Programmer un rendez-vous</h2>
+            <form onsubmit="handleSaveRDV(event)">
+                <div class="form-group">
+                    <label>Patient *</label>
+                    <select id="select-patient" required><option value="">Sélectionner un patient...</option></select>
+                </div>
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div><label>Date *</label><input type="date" id="rdv-date" required></div>
+                    <div><label>Heure *</label><input type="time" id="rdv-time" required></div>
+                </div>
+                <div class="form-group">
+                    <label>Type de visite</label>
+                    <select id="rdv-type">
+                        <option value="consultation">Consultation Générale</option>
+                        <option value="bilan">Examen / Analyse</option>
+                        <option value="urgence">Urgence</option>
+                        <option value="suivi">Visite de suivi</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Motif précis (Optionnel)</label>
+                    <input type="text" id="rdv-motif" placeholder="Ex: Douleurs au genou...">
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 32px;">
+                    <button type="button" class="btn" style="flex:1;" onclick="closeModal()">Annuler</button>
+                    <button type="submit" class="btn btn-primary" style="flex:1;" id="btn-save">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     <script>
-        // Charger les infos utilisateur
-        document.addEventListener('DOMContentLoaded', function() { if(window.updateDrawerUser) window.updateDrawerUser(); });
-window.onload = function () {
-            const currentUser = localStorage.getItem('currentUser');
-            if (!currentUser) {
-                window.location.href = 'login.html';
-                return;
+        let calendar;
+        let selectedDate = new Date().toISOString().split('T')[0];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initUser();
+            initMiniCalendar();
+            updateDateDisplay(new Date());
+            await chargerPatients();
+            await chargerRDV(selectedDate);
+        });
+
+        function initUser() {
+            const u = localStorage.getItem('currentUser');
+            if (u) {
+                const user = JSON.parse(u);
+                document.getElementById('side-name').textContent = user.name || 'Utilisateur';
+                document.getElementById('side-role').textContent = user.role;
+                document.getElementById('side-avatar').textContent = (user.name || 'U').substring(0, 2).toUpperCase();
             }
+        }
 
-            const user = JSON.parse(currentUser);
-            document.getElementById('userName').textContent = getDisplayName(user);
-            document.getElementById('userRole').textContent = getRoleName(user.role);
-            document.getElementById('userAvatar').textContent = getInitials(user);
+        function initMiniCalendar() {
+            const calendarEl = document.getElementById('mini-calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'fr',
+                headerToolbar: { left: 'prev', center: 'title', right: 'next' },
+                height: 'auto',
+                dateClick: function(info) {
+                    selectedDate = info.dateStr;
+                    updateDateDisplay(info.date);
+                    chargerRDV(selectedDate);
+                }
+            });
+            calendar.render();
+        }
 
-            // Vérifier si on doit ouvrir l'onglet nouveau RDV
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('new') === 'true') {
-                switchTab('new');
-            }
+        function updateDateDisplay(date) {
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('current-date-display').textContent = date.toLocaleDateString('fr-FR', options);
+            const isToday = new Date().toISOString().split('T')[0] === date.toISOString().split('T')[0];
+            document.getElementById('day-name').textContent = isToday ? "AUJOURD'HUI" : date.toLocaleDateString('fr-FR', { weekday: 'long' });
+            document.getElementById('rdv-date').value = date.toISOString().split('T')[0];
+        }
 
-            // Définir la date d'aujourd'hui par défaut
+        async function chargerPatients() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data } = await supabase.from('patients').select('id, nom, prenom').order('nom');
+            const select = document.getElementById('select-patient');
+            if (data) data.forEach(p => select.innerHTML += `<option value="${p.id}">${p.nom} ${p.prenom || ''}</option>`);
+        }
+
+        function jumpToDate(dateStr) {
+            if (!dateStr) return;
+            selectedDate = dateStr;
+            const dateObj = new Date(dateStr);
+            calendar.gotoDate(dateObj);
+            updateDateDisplay(dateObj);
+            chargerRDV(selectedDate);
+        }
+
+        async function chargerAvenir() {
+            const loader = document.getElementById('rdv-loader');
+            const container = document.getElementById('rdv-list-container');
+            loader.style.display = 'block';
+            container.innerHTML = '';
+            
+            document.getElementById('current-date-display').textContent = "7 Prochains jours";
+            document.getElementById('day-name').textContent = "APERÃ‡U";
+
+            const supabase = await window.SupabaseAPI.initSupabase();
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('date_rdv').value = today;
-        };
+            const nextWeek = new Date();
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            const nextWeekStr = nextWeek.toISOString().split('T')[0];
 
-        function getDisplayName(user) {
-            if (user.role === 'medecin') return 'Dr. Duval';
-            if (user.role === 'infirmiere') return 'Infirm. Martin';
-            if (user.role === 'receptionniste') return 'M. Koffi';
-            return user.name || 'Utilisateur';
-        }
-
-        function getRoleName(role) {
-            const roles = {
-                'medecin': 'Médecin',
-                'infirmiere': 'Infirmière',
-                'receptionniste': 'Réceptionniste'
-            };
-            return roles[role] || role;
-        }
-
-        function getInitials(user) {
-            const name = getDisplayName(user);
-            const parts = name.split(' ');
-            if (parts.length >= 2) {
-                return (parts[0][0] + parts[1][0]).toUpperCase();
-            }
-            return name.substring(0, 2).toUpperCase();
-        }
-
-        // Gestion des onglets
-        function switchTab(tabName) {
-            // Retirer la classe active de tous les onglets
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-
-            // Activer l'onglet sélectionné
-            const t = document.querySelector(`[data-tab="${tabName}"]`); if(t) t.classList.add('active');
-            const c = document.getElementById(`tab-${tabName}`); if(c) c.classList.add('active');
-        }
-
-        // ====== CALENDRIER STRIP PREMIUM ======
-        async function reinitialiserCalendrier(dateSource) {
-            const strip = document.getElementById('calendar-strip');
-            const displayMois = document.getElementById('current-month-display');
-            const listeContainer = document.getElementById('list-rdv-dynamique');
-            const titleEl = document.getElementById('rdv-section-title');
-
-            const joursSemaine = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-            const moisAnnee = ['Janvier','Février','Mars','Avril','Mai','Juin',
-                               'Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-
-            if (!strip) return;
-
-            const dateDepart = new Date(dateSource + 'T00:00:00');
-
-            // Afficher le mois courant
-            if (displayMois) displayMois.textContent =
-                `${moisAnnee[dateDepart.getMonth()]} ${dateDepart.getFullYear()}`;
-
-            // Mettre le title de la liste au jour de départ
-            if (titleEl) {
-                titleEl.textContent = `Rendez-vous du ${dateDepart.toLocaleDateString('fr-FR',
-                    { weekday:'long', day:'numeric', month:'long' })}`;
-            }
-
-            strip.innerHTML = '<p style="color:var(--text-light);padding:10px;"><i class="fa-solid fa-spinner fa-spin"></i></p>';
-            if (listeContainer) listeContainer.innerHTML = '<p style="color:var(--text-light);padding:20px;text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i> Chargement...</p>';
-
-            const supabase = await window.SupabaseAPI.initSupabase();
-            if (!supabase) return;
-
-            strip.innerHTML = '';
-
-            // Générer 14 jours avec indicateurs de RDV
-            for (let i = 0; i < 14; i++) {
-                const d = new Date(dateDepart);
-                d.setDate(dateDepart.getDate() + i);
-                const isoDate = d.toISOString().split('T')[0];
-
-                // Vérifier si des RDV existent pour ce jour
-                const { count } = await supabase
-                    .from('rendez_vous')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('date', isoDate);
-
-                const card = document.createElement('div');
-                card.className = `day-item${i === 0 ? ' active' : ''}`;
-                card.innerHTML = `
-                    <span class="day-name">${joursSemaine[d.getDay()]}</span>
-                    <span class="day-num">${d.getDate()}</span>
-                    ${count > 0 ? '<div class="has-rdv-dot"></div>' : ''}
-                `;
-                card.onclick = () => {
-                    document.querySelectorAll('.day-item').forEach(c => c.classList.remove('active'));
-                    card.classList.add('active');
-                    if (titleEl) titleEl.textContent = `Rendez-vous du ${d.toLocaleDateString('fr-FR',
-                        { weekday:'long', day:'numeric', month:'long' })}`;
-                    chargerRDVParDate(isoDate);
-                };
-                strip.appendChild(card);
-            }
-
-            // Charger les RDV du premier jour
-            chargerRDVParDate(dateSource);
-        }
-
-        async function chargerRDVParDate(dateCible) {
-            const supabase = await window.SupabaseAPI.initSupabase();
-            if (!supabase) return;
-
-            const listeContainer = document.getElementById('list-rdv-dynamique');
-            const titleEl = document.getElementById('selected-date-title');
-
-            if (listeContainer) listeContainer.innerHTML = `<p style="color:var(--text-light); text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i> Chargement...</p>`;
-
-            // Mise à jour du titre avec la date formatée
-            if (titleEl) {
-                const d = new Date(dateCible + 'T00:00:00');
-                titleEl.textContent = `Rendez-vous du ${d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })}`;
-            }
-
-            const { data, error } = await supabase
+            const { data } = await supabase
                 .from('rendez_vous')
                 .select('*, patients(nom, prenom)')
-                .eq('date', dateCible)
+                .gte('date', today)
+                .lte('date', nextWeekStr)
+                .order('date', { ascending: true })
                 .order('heure', { ascending: true });
 
-            if (!listeContainer) return;
-            listeContainer.innerHTML = '';
+            loader.style.display = 'none';
 
-            if (error || !data || data.length === 0) {
-                listeContainer.innerHTML = `<p style="text-align:center; padding:24px; color:var(--text-light);"><i class="fa-solid fa-calendar-xmark" style="display:block;font-size:2rem;opacity:0.3;margin-bottom:10px;"></i>Aucun RDV prévu ce jour.</p>`;
+            if (!data || data.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:40px;">Aucun RDV prévu dans les 7 prochains jours.</div>`;
                 return;
             }
 
-            data.forEach(rdv => {
-                const patientNom = rdv.patients ? `${rdv.patients.nom} ${rdv.patients.prenom || ''}` : 'Patient inconnu';
-                const heureStr = rdv.heure ? rdv.heure.substring(0, 5) : '--:--';
-                const statut = rdv.statut || 'prevu';
-                const cssStatut = statut === 'prevu' ? 'confirmed' : statut === 'annule' ? 'cancelled' : 'pending';
-                const labelStatut = { prevu: 'Prévu', confirme: 'Confirmé', annule: 'Annulé', effectue: 'Effectué' }[statut] || statut;
-
-                listeContainer.innerHTML += `
-                    <div class="appointment-card">
-                        <div class="appointment-time">
-                            <span class="time">${heureStr}</span>
-                            <span class="duration">30 min</span>
-                        </div>
-                        <div class="appointment-info">
-                            <div class="appointment-header">
-                                <div class="patient-name"
-                                     onclick="voirDetailsPatient('${rdv.patient_id}')"
-                                     style="color:var(--primary); cursor:pointer; text-decoration:underline;">
-                                    ${patientNom}
-                                </div>
-                                <span class="appointment-status status-${cssStatut}">${labelStatut}</span>
-                            </div>
-                            <div class="appointment-reason">${rdv.notes || rdv.motif || 'Consultation'}</div>
-                        </div>
+            container.innerHTML = data.map(r => `
+                <div class="rdv-item">
+                    <div class="rdv-time" style="font-size:0.8rem; line-height:1.2;">
+                        ${new Date(r.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'})}<br>
+                        <strong>${r.heure.substring(0,5)}</strong>
                     </div>
-                `;
-            });
-        }
-
-        // Soumettre nouveau RDV
-        async function remplirListePatients() {
-            const supabase = await window.SupabaseAPI.initSupabase();
-            const select = document.getElementById('patient_id');
-            if (!supabase || !select) return;
-
-            try {
-                const { data: patients, error } = await supabase
-                    .from('patients')
-                    .select('id, nom, prenom')
-                    .order('nom');
-
-                if (error) throw error;
-
-                select.innerHTML = '<option value="">Choisir un patient...</option>';
-                patients.forEach(p => {
-                    select.innerHTML += `<option value="${p.id}">${p.nom} ${p.prenom || ''}</option>`;
-                });
-            } catch (err) {
-                console.error("❌ Erreur chargement patients:", err.message);
-            }
-        }
-
-        async function enregistrerRendezVous(event) {
-            event.preventDefault();
-
-            const supabase = await window.SupabaseAPI.initSupabase();
-            if (!supabase) return;
-
-            // On récupère la valeur du champ "Motif" du formulaire 
-            // et on l'enregistre dans la colonne "notes" qui existe en base
-            const motifSaisi = document.getElementById('reason').value;
-            const notesSaisies = document.getElementById('notes_rdv').value;
-
-            const nouveauRDV = {
-                patient_id: document.getElementById('patient_id').value,
-                date: document.getElementById('date_rdv').value,
-                heure: document.getElementById('heure_rdv').value,
-                // Fusion des motifs et notes dans la colonne 'notes' qui existe
-                notes: motifSaisi + (notesSaisies ? " - " + notesSaisies : ""),
-                statut: 'prevu'
-            };
-
-            if (!nouveauRDV.patient_id) {
-                alert("Veuillez choisir un patient dans la liste.");
-                return;
-            }
-
-            const { error } = await supabase
-                .from('rendez_vous')
-                .insert([nouveauRDV]);
-
-            if (error) {
-                notifier("Erreur : " + error.message, "error");
-            } else {
-                const select = document.getElementById('patient_id');
-                const patientNom = select.options[select.selectedIndex].text;
-                notifier(`Rendez-vous confirmé pour <strong>${patientNom}</strong>.`);
-                
-                document.getElementById('form-rendez-vous').reset();
-                document.getElementById('date_rdv').value = new Date().toISOString().split('T')[0];
-                switchTab('new');
-                await chargerListeRDV();
-            }
-        }
-
-        async function chargerListeRDV() {
-            const supabase = await window.SupabaseAPI.initSupabase();
-            if (!supabase) return;
-
-            const tbody = document.getElementById('table-rdv-body');
-            const appointmentList = document.querySelector('.appointment-list');
-
-            // Afficher un loader dans le tableau
-            if (tbody) tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:24px; color:var(--text-light);"><i class="fa-solid fa-spinner fa-spin"></i> Chargement...</td></tr>`;
-
-            try {
-                const { data: rdv, error } = await supabase
-                    .from('rendez_vous')
-                    .select('*, patients(nom, prenom)')
-                    .order('date', { ascending: true });
-
-                if (error) throw error;
-
-                // --- 1. Remplir le tableau de l'onglet "Créer RDV" ---
-                if (tbody) {
-                    if (!rdv || rdv.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:32px; color:var(--text-light);"><i class="fa-solid fa-calendar-xmark" style="font-size:2rem; display:block; margin-bottom:8px; opacity:0.4;"></i>Aucun rendez-vous enregistré</td></tr>`;
-                    } else {
-                        tbody.innerHTML = '';
-                        rdv.forEach(item => {
-                            const nomPatient = item.patients ? `${item.patients.nom} ${item.patients.prenom || ''}` : 'Patient inconnu';
-                            const dateStr = item.date ? new Date(item.date + 'T00:00:00').toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' }) : '-';
-                            const heureStr = item.heure ? item.heure.substring(0, 5) : '-';
-                            const statut = item.statut || 'prevu';
-                            const labelStatut = { prevu: 'Prévu', confirme: 'Confirmé', annule: 'Annulé', effectue: 'Effectué' }[statut] || statut;
-
-                            tbody.innerHTML += `
-                                <tr id="row-${item.id}">
-                                    <td style="font-weight: 600;">${nomPatient}</td>
-                                    <td>Le <strong>${dateStr}</strong> à <strong>${heureStr}</strong></td>
-                                    <td><span class="badge-${statut}">${labelStatut}</span></td>
-                                    <td>
-                                        <button onclick="supprimerRDV('${item.id}')" class="btn-action" title="Supprimer ce rendez-vous" style="color: var(--danger);">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            `;
-                        });
-                    }
-                }
-
-                // --- 2. Remplir la liste de l'onglet "Calendrier" ---
-                if (appointmentList) {
-                    if (!rdv || rdv.length === 0) {
-                        appointmentList.innerHTML = `<p style="padding:16px; color:var(--text-light); text-align:center;"><i class="fa-solid fa-calendar-xmark"></i> Aucun rendez-vous enregistré</p>`;
-                    } else {
-                        appointmentList.innerHTML = '';
-                        rdv.forEach(item => {
-                            const patientNom = item.patients ? `${item.patients.nom} ${item.patients.prenom || ''}` : 'Patient inconnu';
-                            const heureStr = item.heure ? item.heure.substring(0, 5) : '--:--';
-                            const statut = item.statut || 'prevu';
-                            const cssStatut = statut === 'prevu' ? 'confirmed' : statut === 'annule' ? 'cancelled' : 'pending';
-                            const labelStatut = { prevu: 'Prévu', confirme: 'Confirmé', annule: 'Annulé', effectue: 'Effectué' }[statut] || statut;
-
-                            appointmentList.innerHTML += `
-                                <div class="appointment-card" id="rdv-${item.id}">
-                                    <div class="appointment-time">
-                                        <span class="time">${heureStr}</span>
-                                        <span class="duration">${item.duree || 30} min</span>
-                                    </div>
-                                    <div class="appointment-info">
-                                        <div class="appointment-header">
-                                            <div class="patient-name">${patientNom}</div>
-                                            <span class="appointment-status status-${cssStatut}">${labelStatut}</span>
-                                        </div>
-                                        <div class="appointment-reason">${item.notes || 'Sans motif'}</div>
-                                        <div style="margin-top: 10px; text-align: right;">
-                                            <button onclick="supprimerRDV('${item.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.85rem;">
-                                                <i class="fa-solid fa-trash"></i> Supprimer
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                    }
-                }
-
-            } catch (err) {
-                console.error("❌ Erreur liste RDV:", err.message);
-                if (tbody) tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:24px; color:var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Erreur : ${err.message}</td></tr>`;
-            }
-        }
-
-        async function supprimerRDV(id) {
-            if (!confirm("Supprimer définitivement ce rendez-vous ?")) return;
-
-            const supabase = await window.SupabaseAPI.initSupabase();
-            if (!supabase) return;
-
-            const { error } = await supabase
-                .from('rendez_vous')
-                .delete()
-                .eq('id', id);
-
-            if (error) {
-                alert("Erreur lors de la suppression : " + error.message);
-            } else {
-                // Supprimer visuellement dans le tableau ET dans la liste calendrier
-                const row = document.getElementById(`row-${id}`);
-                if (row) row.remove();
-                const card = document.getElementById(`rdv-${id}`);
-                if (card) card.remove();
-            }
-        }
-
-        // ====== MODAL DOSSIER PATIENT ======
-        async function voirDetailsPatient(patientId) {
-            const modal = document.getElementById('modal-patient');
-            const content = document.getElementById('details-patient-content');
-            if (!modal || !content) return;
-
-            modal.classList.add('active');
-            content.innerHTML = '<p style="text-align:center; padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i> Chargement...</p>';
-
-            const supabase = await window.SupabaseAPI.initSupabase();
-            if (!supabase) return;
-
-            const { data: p, error } = await supabase
-                .from('patients')
-                .select('*')
-                .eq('id', patientId)
-                .single();
-
-            if (error || !p) {
-                content.innerHTML = '<p style="color:var(--danger); text-align:center; padding:20px;"><i class="fa-solid fa-triangle-exclamation"></i> Erreur lors du chargement.</p>';
-                return;
-            }
-
-            content.innerHTML = `
-                <div class="info-row">
-                    <span class="info-label">NOM COMPLET</span>
-                    <span class="info-value">${p.nom} ${p.prenom || ''}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">TÉLÉPHONE</span>
-                    <span class="info-value">${p.telephone || 'Non renseigné'}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">ÂGE / GENRE</span>
-                    <span class="info-value">${p.age || '?'} ans &mdash; ${p.genre || 'N/C'}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">ANTÉCÉDENTS / NOTES</span>
-                    <span class="info-value" style="background:#f1f5f9; padding:10px; border-radius:8px; display:block;">
-                        ${p.antecedents || 'Aucun antécédent noté.'}
-                    </span>
-                </div>
-                <div style="margin-top:20px;">
-                    <a href="dossier-patient.html?id=${p.id}" class="btn" style="display:block; text-align:center; background:var(--primary); color:white; text-decoration:none; padding:10px; border-radius:8px; font-weight:600;">
-                        <i class="fa-solid fa-folder-open"></i> Ouvrir le dossier complet
-                    </a>
-                </div>
-            `;
-        }
-
-        function fermerModalPatient(e) {
-            if (e.target.classList.contains('modal-overlay')) {
-                document.getElementById('modal-patient').classList.remove('active');
-            }
-        }
-
-        // ====== SYSTÈME DE RAPPELS ======
-        const rappelSon = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-
-        function verifierRappelsRendezVous(rdvs) {
-            const maintenant = new Date();
-            const heureActuelle = maintenant.getHours().toString().padStart(2, '0') + ':' +
-                                  maintenant.getMinutes().toString().padStart(2, '0');
-            rdvs.forEach(rdv => {
-                if (rdv.heure && rdv.heure.substring(0, 5) === heureActuelle && rdv.statut === 'prevu') {
-                    declencherAlerte(rdv);
-                }
-            });
-        }
-
-        function declencherAlerte(rdv) {
-            // Son personnalisé
-            rappelSon.play().catch(e => console.log('Le son attend une interaction utilisateur'));
-
-            // Motif de la consultation
-            const motifConsultation = rdv.motif || rdv.notes || 'Consultation générale';
-
-            // Notification système (Windows/Mac/Android)
-            if (Notification.permission === 'granted') {
-                const nom = rdv.patients ? rdv.patients.nom : 'votre patient';
-                new Notification('⏰ Nouveau Patient : ' + nom, {
-                    body: `Motif : ${motifConsultation}\nHeure : ${rdv.heure.substring(0, 5)}`,
-                    icon: 'assets/logo.png',
-                    silent: true  // on gère le son nous-mêmes
-                });
-            }
-
-            // Bandeau discret non-bloquant (remplace l'alert)
-            afficherBandeauAlerte(rdv, motifConsultation);
-        }
-
-        function afficherBandeauAlerte(rdv, motif) {
-            // Éviter les doublons
-            document.querySelectorAll('.alerte-notification-top').forEach(b => b.remove());
-
-            const nom = rdv.patients
-                ? `${rdv.patients.nom} ${rdv.patients.prenom || ''}`
-                : 'votre patient';
-
-            const bandeau = document.createElement('div');
-            bandeau.className = 'alerte-notification-top';
-            bandeau.innerHTML = `
-                <div class="alerte-icon"><i class="fas fa-bell"></i></div>
-                <div class="alerte-text">
-                    <strong>C'est l'heure : ${nom}</strong><br>
-                    <small>${motif} &mdash; ${rdv.heure.substring(0, 5)}</small>
-                </div>
-                <button onclick="this.parentElement.remove()" aria-label="Fermer">Fermer</button>
-            `;
-            document.body.appendChild(bandeau);
-
-            // Disparition automatique après 10 secondes
-            setTimeout(() => { if (bandeau.parentElement) bandeau.remove(); }, 10000);
-        }
-
-        // --- Fonctions de Notifications ---
-        async function toggleNotifications() {
-            const dropdown = document.getElementById('notification-dropdown');
-            if (dropdown) {
-                dropdown.classList.toggle('active');
-                if (dropdown.classList.contains('active')) {
-                    await actualiserNotifications();
-                }
-            }
-        }
-
-        async function actualiserNotifications() {
-            const notifList = document.getElementById('notif-list');
-            if (!notifList) return;
-
-            const supabase = await window.SupabaseAPI.initSupabase();
-            if (!supabase) return;
-
-            const now = new Date();
-            const today = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
-
-            const { data: rdvs, error } = await supabase
-                .from('rendez_vous')
-                .select('*, patients(nom, prenom)')
-                .eq('date', today)
-                .eq('statut', 'prevu')
-                .order('heure', { ascending: true });
-
-            if (error || !rdvs || rdvs.length === 0) {
-                notifList.innerHTML = '<p style="padding:15px; font-size:0.8rem; color:gray; text-align:center;">Aucune notification pour aujourd\'hui.</p>';
-                return;
-            }
-
-            notifList.innerHTML = rdvs.map(rdv => `
-                <div class="notif-item">
-                    <strong>${rdv.heure.substring(0, 5)}</strong> - ${rdv.patients.nom} ${rdv.patients.prenom || ''}
-                    <br><small style="color:gray;">${rdv.notes || 'Consultation'}</small>
+                    <div class="patient-info">
+                        <div class="patient-name">${r.patients?.nom} ${r.patients?.prenom || ''}</div>
+                        <div class="rdv-reason"><i class="fa-solid fa-tag"></i> ${r.motif || 'Consultation'}</div>
+                    </div>
+                    <div class="status status-confirmed">Confirmé</div>
                 </div>
             `).join('');
         }
 
-        // Click outside pour fermer les menus
-        document.addEventListener('click', function(event) {
-            const notifDropdown = document.getElementById('notification-dropdown');
-            const notifBell = document.querySelector('.notification-bell');
-            
-            if (notifDropdown && notifDropdown.classList.contains('active')) {
-                if (!notifDropdown.contains(event.target) && !notifBell.contains(event.target)) {
-                    notifDropdown.classList.remove('active');
-                }
-            }
-        });
-    </script>
-    
+        async function chargerRDV(date) {
+            const loader = document.getElementById('rdv-loader');
+            const container = document.getElementById('rdv-list-container');
+            loader.style.display = 'block';
+            container.innerHTML = '';
 
-    
-    </div>
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data, error } = await supabase
+                .from('rendez_vous')
+                .select('*, patients(id, nom, prenom)')
+                .eq('date', date)
+                .order('heure', { ascending: true });
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
-    <script>
-        // --- Fonctions mobiles ---
-        
-        
-        function toggleMorePopup() {
-            const p = document.getElementById('morePopup');
-            const o = document.getElementById('moreOverlay');
-            if (p && o) {
-                if(p.classList.contains('active')) {
-                    p.classList.remove('active');
-                    o.classList.remove('active');
-                } else {
-                    p.classList.add('active');
-                    o.classList.add('active');
-                }
+            loader.style.display = 'none';
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:40px; background:white; border-radius:16px; color:var(--text-light); border:1px dashed var(--border);">
+                        <i class="fa-solid fa-calendar-day fa-3x" style="opacity:0.2; margin-bottom:16px;"></i>
+                        <p>Aucun rendez-vous pour cette journée.</p>
+                    </div>`;
+                return;
             }
+
+            container.innerHTML = data.map(r => `
+                <div class="rdv-item" onclick="window.location.href='dossier-patient.html?id=${r.patients?.id}'" style="cursor:pointer;">
+                    <div class="rdv-time">${r.heure.substring(0,5)}</div>
+                    <div class="patient-info">
+                        <div class="patient-name">${r.patients?.nom} ${r.patients?.prenom || ''}</div>
+                        <div class="rdv-reason">
+                            <i class="fa-solid fa-tag" style="color:var(--primary);"></i>
+                            ${r.motif || 'Consultation'}
+                        </div>
+                    </div>
+                    <div class="status status-confirmed">Confirmé</div>
+                    <button onclick="event.stopPropagation(); deleteRDV('${r.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer; opacity:0.3; transition:0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
         }
-        function closeMorePopup() {
-            const p = document.getElementById('morePopup');
-            const o = document.getElementById('moreOverlay');
-            if (p && o) {
-                p.classList.remove('active');
-                o.classList.remove('active');
-            }
-        }
-        
-        // Initialisation mobile et données
 
+        async function handleSaveRDV(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save');
+            btn.disabled = true;
+            btn.textContent = "Enregistrement...";
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const menuBtn = document.querySelector('.header-logo');
-            if (menuBtn) menuBtn.onclick = openDrawer;
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const rdv = {
+                patient_id: document.getElementById('select-patient').value,
+                date: document.getElementById('rdv-date').value,
+                heure: document.getElementById('rdv-time').value,
+                motif: document.getElementById('rdv-type').options[document.getElementById('rdv-type').selectedIndex].text,
+                notes: document.getElementById('rdv-motif').value || null
+            };
+
+            const { error } = await supabase.from('rendez_vous').insert([rdv]);
+            if (!error) {
+                closeModal();
+                await chargerRDV(selectedDate);
+                window.notifier("Rendez-vous enregistré !");
+            } else window.notifier("Erreur : " + error.message, 'error');
             
-            if (window.updateDrawerUser) window.updateDrawerUser();
+            btn.disabled = false;
+            btn.textContent = "Enregistrer";
+        }
 
-            // Demander la permission pour les notifications navigateur
-            if (Notification && Notification.permission !== 'denied') {
-                Notification.requestPermission();
-            }
+        async function deleteRDV(id) {
+            if (!confirm("Supprimer ce rendez-vous ?")) return;
+            const supabase = await window.SupabaseAPI.initSupabase();
+            await supabase.from('rendez_vous').delete().eq('id', id);
+            await chargerRDV(selectedDate);
+        }
 
-            // Charger les patients pour le select
-            await remplirListePatients();
+        function openModal() { document.getElementById('rdvModal').classList.add('active'); }
+        function closeModal() { document.getElementById('rdvModal').classList.remove('active'); }
 
-            // Charger la liste des rendez-vous existants (tableau onglet Créer RDV)
-            await chargerListeRDV();
-
-            // Initialiser le calendrier avec aujourd'hui
-            reinitialiserCalendrier(new Date().toISOString().split('T')[0]);
-
-
-            // Vérification des rappels toutes les 60 secondes
-            setInterval(async () => {
-                const supabase = await window.SupabaseAPI.initSupabase();
-                if (!supabase) return;
-                const aujourdhui = new Date().toISOString().split('T')[0];
-                const { data: rdvs } = await supabase
-                    .from('rendez_vous')
-                    .select('heure, statut, patients(nom, prenom)')
-                    .eq('date', aujourdhui);
-                if (rdvs) verifierRappelsRendezVous(rdvs);
-            }, 60000);
-        });
+        function toggleMobileSidebar() {
+            const s = document.querySelector('.sidebar');
+            const o = document.getElementById('sidebarOverlay');
+            s.classList.toggle('active');
+            o.classList.toggle('active');
+        }
     </script>
-
-    <!-- Modal Dossier Patient -->
-    <div id="modal-patient" class="modal-overlay" onclick="fermerModalPatient(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-user-circle" style="color:var(--primary); margin-right:8px;"></i>Dossier Patient</h3>
-                <button class="btn-close-modal" onclick="document.getElementById('modal-patient').classList.remove('active')">&times;</button>
-            </div>
-            <div id="details-patient-content" class="modal-body">
-                <p>Chargement des données...</p>
-            </div>
-        </div>
-    </div>
-
-    <style>
-    .modal-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.55); display: none; z-index: 2000;
-        align-items: center; justify-content: center;
-        backdrop-filter: blur(3px);
-    }
-    .modal-overlay.active { display: flex; }
-    .modal-content {
-        background: white; width: 92%; max-width: 480px;
-        border-radius: 18px; padding: 24px;
-        animation: slideUp 0.3s ease;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-    }
-    @keyframes slideUp {
-        from { transform: translateY(30px); opacity: 0; }
-        to   { transform: translateY(0);   opacity: 1; }
-    }
-    .modal-header {
-        display: flex; justify-content: space-between; align-items: center;
-        border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 4px;
-    }
-    .modal-header h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; }
-    .btn-close-modal {
-        background: var(--bg); border: none; width: 32px; height: 32px;
-        border-radius: 50%; font-size: 1.3rem; cursor: pointer; line-height: 1;
-        color: var(--text-light); transition: 0.2s;
-    }
-    .btn-close-modal:hover { background: var(--border); color: var(--text); }
-    .modal-body { padding-top: 8px; }
-    .info-row { margin: 14px 0; display: flex; flex-direction: column; gap: 4px; }
-    .info-label { font-size: 0.72rem; color: var(--text-light); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    .info-value { font-size: 0.97rem; color: var(--text); font-weight: 500; }
-
-    /* Bandeau d'alerte RDV */
-    .alerte-notification-top {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: var(--primary);
-        color: white;
-        padding: 15px 20px;
-        border-radius: 14px;
-        box-shadow: 0 10px 30px rgba(0, 119, 182, 0.35);
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        z-index: 9999;
-        animation: slideInRight 0.45s ease;
-        max-width: 340px;
-    }
-    @keyframes slideInRight {
-        from { transform: translateX(110%); opacity: 0; }
-        to   { transform: translateX(0);   opacity: 1; }
-    }
-    .alerte-icon { font-size: 1.5rem; flex-shrink: 0; }
-    .alerte-text { flex: 1; line-height: 1.4; }
-    .alerte-text small { opacity: 0.85; }
-    .alerte-notification-top button {
-        background: rgba(255,255,255,0.2);
-        border: 1px solid rgba(255,255,255,0.3);
-        color: white;
-        padding: 5px 12px;
-        border-radius: 7px;
-        cursor: pointer;
-        font-size: 0.8rem;
-        font-weight: 600;
-        white-space: nowrap;
-        transition: 0.2s;
-    }
-    .alerte-notification-top button:hover { background: rgba(255,255,255,0.35); }
-    </style>
-
-    <!-- Mobile Bottom Navigation -->
-    <nav class="mobile-bottom-nav">
-        <a href="dashboard.html" class="mobile-nav-item "><i class="fa-solid fa-chart-line"></i><span>Accueil</span></a>
-        <a href="patients.html" class="mobile-nav-item "><i class="fa-solid fa-users"></i><span>Patients</span></a>
-        <a href="consultations.html" class="mobile-nav-item "><i class="fa-solid fa-stethoscope"></i><span>Consult.</span></a>
-        <a href="rendez-vous.html" class="mobile-nav-item active"><i class="fa-solid fa-calendar-check"></i><span>RDV</span></a>
-        <button class="mobile-nav-item more-btn" onclick="toggleMorePopup()"><i class="fa-solid fa-ellipsis-h"></i><span>Plus</span></button>
-    </nav>
-    <!-- Popup Plus -->
-    <div class="more-popup-overlay" id="moreOverlay" onclick="closeMorePopup()"></div>
-    <div class="more-popup" id="morePopup">
-        <div class="popup-grid">
-            <a href="messagerie.html" class="popup-item"><i class="fa-solid fa-comments"></i>Messages</a>
-            <a href="finance.html" class="popup-item"><i class="fa-solid fa-coins"></i>Finance</a>
-            <a href="stocks.html" class="popup-item"><i class="fa-solid fa-boxes-stacked"></i>Stocks</a>
-            <a href="alertes.html" class="popup-item"><i class="fa-solid fa-bell"></i>Alertes</a>
-            <a href="parametres.html" class="popup-item" style="grid-column: span 2;"><i class="fa-solid fa-cog"></i>Paramètres</a>
-        </div>
-    </div>
-
 </body>
 </html>
