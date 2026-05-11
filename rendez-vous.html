@@ -30,7 +30,9 @@
         .patient-info { flex: 1; }
         .patient-name { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
         .rdv-reason { font-size: 0.85rem; color: var(--text-light); display: flex; align-items: center; gap: 6px; }
-        .status-confirmed { background: rgba(42, 157, 143, 0.1); color: var(--secondary); }
+        .status-badge { padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
+        .status-confirmed { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
         .modal.active { display: flex; }
         .modal-content { background: white; padding: 32px; border-radius: 20px; width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
@@ -69,21 +71,21 @@
             </div>
             <nav class="nav-menu">
 
-                <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
-                <a href="patients.html" class="nav-item"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
-                <a href="consultations.html" class="nav-item"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
-                <a href="rendez-vous.html" class="nav-item active"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
+                <a href="dashboard.html" class="nav-item" id="menu-dashboard"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
+                <a href="patients.html" class="nav-item" id="menu-patients"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
+                <a href="consultations.html" class="nav-item" id="menu-consultations"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
+                <a href="rendez-vous.html" class="nav-item active" id="menu-rendezvous"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
+                
+                <hr class="nav-separator" id="sep-finance">
+                
+                <a href="finance.html" class="nav-item" id="menu-finance"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
+                <a href="stocks.html" class="nav-item" id="menu-stocks"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
                 
                 <hr class="nav-separator">
                 
-                <a href="finance.html" class="nav-item"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
-                <a href="stocks.html" class="nav-item"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
-                
-                <hr class="nav-separator">
-                
-                <a href="messagerie.html" class="nav-item"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
-                <a href="alertes.html" class="nav-item"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
-                <a href="parametres.html" class="nav-item"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
+                <a href="messagerie.html" class="nav-item" id="menu-messagerie"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
+                <a href="alertes.html" class="nav-item" id="menu-alertes"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
+                <a href="parametres.html" class="nav-item" id="menu-parametres"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
             
             </nav>
         </aside>
@@ -110,6 +112,27 @@
                         <div style="display:flex; align-items:center; gap:8px;"><div style="width:12px; height:12px; border-radius:3px; background:var(--primary);"></div> Consultation</div>
                         <div style="display:flex; align-items:center; gap:8px;"><div style="width:12px; height:12px; border-radius:3px; background:var(--secondary);"></div> Examen</div>
                         <div style="display:flex; align-items:center; gap:8px;"><div style="width:12px; height:12px; border-radius:3px; background:var(--danger);"></div> Urgence</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section RDV en attente de confirmation -->
+            <section id="pending-section" style="display:none; margin-bottom: 24px;">
+                <div style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 2px solid #f59e0b; border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(245,158,11,0.12);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #ef4444); display: flex; align-items: center; justify-content: center;">
+                                <i class="fa-solid fa-clock" style="color: white; font-size: 1.1rem;"></i>
+                            </div>
+                            <div>
+                                <h3 style="margin:0; font-family:'Space Grotesk'; font-size: 1.1rem; color: #92400e;">Rendez-vous en attente</h3>
+                                <p style="margin:0; font-size: 0.8rem; color: #b45309;">Demandes depuis le site public</p>
+                            </div>
+                        </div>
+                        <span id="pending-count-badge" style="background: #ef4444; color: white; font-size: 0.85rem; font-weight: 700; padding: 4px 14px; border-radius: 20px; box-shadow: 0 2px 8px rgba(239,68,68,0.3);">0</span>
+                    </div>
+                    <div id="pending-list" style="display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Les RDV en attente s'afficheront ici -->
                     </div>
                 </div>
             </section>
@@ -184,8 +207,118 @@
             initMiniCalendar();
             updateDateDisplay(new Date());
             await chargerPatients();
+            await chargerRDVEnAttente();
             await chargerRDV(selectedDate);
+            setupRealtimeAlerts();
         });
+
+        async function setupRealtimeAlerts() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            supabase.channel('rendez_vous_page_changes')
+                .on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'rendez_vous' },
+                    (payload) => {
+                        // Recharger la section en attente
+                        chargerRDVEnAttente();
+                        // Recharger le jour affiché si la date correspond
+                        if (payload.new.date === selectedDate) {
+                            chargerRDV(selectedDate);
+                        }
+                    }
+                )
+                .on(
+                    'postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'rendez_vous' },
+                    () => {
+                        // Quand un RDV est confirmé, recharger les deux sections
+                        chargerRDVEnAttente();
+                        chargerRDV(selectedDate);
+                    }
+                )
+                .on(
+                    'postgres_changes',
+                    { event: 'DELETE', schema: 'public', table: 'rendez_vous' },
+                    () => {
+                        chargerRDVEnAttente();
+                        chargerRDV(selectedDate);
+                    }
+                )
+                .subscribe();
+        }
+
+        /**
+         * Charge TOUS les rendez-vous en attente (toutes dates confondues)
+         */
+        async function chargerRDVEnAttente() {
+            const section = document.getElementById('pending-section');
+            const list = document.getElementById('pending-list');
+            const countBadge = document.getElementById('pending-count-badge');
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+
+            // Requête : tous les RDV en_attente, toutes dates
+            let { data, error } = await supabase
+                .from('rendez_vous')
+                .select('*')
+                .eq('statut', 'en_attente')
+                .order('date', { ascending: true })
+                .order('heure', { ascending: true });
+
+            if (error || !data) data = [];
+
+            // Récupérer les noms de patients
+            if (data.length > 0) {
+                const patientIds = [...new Set(data.map(r => r.patient_id).filter(Boolean))];
+                if (patientIds.length > 0) {
+                    const { data: patientsData } = await supabase
+                        .from('patients')
+                        .select('id, nom, prenom, telephone')
+                        .in('id', patientIds);
+                    
+                    const pMap = {};
+                    if (patientsData) patientsData.forEach(p => { pMap[p.id] = p; });
+                    data = data.map(r => ({ ...r, patient: pMap[r.patient_id] || null }));
+                }
+            }
+
+            if (data.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            countBadge.textContent = data.length;
+
+            list.innerHTML = data.map(r => {
+                const p = r.patient;
+                const nom = p ? `${p.nom} ${p.prenom || ''}` : 'Patient #' + r.patient_id;
+                const initials = p ? (p.nom[0] + (p.prenom ? p.prenom[0] : '')).toUpperCase() : '??';
+                const tel = p?.telephone || '';
+                const dateObj = new Date(r.date + 'T00:00:00');
+                const dateStr = dateObj.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+                const heureStr = r.heure.substring(0, 5);
+
+                return `
+                <div style="background: white; border-radius: 14px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #fde68a; transition: all 0.2s;" onmouseenter="this.style.boxShadow='0 4px 16px rgba(245,158,11,0.2)'" onmouseleave="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'">
+                    <div style="width:42px; height:42px; border-radius:50%; background: linear-gradient(135deg, #f59e0b, #f97316); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0;">${initials}</div>
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-weight:700; font-size:0.95rem; color:#1e293b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${nom}</div>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:3px; font-size:0.8rem; color:#64748b;">
+                            <span><i class="fa-solid fa-calendar" style="margin-right:4px; color:#f59e0b;"></i>${dateStr}</span>
+                            <span><i class="fa-solid fa-clock" style="margin-right:4px; color:#f59e0b;"></i>${heureStr}</span>
+                            <span><i class="fa-solid fa-tag" style="margin-right:4px; color:#f59e0b;"></i>${r.motif || 'Consultation'}</span>
+                            ${tel ? `<span><i class="fa-solid fa-phone" style="margin-right:4px; color:#f59e0b;"></i>${tel}</span>` : ''}
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-shrink:0;">
+                        <button onclick="confirmerRDV('${r.id}')" style="background: linear-gradient(135deg, #10b981, #059669); color:white; border:none; padding:8px 16px; border-radius:10px; font-size:0.8rem; cursor:pointer; font-weight:700; box-shadow:0 4px 12px rgba(16,185,129,0.25); transition:all 0.2s;" onmouseenter="this.style.transform='scale(1.05)'" onmouseleave="this.style.transform='scale(1)'"><i class="fa-solid fa-check" style="margin-right:4px;"></i>Confirmer</button>
+                        <button onclick="deleteRDV('${r.id}')" style="background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.2); padding:8px 12px; border-radius:10px; font-size:0.8rem; cursor:pointer; font-weight:600; transition:all 0.2s;" onmouseenter="this.style.background='rgba(239,68,68,0.2)'" onmouseleave="this.style.background='rgba(239,68,68,0.1)'"><i class="fa-solid fa-times"></i></button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
 
         function initUser() {
             const u = localStorage.getItem('currentUser');
@@ -244,7 +377,7 @@
             container.innerHTML = '';
             
             document.getElementById('current-date-display').textContent = "7 Prochains jours";
-            document.getElementById('day-name').textContent = "APERÃ‡U";
+            document.getElementById('day-name').textContent = "APERÇU";
 
             const supabase = await window.SupabaseAPI.initSupabase();
             const today = new Date().toISOString().split('T')[0];
@@ -252,13 +385,36 @@
             nextWeek.setDate(nextWeek.getDate() + 7);
             const nextWeekStr = nextWeek.toISOString().split('T')[0];
 
-            const { data } = await supabase
+            let { data, error } = await supabase
                 .from('rendez_vous')
                 .select('*, patients(nom, prenom)')
                 .gte('date', today)
                 .lte('date', nextWeekStr)
                 .order('date', { ascending: true })
                 .order('heure', { ascending: true });
+
+            // Fallback si la jointure échoue
+            if (error || !data) {
+                const result = await supabase
+                    .from('rendez_vous')
+                    .select('*')
+                    .gte('date', today)
+                    .lte('date', nextWeekStr)
+                    .order('date', { ascending: true })
+                    .order('heure', { ascending: true });
+                data = result.data;
+
+                if (data && data.length > 0) {
+                    const patientIds = [...new Set(data.map(r => r.patient_id).filter(Boolean))];
+                    if (patientIds.length > 0) {
+                        const { data: patientsData } = await supabase
+                            .from('patients').select('id, nom, prenom').in('id', patientIds);
+                        const pMap = {};
+                        if (patientsData) patientsData.forEach(p => { pMap[p.id] = p; });
+                        data = data.map(r => ({ ...r, patients: pMap[r.patient_id] || { nom: 'Patient', prenom: '#'+r.patient_id } }));
+                    }
+                }
+            }
 
             loader.style.display = 'none';
 
@@ -267,19 +423,26 @@
                 return;
             }
 
-            container.innerHTML = data.map(r => `
+            container.innerHTML = data.map(r => {
+                const statusStr = r.statut || 'confirme';
+                const isPending = statusStr === 'en_attente';
+                const badgeClass = isPending ? 'status-pending' : 'status-confirmed';
+                const badgeText = isPending ? 'En attente' : 'Confirmé';
+
+                return `
                 <div class="rdv-item">
                     <div class="rdv-time" style="font-size:0.8rem; line-height:1.2;">
                         ${new Date(r.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'})}<br>
                         <strong>${r.heure.substring(0,5)}</strong>
                     </div>
                     <div class="patient-info">
-                        <div class="patient-name">${r.patients?.nom} ${r.patients?.prenom || ''}</div>
+                        <div class="patient-name">${r.patients?.nom || 'Inconnu'} ${r.patients?.prenom || ''}</div>
                         <div class="rdv-reason"><i class="fa-solid fa-tag"></i> ${r.motif || 'Consultation'}</div>
                     </div>
-                    <div class="status status-confirmed">Confirmé</div>
+                    <div class="status-badge ${badgeClass}">${badgeText}</div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         async function chargerRDV(date) {
@@ -289,11 +452,50 @@
             container.innerHTML = '';
 
             const supabase = await window.SupabaseAPI.initSupabase();
-            const { data, error } = await supabase
+            
+            // Tentative 1 : avec jointure patients
+            let { data, error } = await supabase
                 .from('rendez_vous')
                 .select('*, patients(id, nom, prenom)')
                 .eq('date', date)
                 .order('heure', { ascending: true });
+
+            console.log('📅 chargerRDV date:', date, '| data:', data, '| error:', error);
+
+            // Tentative 2 : si la jointure échoue, charger sans jointure
+            if (error || !data) {
+                console.warn('⚠️ Jointure patients échouée, chargement sans jointure...', error?.message);
+                const result = await supabase
+                    .from('rendez_vous')
+                    .select('*')
+                    .eq('date', date)
+                    .order('heure', { ascending: true });
+                
+                data = result.data;
+                error = result.error;
+                console.log('📅 Sans jointure - data:', data, '| error:', error);
+
+                // Récupérer les noms des patients séparément
+                if (data && data.length > 0) {
+                    const patientIds = [...new Set(data.map(r => r.patient_id).filter(Boolean))];
+                    if (patientIds.length > 0) {
+                        const { data: patientsData } = await supabase
+                            .from('patients')
+                            .select('id, nom, prenom')
+                            .in('id', patientIds);
+                        
+                        const patientsMap = {};
+                        if (patientsData) {
+                            patientsData.forEach(p => { patientsMap[p.id] = p; });
+                        }
+                        // Attacher les infos patients à chaque RDV
+                        data = data.map(r => ({
+                            ...r,
+                            patients: patientsMap[r.patient_id] || { id: r.patient_id, nom: 'Patient', prenom: '#' + r.patient_id }
+                        }));
+                    }
+                }
+            }
 
             loader.style.display = 'none';
 
@@ -306,22 +508,40 @@
                 return;
             }
 
-            container.innerHTML = data.map(r => `
-                <div class="rdv-item" onclick="window.location.href='dossier-patient.html?id=${r.patients?.id}'" style="cursor:pointer;">
+            container.innerHTML = data.map(r => {
+                const statusStr = r.statut || 'confirme';
+                const isPending = statusStr === 'en_attente';
+                const badgeClass = isPending ? 'status-pending' : 'status-confirmed';
+                const badgeText = isPending ? 'En attente' : 'Confirmé';
+                
+                const actionBtn = isPending 
+                    ? `<button onclick="event.stopPropagation(); confirmerRDV('${r.id}')" style="background:var(--success); color:white; border:none; padding:6px 12px; border-radius:8px; font-size:0.8rem; cursor:pointer; font-weight:600; box-shadow:0 4px 10px rgba(16,185,129,0.2);"><i class="fa-solid fa-check"></i> Confirmer</button>` 
+                    : '';
+
+                const patientNom = r.patients?.nom || 'Inconnu';
+                const patientPrenom = r.patients?.prenom || '';
+                const patientId = r.patients?.id || r.patient_id;
+
+                return `
+                <div class="rdv-item" onclick="window.location.href='dossier-patient.html?id=${patientId}'" style="cursor:pointer;">
                     <div class="rdv-time">${r.heure.substring(0,5)}</div>
                     <div class="patient-info">
-                        <div class="patient-name">${r.patients?.nom} ${r.patients?.prenom || ''}</div>
+                        <div class="patient-name">${patientNom} ${patientPrenom}</div>
                         <div class="rdv-reason">
                             <i class="fa-solid fa-tag" style="color:var(--primary);"></i>
                             ${r.motif || 'Consultation'}
                         </div>
                     </div>
-                    <div class="status status-confirmed">Confirmé</div>
-                    <button onclick="event.stopPropagation(); deleteRDV('${r.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer; opacity:0.3; transition:0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3">
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                        <div class="status-badge ${badgeClass}">${badgeText}</div>
+                        ${actionBtn}
+                    </div>
+                    <button onclick="event.stopPropagation(); deleteRDV('${r.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer; opacity:0.3; transition:0.2s; margin-left: 10px;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         async function handleSaveRDV(e) {
@@ -336,7 +556,8 @@
                 date: document.getElementById('rdv-date').value,
                 heure: document.getElementById('rdv-time').value,
                 motif: document.getElementById('rdv-type').options[document.getElementById('rdv-type').selectedIndex].text,
-                notes: document.getElementById('rdv-motif').value || null
+                notes: document.getElementById('rdv-motif').value || null,
+                statut: 'confirme' // Un RDV pris par la réceptionniste est confirmé par défaut
             };
 
             const { error } = await supabase.from('rendez_vous').insert([rdv]);
@@ -348,6 +569,29 @@
             
             btn.disabled = false;
             btn.textContent = "Enregistrer";
+        }
+
+        async function confirmerRDV(id) {
+            console.log("Tentative de confirmation du RDV id:", id);
+            try {
+                const supabase = await window.SupabaseAPI.initSupabase();
+                const { data, error } = await supabase.from('rendez_vous').update({ statut: 'confirme' }).eq('id', id).select();
+                
+                if (error) {
+                    console.error("Erreur SQL lors de la confirmation :", error);
+                    if (window.notifier) window.notifier("Erreur lors de la confirmation : " + error.message, 'error');
+                    else alert("Erreur: " + error.message);
+                } else {
+                    console.log("Confirmation réussie :", data);
+                    if (window.notifier) window.notifier("Rendez-vous confirmé !");
+                    // Recharge IMMÉDIATEMENT les deux listes sans attendre le temps réel
+                    if (typeof chargerRDVEnAttente === 'function') await chargerRDVEnAttente();
+                    await chargerRDV(selectedDate);
+                }
+            } catch (err) {
+                console.error("Erreur inattendue dans confirmerRDV:", err);
+                alert("Une erreur inattendue s'est produite.");
+            }
         }
 
         async function deleteRDV(id) {

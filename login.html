@@ -340,13 +340,47 @@
         }
 
         @media (max-width: 480px) {
-            .login-right {
-                padding: 24px;
-            }
+            .login-right { padding: 24px; }
+            .demo-buttons { grid-template-columns: 1fr; }
+        }
 
-            .demo-buttons {
-                grid-template-columns: 1fr;
-            }
+        /* Panneau Première Connexion */
+        .first-login-panel {
+            display: none;
+            margin-top: 20px;
+            padding: 24px;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 16px;
+            border: 2px solid rgba(0, 119, 182, 0.15);
+        }
+        .first-login-panel h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            color: var(--primary-dark);
+            margin-bottom: 6px;
+        }
+        .first-login-panel p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+        .step-indicator {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        .step-dot {
+            flex: 1;
+            height: 4px;
+            border-radius: 4px;
+            background: var(--border);
+            transition: 0.3s;
+        }
+        .step-dot.active { background: var(--primary); }
+        .btn-link {
+            background: none; border: none; color: var(--primary);
+            font-size: 0.85rem; cursor: pointer; text-decoration: underline;
+            font-family: inherit; padding: 0; margin-top: 12px;
         }
     </style>
 </head>
@@ -411,12 +445,10 @@
                     <label for="email">Email professionnel</label>
                     <input type="email" id="email" placeholder="exemple@refontiq.ci" required>
                 </div>
-
                 <div class="form-group">
                     <label for="password">Mot de passe</label>
                     <input type="password" id="password" placeholder="••••••••" required>
                 </div>
-
                 <div class="form-group">
                     <label for="role">Rôle</label>
                     <select id="role" required>
@@ -426,7 +458,6 @@
                         <option value="receptionniste">Réceptionniste</option>
                     </select>
                 </div>
-
                 <div class="remember-forgot">
                     <label class="remember-me">
                         <input type="checkbox" id="remember">
@@ -434,29 +465,81 @@
                     </label>
                     <a href="#" class="forgot-password">Mot de passe oublié ?</a>
                 </div>
-
                 <button type="submit" class="btn btn-primary">
                     <i class="fa-solid fa-right-to-bracket"></i>
                     Se connecter
                 </button>
             </form>
 
-            <div class="form-divider">
-                <span>Comptes de démonstration</span>
+            <!-- Bouton Première Connexion -->
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn-link" onclick="togglePremièreConnexion()">
+                    <i class="fa-solid fa-user-plus" style="margin-right:5px;"></i> Première connexion ? Activer mon compte
+                </button>
             </div>
 
+            <!-- Panneau Première Connexion -->
+            <div class="first-login-panel" id="first-login-panel">
+                <h3><i class="fa-solid fa-key" style="margin-right:8px; color:var(--primary);"></i> Activer mon compte</h3>
+                <p>Votre médecin vous a remis un identifiant et un code à 4 chiffres. Entrez-les ci-dessous.</p>
+
+                <!-- Étape 1 : Identifiant + Code -->
+                <div id="step-1">
+                    <div class="step-indicator">
+                        <div class="step-dot active"></div>
+                        <div class="step-dot"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Votre identifiant</label>
+                        <input type="text" id="inv-username" placeholder="Ex: marie.infirmiere">
+                    </div>
+                    <div class="form-group">
+                        <label>Code d'invitation (4 chiffres)</label>
+                        <input type="text" id="inv-code" placeholder="Ex: 8529" maxlength="4" style="letter-spacing: 8px; font-size: 1.3rem; font-weight:700; text-align:center;">
+                    </div>
+                    <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="verifierCode()">
+                        <i class="fa-solid fa-check"></i> Vérifier le code
+                    </button>
+                </div>
+
+                <!-- Étape 2 : Choisir email + mot de passe -->
+                <div id="step-2" style="display:none;">
+                    <div class="step-indicator">
+                        <div class="step-dot active"></div>
+                        <div class="step-dot active"></div>
+                    </div>
+                    <div style="padding: 12px; background: rgba(16,185,129,0.1); border-radius: 10px; margin-bottom: 16px;">
+                        <p style="color: var(--secondary); margin: 0; font-weight:600; font-size:0.85rem;">
+                            <i class="fa-solid fa-circle-check"></i> Code valide ! Bienvenue, <span id="inv-welcome-name"></span>
+                        </p>
+                    </div>
+                    <div class="form-group">
+                        <label>Votre adresse email (pour vous connecter)</label>
+                        <input type="email" id="inv-email" placeholder="ex: marie@refontiq.ci">
+                    </div>
+                    <div class="form-group">
+                        <label>Choisissez un mot de passe</label>
+                        <input type="password" id="inv-password" placeholder="Minimum 6 caractères">
+                    </div>
+                    <button class="btn btn-primary" style="width:100%; margin-top:8px; background: linear-gradient(135deg, var(--secondary), #1a7a6e) !important;" onclick="activerCompte()">
+                        <i class="fa-solid fa-rocket"></i> Créer mon compte
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-divider"><span>Comptes de démonstration</span></div>
             <div class="demo-accounts">
                 <h4>Accès Rapide (Démo)</h4>
                 <div class="demo-buttons">
-                    <button class="demo-btn" onclick="fillDemo('medecin')">
+                    <button class="demo-btn" onclick="accesRapide('medecin')">
                         <i class="fa-solid fa-user-doctor"></i>
                         <span>Médecin</span>
                     </button>
-                    <button class="demo-btn" onclick="fillDemo('infirmiere')">
+                    <button class="demo-btn" onclick="accesRapide('infirmiere')">
                         <i class="fa-solid fa-user-nurse"></i>
                         <span>Infirmière</span>
                     </button>
-                    <button class="demo-btn" onclick="fillDemo('receptionniste')">
+                    <button class="demo-btn" onclick="accesRapide('reception')">
                         <i class="fa-solid fa-headset"></i>
                         <span>Réception</span>
                     </button>
@@ -468,79 +551,177 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.1/dist/umd/supabase.js"></script>
     <script src="supabase-config.js"></script>
     <script>
-        // Données de démonstration
-        const demoAccounts = {
-            medecin: {
-                email: 'dr.duval@refontiq.ci',
-                password: 'medecin2024',
-                role: 'medecin'
-            },
-            infirmiere: {
-                email: 'infirmiere.martin@refontiq.ci',
-                password: 'infirmiere2024',
-                role: 'infirmiere'
-            },
-            receptionniste: {
-                email: 'reception@refontiq.ci',
-                password: 'reception2024',
-                role: 'receptionniste'
-            }
-        };
-
-        // Remplir le formulaire avec un compte de démonstration
-        function fillDemo(role) {
-            const account = demoAccounts[role];
-            document.getElementById('email').value = account.email;
-            document.getElementById('password').value = account.password;
-            document.getElementById('role').value = account.role;
+        // Afficher / Cacher le panneau Première Connexion
+        function togglePremièreConnexion() {
+            const panel = document.getElementById('first-login-panel');
+            const isHidden = panel.style.display === 'none' || panel.style.display === '';
+            panel.style.display = isHidden ? 'block' : 'none';
+            if (isHidden) panel.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Gérer la connexion
-        async function handleLogin(event) {
-            event.preventDefault();
+        // Étape 1 : Vérifier l'identifiant + code invitation
+        let invitationData = null;
+        async function verifierCode() {
+            const username = document.getElementById('inv-username').value.trim().toLowerCase();
+            const code = document.getElementById('inv-code').value.trim();
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
-
-            // 1. On initialise la connexion à Supabase
-            const supabase = await window.SupabaseAPI.initSupabase();
-            
-            if (!supabase) {
-                window.notifier("Impossible de se connecter à la base de données. Vérifiez votre configuration.", 'error');
+            if (!username || !code) {
+                window.notifier("Remplissez l'identifiant et le code.", 'error');
                 return;
             }
 
-            // 2. On cherche l'utilisateur dans la table 'users'
-            const user = await window.SupabaseAPI.loginUser(supabase, email);
+            const supabase = await window.SupabaseAPI.initSupabase();
+            if (!supabase) return;
 
-            if (user) {
-                // Si l'utilisateur existe, on enregistre ses vraies infos
+            const { data, error } = await supabase
+                .from('invitations')
+                .select('*')
+                .eq('nom_utilisateur', username)
+                .eq('code_invitation', code)
+                .eq('utilise', false)
+                .single();
+
+            if (error || !data) {
+                window.notifier("Code invalide ou déjà utilisé. Vérifiez avec votre médecin.", 'error');
+                return;
+            }
+
+            // Code valide : passer à l'étape 2
+            invitationData = data;
+            document.getElementById('inv-welcome-name').textContent = data.nom;
+            document.getElementById('step-1').style.display = 'none';
+            document.getElementById('step-2').style.display = 'block';
+        }
+
+        // Étape 2 : Créer le compte définitif
+        async function activerCompte() {
+            if (!invitationData) return;
+
+            const email    = document.getElementById('inv-email').value.trim();
+            const password = document.getElementById('inv-password').value;
+
+            if (!email || password.length < 6) {
+                window.notifier("Email valide et mot de passe (min. 6 car.) requis.", 'error');
+                return;
+            }
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+            if (!supabase) return;
+
+            // 1. Créer le compte dans la table 'users'
+            const { error: userError } = await supabase.from('users').insert([{
+                email: email,
+                nom: invitationData.nom,
+                prenom: invitationData.prenom || '',
+                role: invitationData.role
+            }]);
+
+            if (userError) {
+                window.notifier("Erreur : cet email est peut-être déjà utilisé.", 'error');
+                return;
+            }
+
+            // 2. Marquer l'invitation comme utilisée
+            await supabase.from('invitations').update({ utilise: true }).eq('id', invitationData.id);
+
+            // 3. Essayer de connecter directement l'utilisateur
+            const res = await window.SupabaseAPI.loginUser(supabase, email);
+            
+            if (res && res.success) {
                 const userData = {
-                    email: user.email,
-                    role: user.role,
-                    name: user.nom,
+                    email: res.data.email,
+                    role: res.data.role,
+                    name: res.data.nom,
                     timestamp: new Date().toISOString()
                 };
-
                 localStorage.setItem('currentUser', JSON.stringify(userData));
+                window.notifier("Compte créé avec succès ! Bienvenue " + invitationData.nom + " !");
+                setTimeout(() => window.location.href = 'dashboard.html', 1500);
+            } else if (res && res.reason === 'ALREADY_LOGGED_IN') {
+                window.notifier(`Le compte est créé, mais l'accès est refusé : ${res.activeUser} est déjà connecté(e) en tant que ${invitationData.role}. Réessayez plus tard.`, 'error');
+                setTimeout(() => window.location.reload(), 3000);
+            } else {
+                window.notifier("Le compte a été créé, mais la connexion automatique a échoué. Veuillez vous connecter manuellement.", 'error');
+                setTimeout(() => window.location.reload(), 3000);
+            }
+        }
 
-                // Rediriger vers le dashboard
+        // Accès Rapide : remplir les champs automatiquement
+        function accesRapide(type) {
+            const emailField    = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+            const roleField     = document.getElementById('role');
+
+            if (type === 'medecin') {
+                emailField.value = 'dr.duval@refontiq.ci';
+                passwordField.value = 'password123';
+                roleField.value = 'medecin';
+            } else if (type === 'infirmiere') {
+                emailField.value = 'infirmiere@refontiq.ci';
+                passwordField.value = 'password123';
+                roleField.value = 'infirmiere';
+            } else if (type === 'reception') {
+                emailField.value = 'reception@refontiq.ci';
+                passwordField.value = 'password123';
+                roleField.value = 'receptionniste';
+            }
+
+            [emailField, passwordField, roleField].forEach(el => {
+                el.style.borderColor = 'var(--primary)';
+                el.style.background  = 'var(--primary-light)';
+                setTimeout(() => { el.style.borderColor = ''; el.style.background = ''; }, 600);
+            });
+            window.notifier("Champs remplis ! Cliquez sur Se connecter.");
+        }
+
+        // Connexion classique
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email    = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+            if (!supabase) {
+                window.notifier("Impossible de se connecter à la base de données.", 'error');
+                return;
+            }
+
+            // Bouton en mode chargement
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Connexion...';
+            submitBtn.disabled = true;
+
+            const res = await window.SupabaseAPI.loginUser(supabase, email);
+            
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+
+            if (res && res.success) {
+                const userData = {
+                    email: res.data.email,
+                    role: res.data.role,
+                    name: res.data.nom,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem('currentUser', JSON.stringify(userData));
                 window.location.href = 'dashboard.html';
             } else {
-                // Si l'email n'est pas dans la table 'users' de Supabase
-                window.notifier("Accès refusé : cet email n'est pas enregistré dans la base de données de la clinique.", 'error');
+                if (res && res.reason === 'ALREADY_LOGGED_IN') {
+                    // Message spécifique pour le blocage de session multiple
+                    const roleName = document.getElementById('role').options[document.getElementById('role').selectedIndex].text;
+                    window.notifier(`Accès refusé : ${res.activeUser} est déjà en service en tant que ${roleName}. Une seule personne autorisée à la fois.`, 'error', 10000);
+                } else {
+                    window.notifier("Accès refusé : email non enregistré dans la base de données.", 'error');
+                }
             }
         }
 
         // Vérifier si déjà connecté
         window.onload = function () {
-            const currentUser = localStorage.getItem('currentUser');
-            if (currentUser) {
-                window.location.href = 'dashboard.html';
-            }
+            if (localStorage.getItem('currentUser')) window.location.href = 'dashboard.html';
         };
     </script>
 </body>
 
-</html>
+</html>

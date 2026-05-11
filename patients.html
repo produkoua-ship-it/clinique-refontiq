@@ -37,21 +37,21 @@
             </div>
             <nav class="nav-menu">
 
-                <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
-                <a href="patients.html" class="nav-item active"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
-                <a href="consultations.html" class="nav-item"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
-                <a href="rendez-vous.html" class="nav-item"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
+                <a href="dashboard.html" class="nav-item" id="menu-dashboard"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
+                <a href="patients.html" class="nav-item active" id="menu-patients"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
+                <a href="consultations.html" class="nav-item" id="menu-consultations"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
+                <a href="rendez-vous.html" class="nav-item" id="menu-rendezvous"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
+                
+                <hr class="nav-separator" id="sep-finance">
+                
+                <a href="finance.html" class="nav-item" id="menu-finance"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
+                <a href="stocks.html" class="nav-item" id="menu-stocks"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
                 
                 <hr class="nav-separator">
                 
-                <a href="finance.html" class="nav-item"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
-                <a href="stocks.html" class="nav-item"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
-                
-                <hr class="nav-separator">
-                
-                <a href="messagerie.html" class="nav-item"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
-                <a href="alertes.html" class="nav-item"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
-                <a href="parametres.html" class="nav-item"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
+                <a href="messagerie.html" class="nav-item" id="menu-messagerie"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
+                <a href="alertes.html" class="nav-item" id="menu-alertes"><i class="fa-solid fa-bell glass-icon"></i> Alertes <span class="nav-badge">0</span></a>
+                <a href="parametres.html" class="nav-item" id="menu-parametres"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
             
             </nav>
         </aside>
@@ -104,6 +104,14 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    
+                    <!-- Contrôles de pagination -->
+                    <div id="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-top: 1px solid var(--border); background: var(--bg);">
+                        <div id="pagination-info" style="font-size: 0.85rem; color: var(--text-light);">Chargement...</div>
+                        <div id="pagination-buttons" style="display: flex; gap: 8px;">
+                            <!-- Boutons générés dynamiquement -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -179,13 +187,36 @@
             }
         }
 
-        async function chargerPatients() {
+        let currentPage = 1;
+        const itemsPerPage = 20;
+        let searchQuery = '';
+
+        async function chargerPatients(page = 1) {
+            currentPage = page;
             const supabase = await window.SupabaseAPI.initSupabase();
-            const { data, error } = await supabase.from('patients').select('*').order('nom', { ascending: true });
-            
             const tbody = document.getElementById('patient-table-body');
             const countText = document.getElementById('count-text');
+            const pagInfo = document.getElementById('pagination-info');
+            const pagBtns = document.getElementById('pagination-buttons');
+            
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="color:var(--primary);"></i> Chargement...</td></tr>`;
 
+            // Construction de la requête avec count exact
+            let query = supabase.from('patients').select('*', { count: 'exact' });
+            
+            // Recherche si définie
+            if (searchQuery) {
+                query = query.or(`nom.ilike.%${searchQuery}%,prenom.ilike.%${searchQuery}%,telephone.ilike.%${searchQuery}%`);
+            }
+
+            // Pagination logic (Supabase is 0-indexed for ranges)
+            const from = (page - 1) * itemsPerPage;
+            const to = from + itemsPerPage - 1;
+
+            const { data, count, error } = await query
+                .order('nom', { ascending: true })
+                .range(from, to);
+            
             if (error) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger);">Erreur : ${error.message}</td></tr>`;
                 return;
@@ -194,13 +225,16 @@
             if (!data || data.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Aucun patient trouvé.</td></tr>`;
                 countText.textContent = "0 patient enregistré";
+                pagInfo.textContent = "0 résultat";
+                pagBtns.innerHTML = '';
                 return;
             }
 
-            countText.textContent = `${data.length} patient${data.length > 1 ? 's' : ''} enregistré${data.length > 1 ? 's' : ''}`;
+            countText.textContent = `${count} patient${count > 1 ? 's' : ''} enregistré${count > 1 ? 's' : ''}`;
             
+            // Affichage des patients
             tbody.innerHTML = data.map(p => `
-                <tr onclick="window.location.href='dossier-patient.html?id=${p.id}'">
+                <tr onclick="window.location.href='dossier-patient.html?id=${p.id}'" style="cursor: pointer;">
                     <td>
                         <div style="display:flex; align-items:center; gap:12px;">
                             <div class="patient-avatar-table">${p.nom[0]}${p.prenom ? p.prenom[0] : ''}</div>
@@ -216,6 +250,20 @@
                     <td><span class="status-badge status-active">Dossier Actif</span></td>
                 </tr>
             `).join('');
+
+            // Affichage de la pagination
+            const totalPages = Math.ceil(count / itemsPerPage);
+            const actualEnd = Math.min(to + 1, count);
+            pagInfo.textContent = `Affichage ${from + 1} à ${actualEnd} sur ${count}`;
+
+            let btnHTML = '';
+            if (currentPage > 1) {
+                btnHTML += `<button class="btn" style="padding: 6px 12px;" onclick="chargerPatients(${currentPage - 1})"><i class="fa-solid fa-angle-left"></i> Précédent</button>`;
+            }
+            if (currentPage < totalPages) {
+                btnHTML += `<button class="btn btn-primary" style="padding: 6px 12px;" onclick="chargerPatients(${currentPage + 1})">Suivant <i class="fa-solid fa-angle-right"></i></button>`;
+            }
+            pagBtns.innerHTML = btnHTML;
         }
 
         async function handleNewPatient(e) {
@@ -257,13 +305,13 @@
             document.getElementById('view-new').style.display = s === 'new' ? 'block' : 'none';
         }
 
+        let searchTimeout;
         function filtrerPatients() {
-            const val = document.getElementById('search-patient').value.toLowerCase();
-            const rows = document.querySelectorAll('#patient-table-body tr');
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(val) ? '' : 'none';
-            });
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchQuery = document.getElementById('search-patient').value.trim();
+                chargerPatients(1); // Retour à la première page avec la nouvelle recherche
+            }, 300); // 300ms de délai pour éviter de spammer la base de données pendant la frappe
         }
 
         function toggleMobileSidebar() {

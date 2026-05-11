@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 
 <head>
@@ -16,6 +16,17 @@
         .alert-content { flex: 1; }
         .alert-title { font-weight: 700; margin-bottom: 4px; }
         .alert-desc { font-size: 0.85rem; color: var(--text-light); }
+        .nav-badge { 
+            background: var(--danger); 
+            color: white; 
+            font-size: 0.7rem; 
+            font-weight: 700; 
+            padding: 2px 8px; 
+            border-radius: 10px; 
+            margin-left: auto; 
+            display: none;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+        }
     </style>
 </head>
 
@@ -43,21 +54,21 @@
             </div>
             <nav class="nav-menu">
 
-                <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
-                <a href="patients.html" class="nav-item"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
-                <a href="consultations.html" class="nav-item"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
-                <a href="rendez-vous.html" class="nav-item"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
+                <a href="dashboard.html" class="nav-item" id="menu-dashboard"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
+                <a href="patients.html" class="nav-item" id="menu-patients"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
+                <a href="consultations.html" class="nav-item" id="menu-consultations"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
+                <a href="rendez-vous.html" class="nav-item" id="menu-rendezvous"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
+                
+                <hr class="nav-separator" id="sep-finance">
+                
+                <a href="finance.html" class="nav-item" id="menu-finance"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
+                <a href="stocks.html" class="nav-item" id="menu-stocks"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
                 
                 <hr class="nav-separator">
                 
-                <a href="finance.html" class="nav-item"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
-                <a href="stocks.html" class="nav-item"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
-                
-                <hr class="nav-separator">
-                
-                <a href="messagerie.html" class="nav-item"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
-                <a href="alertes.html" class="nav-item active"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
-                <a href="parametres.html" class="nav-item"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
+                <a href="messagerie.html" class="nav-item" id="menu-messagerie"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
+                <a href="alertes.html" class="nav-item active" id="menu-alertes"><i class="fa-solid fa-bell glass-icon"></i> Alertes <span class="nav-badge">0</span></a>
+                <a href="parametres.html" class="nav-item" id="menu-parametres"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
             
             </nav>
         </aside>
@@ -111,14 +122,23 @@
 
         async function chargerAlertes() {
             const supabase = await window.SupabaseAPI.initSupabase();
+            
+            // 1. Charger les stocks critiques
             const { data: stocks } = await supabase.from('stocks').select('*').lt('quantite', 10);
             
+            // 2. Charger les alertes générales non lues
+            const { data: generalAlerts } = await supabase
+                .from('alertes')
+                .select('*')
+                .eq('lu', false)
+                .order('created_at', { ascending: false });
+
             const list = document.getElementById('alert-list');
             list.innerHTML = '';
 
             let hasAlerts = false;
 
-            // 1. Alertes Stocks
+            // Affichage des alertes de stocks
             if (stocks && stocks.length > 0) {
                 hasAlerts = true;
                 stocks.forEach(s => {
@@ -129,7 +149,31 @@
                                 <div class="alert-title">Stock Critique : ${s.produit}</div>
                                 <div class="alert-desc">Il ne reste que <strong>${s.quantite}</strong> unités en stock. Seuil d'alerte : ${s.seuil_alerte || 10}.</div>
                             </div>
-                            <a href="stocks.html" class="btn" style="background: var(--bg); font-size: 0.8rem;">Gérer</a>
+                            <a href="stocks.html" class="btn" style="background: var(--bg); font-size: 0.8rem; color: var(--text);">Gérer</a>
+                        </div>
+                    `;
+                });
+            }
+
+            // Affichage des alertes générales
+            if (generalAlerts && generalAlerts.length > 0) {
+                hasAlerts = true;
+                generalAlerts.forEach(a => {
+                    const icon = a.type === 'finance' ? 'fa-coins' : 
+                                 a.type === 'medical' ? 'fa-stethoscope' : 
+                                 'fa-bell';
+                    const color = a.priorite === 'haute' ? 'var(--danger)' : 
+                                  a.priorite === 'moyenne' ? 'var(--warning)' : 
+                                  'var(--primary)';
+
+                    list.innerHTML += `
+                        <div class="alert-card" style="border-left-color: ${color}">
+                            <div class="alert-icon" style="color: ${color}; background: ${color}1a"><i class="fa-solid ${icon}"></i></div>
+                            <div class="alert-content">
+                                <div class="alert-title">${a.message}</div>
+                                <div class="alert-desc">${new Date(a.created_at).toLocaleString('fr-FR')} - Priorité : ${a.priorite}</div>
+                            </div>
+                            <button onclick="marquerLue('${a.id}')" class="btn" style="background: var(--bg); font-size: 0.8rem; color: var(--text);">Marquer lue</button>
                         </div>
                     `;
                 });
@@ -145,6 +189,22 @@
                 `;
             }
         }
+
+        async function marquerLue(id) {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { error } = await supabase
+                .from('alertes')
+                .update({ lu: true })
+                .eq('id', id);
+            
+            if (error) {
+                console.error('Erreur lors de la mise à jour:', error);
+                alert('Impossible de marquer l\'alerte comme lue.');
+            } else {
+                await chargerAlertes();
+            }
+        }
+
 
         function toggleMobileSidebar() {
             const s = document.querySelector('.sidebar');

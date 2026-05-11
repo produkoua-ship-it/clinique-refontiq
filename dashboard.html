@@ -11,9 +11,46 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <link href="assets/premium-style.css" rel="stylesheet">
+    <style>
+        /* Optimisation Mobile pour les nouveaux éléments */
+        @media (max-width: 992px) {
+            .intelligence-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+            .main-content-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+            .intelligence-grid .card { min-height: auto !important; }
+            #ai-suggestion { font-size: 1rem !important; }
+            .mobile-header { 
+                position: fixed !important; 
+                top: 0; 
+                left: 0;
+                right: 0;
+                width: 100%;
+                z-index: 2000; 
+                background: #0f172a !important; /* On force le fond sombre pour qu'il soit opaque */
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
+                padding: 12px 20px !important;
+            }
+            .main-content {
+                padding-top: 85px !important; 
+            }
+        }
+    </style>
 </head>
 
 <body>
+    <!-- Masquage immédiat des éléments réservés au médecin (évite le flash) -->
+    <script>
+        (function() {
+            try {
+                var u = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                if (u.role === 'receptionniste' || u.role === 'infirmiere') {
+                    var style = document.createElement('style');
+                    style.id = 'role-hide';
+                    style.textContent = '[onclick*="finance.html"], #rapport-journalier, #btn-rapport { display: none !important; }';
+                    document.head.appendChild(style);
+                }
+            } catch(e) {}
+        })();
+    </script>
     <div class="dashboard-container">
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
         <aside class="sidebar">
@@ -37,21 +74,21 @@
             </div>
             <nav class="nav-menu">
 
-                <a href="dashboard.html" class="nav-item active"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
-                <a href="patients.html" class="nav-item"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
-                <a href="consultations.html" class="nav-item"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
-                <a href="rendez-vous.html" class="nav-item"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
+                <a href="dashboard.html" class="nav-item active" id="menu-dashboard"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
+                <a href="patients.html" class="nav-item" id="menu-patients"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
+                <a href="consultations.html" class="nav-item" id="menu-consultations"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
+                <a href="rendez-vous.html" class="nav-item" id="menu-rendezvous"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
                 
-                <hr class="nav-separator">
+                <hr class="nav-separator" id="sep-1">
                 
-                <a href="finance.html" class="nav-item"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
-                <a href="stocks.html" class="nav-item"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
+                <a href="finance.html" class="nav-item" id="menu-finance"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
+                <a href="stocks.html" class="nav-item" id="menu-stocks"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
                 
-                <hr class="nav-separator">
+                <hr class="nav-separator" id="sep-2">
                 
-                <a href="messagerie.html" class="nav-item"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
-                <a href="alertes.html" class="nav-item"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
-                <a href="parametres.html" class="nav-item"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
+                <a href="messagerie.html" class="nav-item" id="menu-messagerie"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
+                <a href="alertes.html" class="nav-item" id="menu-alertes"><i class="fa-solid fa-bell glass-icon"></i> Alertes <span class="nav-badge">0</span></a>
+                <a href="parametres.html" class="nav-item" id="menu-parametres"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
             
             </nav>
         </aside>
@@ -70,11 +107,12 @@
 
             <div class="top-bar">
                 <div class="page-title">
-                    <h1>Tableau de bord</h1>
+                    <h1 id="dashboard-title">Tableau de bord</h1>
                     <p id="currentDateDisplay">Chargement...</p>
                 </div>
                 <div class="top-actions">
-                    <button class="btn btn-primary" onclick="window.location.href='consultations.html'"><i class="fa-solid fa-plus"></i> Nouvelle Consultation</button>
+                    <button class="btn" id="btn-rapport" style="display:none; background: linear-gradient(135deg, #0f172a, #1e293b); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.3);" onclick="document.getElementById('rapport-journalier').scrollIntoView({behavior:'smooth', block:'start'})"><i class="fa-solid fa-clipboard-list"></i> Rapport du jour</button>
+                    <button class="btn btn-primary" id="action-btn" onclick="window.location.href='consultations.html'"><i class="fa-solid fa-plus"></i> Nouvelle Consultation</button>
                     <button class="btn" style="background: var(--card); border: 1px solid var(--border);" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
             </div>
@@ -144,42 +182,189 @@
                 </div>
             </div>
 
-            <div class="content-grid">
-                <div class="card">
-                    <div class="card-header"><h3>Patients récents</h3><a href="patients.html" style="color:var(--primary); text-decoration:none; font-size:0.9rem;">Voir tout →</a></div>
-                    <div id="recent-patients">Chargement...</div>
+            <!-- SECTION INTELLIGENCE (Charts + Assistant) -->
+            <div class="intelligence-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <!-- Graphique d'activité -->
+                <div class="card" style="margin: 0; padding: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="font-family: 'Space Grotesk'; font-size: 1.1rem;"><i class="fa-solid fa-chart-line" style="margin-right: 10px; color: var(--primary);"></i>Activité de la semaine</h3>
+                        <div style="font-size: 0.75rem; color: var(--text-light); background: var(--bg); padding: 4px 10px; border-radius: 8px;">Patients / Jour</div>
+                    </div>
+                    <div style="height: 250px; width: 100%;">
+                        <canvas id="activityChart"></canvas>
+                    </div>
                 </div>
-                <div class="card">
-                    <div class="card-header"><h3>Alertes critiques</h3></div>
-                    <div id="critical-alerts">Chargement...</div>
+
+                <!-- Assistant Intelligent -->
+                <div class="card" style="margin: 0; padding: 24px; background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border: none; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                            <div style="width: 35px; height: 35px; border-radius: 10px; background: rgba(14, 165, 233, 0.2); color: #0ea5e9; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-brain"></i></div>
+                            <h3 style="font-family: 'Space Grotesk'; font-size: 1rem;">Assistant IA</h3>
+                        </div>
+                        <div id="ai-suggestion" style="font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; min-height: 80px;">
+                            Analyse des données en cours...
+                        </div>
+                    </div>
+                    <div style="padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase;">Mise à jour Live</span>
+                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 10px #22c55e;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content-grid" style="display: grid; grid-template-columns: 2fr 1.2fr; gap: 24px;">
+                <!-- Colonne Gauche -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <!-- Patients récents -->
+                    <div class="card" style="margin: 0;">
+                        <div class="card-header"><h3>Patients récents</h3><a href="patients.html" style="color:var(--primary); text-decoration:none; font-size:0.9rem;">Voir tout →</a></div>
+                        <div id="recent-patients">
+                            <p style="color: var(--text-light); padding: 16px 0;">Chargement...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Alertes critiques -->
+                    <div class="card" style="margin: 0;">
+                        <div class="card-header"><h3>Alertes critiques</h3></div>
+                        <div id="critical-alerts">Chargement...</div>
+                    </div>
+                </div>
+                
+                <!-- Mur de Notifications (Option 4) - Colonne Droite -->
+                <div class="card" style="margin: 0; display: flex; flex-direction: column;">
+                    <div class="card-header" style="border-bottom: 1px solid var(--border);">
+                        <h3><i class="fa-solid fa-bolt" style="margin-right: 8px; color: #fbbf24;"></i>Activité en direct</h3>
+                    </div>
+                    <div id="notification-wall" style="flex: 1; padding: 10px 0; max-height: 600px; overflow-y: auto;">
+                        <p style="color: var(--text-light); text-align: center; padding: 20px;">Aucune activité récente.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RAPPORT JOURNALIER (Médecin uniquement) -->
+            <div id="rapport-journalier" style="display: none; margin-top: 24px;">
+                <div style="background: var(--card); border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden;">
+                    <!-- En-tête du rapport -->
+                    <div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding: 28px 32px; color: white;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                            <div style="display: flex; align-items: center; gap: 16px;">
+                                <div style="width: 50px; height: 50px; background: rgba(14,165,233,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fa-solid fa-clipboard-list" style="font-size: 1.4rem; color: #38bdf8;"></i>
+                                </div>
+                                <div>
+                                    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; margin: 0;">Rapport Journalier</h2>
+                                    <p id="rapport-date" style="margin: 4px 0 0; font-size: 0.85rem; opacity: 0.7;">Chargement...</p>
+                                </div>
+                            </div>
+                            <div style="font-size: 0.75rem; background: rgba(56,189,248,0.15); padding: 6px 14px; border-radius: 8px; color: #7dd3fc;"><i class="fa-solid fa-robot" style="margin-right: 6px;"></i>Généré automatiquement</div>
+                        </div>
+                    </div>
+
+                    <!-- Corps du rapport -->
+                    <div style="padding: 28px 32px;">
+                        <!-- Section Présence Équipe -->
+                        <div style="margin-bottom: 28px;">
+                            <h4 style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;"><span style="width: 32px; height: 32px; background: rgba(16,185,129,0.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;"><i class="fa-solid fa-users" style="color: var(--secondary); font-size: 0.85rem;"></i></span> Présence Équipe</h4>
+                            <div id="rapport-presence" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">Chargement...</div>
+                        </div>
+
+                        <hr style="border: none; border-top: 1px solid var(--border); margin: 20px 0;">
+
+                        <!-- Section RDV du jour -->
+                        <div style="margin-bottom: 28px;">
+                            <h4 style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;"><span style="width: 32px; height: 32px; background: rgba(245,158,11,0.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;"><i class="fa-solid fa-calendar-check" style="color: var(--accent); font-size: 0.85rem;"></i></span> Rendez-vous du jour <span id="rapport-rdv-count" style="font-size: 0.75rem; background: var(--primary-light); color: var(--primary); padding: 2px 10px; border-radius: 20px; font-weight: 700;">0</span></h4>
+                            <div id="rapport-rdv">Chargement...</div>
+                        </div>
+
+                        <hr style="border: none; border-top: 1px solid var(--border); margin: 20px 0;">
+
+                        <!-- Section Patients enregistrés -->
+                        <div style="margin-bottom: 28px;">
+                            <h4 style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;"><span style="width: 32px; height: 32px; background: rgba(14,165,233,0.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;"><i class="fa-solid fa-user-plus" style="color: var(--primary); font-size: 0.85rem;"></i></span> Nouveaux patients aujourd'hui <span id="rapport-patients-count" style="font-size: 0.75rem; background: rgba(16,185,129,0.1); color: var(--secondary); padding: 2px 10px; border-radius: 20px; font-weight: 700;">0</span></h4>
+                            <div id="rapport-patients">Chargement...</div>
+                        </div>
+
+                        <hr style="border: none; border-top: 1px solid var(--border); margin: 20px 0;">
+
+                        <!-- Section Stocks en alerte -->
+                        <div>
+                            <h4 style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;"><span style="width: 32px; height: 32px; background: rgba(239,68,68,0.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;"><i class="fa-solid fa-box-open" style="color: var(--danger); font-size: 0.85rem;"></i></span> Stocks en alerte</h4>
+                            <div id="rapport-stocks">Chargement...</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="supabase-config.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            initUser();
+            // adapterMenuParRole() est appelé automatiquement par supabase-config.js
             const isDark = localStorage.getItem('theme') === 'dark';
             document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-            
+
             await chargerStatsCompletes();
             await chargerProchainPatient();
             await chargerPatientsRecents();
             await chargerAlertes();
+            
+            // Nouvelles fonctionnalités intelligentes
+            await initActivityChart();
+            await updateAISuggestions();
+            await updateNotificationWall();
+
+            // Adapter le bouton d'action et le titre selon le rôle
+            adapterDashboardParRole();
+
+            // Rapport journalier (médecin uniquement)
+            const userJson = localStorage.getItem('currentUser');
+            if (userJson) {
+                const u = JSON.parse(userJson);
+                if (u.role === 'medecin') await chargerRapportJournalier();
+            }
         });
 
-        function initUser() {
-            const u = localStorage.getItem('currentUser');
-            if (u) {
-                const user = JSON.parse(u);
-                document.getElementById('side-name').textContent = user.name || 'Utilisateur';
-                document.getElementById('side-role').textContent = user.role;
-                document.getElementById('side-avatar').textContent = (user.name || 'U').substring(0, 2).toUpperCase();
+        function adapterDashboardParRole() {
+            const userJson = localStorage.getItem('currentUser');
+            if (!userJson) return;
+            const user = JSON.parse(userJson);
+            const role = user.role;
+
+            const titleEl = document.getElementById('dashboard-title');
+            const btn = document.getElementById('action-btn');
+            const statFinanceCard = document.querySelector('[onclick*="finance.html"]');
+
+            if (role === 'receptionniste') {
+                if (titleEl) titleEl.textContent = 'Gestion des Admissions';
+                if (btn) {
+                    btn.innerHTML = '<i class="fa-solid fa-plus"></i> Nouveau Patient';
+                    btn.onclick = () => window.location.href = 'patients.html';
+                }
+                if (statFinanceCard) statFinanceCard.style.display = 'none';
+
+            } else if (role === 'infirmiere') {
+                if (titleEl) titleEl.textContent = 'Suivi des Soins et Inventaire';
+                if (btn) {
+                    btn.innerHTML = '<i class="fa-solid fa-boxes-stacked"></i> Gérer les Stocks';
+                    btn.onclick = () => window.location.href = 'stocks.html';
+                }
+                if (statFinanceCard) statFinanceCard.style.display = 'none';
+
+            } else {
+                if (titleEl) titleEl.textContent = 'Tableau de Bord Médical';
             }
+
+            // Afficher la date
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date().toLocaleDateString('fr-FR', options);
+            const dateEl = document.getElementById('currentDateDisplay');
+            if (dateEl) dateEl.textContent = today.charAt(0).toUpperCase() + today.slice(1);
         }
+
 
         async function chargerStatsCompletes() {
             const supabase = await window.SupabaseAPI.initSupabase();
@@ -330,6 +515,290 @@
             const overlay = document.getElementById('sidebarOverlay');
             if (sidebar) sidebar.classList.toggle('active');
             if (overlay) overlay.classList.toggle('active');
+        }
+
+        // ==========================================
+        //  RAPPORT JOURNALIER AUTOMATIQUE
+        // ==========================================
+        async function chargerRapportJournalier() {
+            const rapport = document.getElementById('rapport-journalier');
+            rapport.style.display = 'block';
+            const btnRapport = document.getElementById('btn-rapport');
+            if (btnRapport) btnRapport.style.display = 'inline-flex';
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+
+            // Date du rapport
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('rapport-date').textContent = now.toLocaleDateString('fr-FR', options);
+
+            // 1. PRÉSENCE ÉQUIPE
+            const { data: equipe } = await supabase
+                .from('users')
+                .select('nom, email, role, est_connecte, derniere_activite')
+                .in('role', ['infirmiere', 'receptionniste'])
+                .order('derniere_activite', { ascending: false });
+
+            const presenceDiv = document.getElementById('rapport-presence');
+            if (equipe && equipe.length > 0) {
+                const roleLabels = { 'infirmiere': 'Infirmière', 'receptionniste': 'Réceptionniste' };
+                presenceDiv.innerHTML = equipe.map(u => {
+                    const lastSeen = u.derniere_activite ? new Date(u.derniere_activite) : null;
+                    const isToday = lastSeen && lastSeen.toISOString().split('T')[0] === today;
+                    const timeStr = lastSeen ? lastSeen.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                    const statusColor = u.est_connecte ? '#22c55e' : (isToday ? '#f59e0b' : '#94a3b8');
+                    const statusText = u.est_connecte ? 'En ligne' : (isToday ? 'Vue aujourd\'hui' : 'Hors ligne');
+                    return `
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--bg); border-radius: 12px; border: 1px solid var(--border);">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">${(u.nom || u.email).substring(0, 2).toUpperCase()}</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; font-size: 0.9rem;">${u.nom || u.email}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-light);">${roleLabels[u.role] || u.role}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: ${statusColor}; font-weight: 600;"><span style="width: 8px; height: 8px; border-radius: 50%; background: ${statusColor};"></span>${statusText}</div>
+                                <div style="font-size: 0.7rem; color: var(--text-light); margin-top: 2px;">${isToday ? 'Dernière activité : ' + timeStr : (lastSeen ? lastSeen.toLocaleDateString('fr-FR') : 'Jamais')}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                presenceDiv.innerHTML = '<p style="color: var(--text-light); font-size: 0.85rem;">Aucun personnel enregistré.</p>';
+            }
+
+            // 2. RENDEZ-VOUS DU JOUR
+            const { data: rdvs } = await supabase
+                .from('rendez_vous')
+                .select('*, patients(nom, prenom)')
+                .eq('date', today)
+                .order('heure', { ascending: true });
+
+            const rdvDiv = document.getElementById('rapport-rdv');
+            document.getElementById('rapport-rdv-count').textContent = rdvs ? rdvs.length : 0;
+            if (rdvs && rdvs.length > 0) {
+                rdvDiv.innerHTML = `
+                    <div style="display: grid; gap: 8px;">
+                        ${rdvs.map(r => `
+                            <div style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: var(--bg); border-radius: 10px; border: 1px solid var(--border);">
+                                <div style="min-width: 55px; font-weight: 700; color: var(--primary); font-family: 'Space Grotesk'; font-size: 1.05rem;">${r.heure.substring(0, 5)}</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 0.9rem;">${r.patients?.nom || 'Patient'} ${r.patients?.prenom || ''}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-light);">${r.motif || 'Consultation'}</div>
+                                </div>
+                                <span style="font-size: 0.7rem; padding: 3px 10px; border-radius: 20px; background: ${r.statut === 'prevu' ? 'rgba(14,165,233,0.1)' : 'rgba(16,185,129,0.1)'}; color: ${r.statut === 'prevu' ? 'var(--primary)' : 'var(--secondary)'}; font-weight: 600;">${r.statut || 'prévu'}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                rdvDiv.innerHTML = '<p style="color: var(--text-light); font-size: 0.85rem;"><i class="fa-solid fa-calendar-xmark" style="margin-right: 6px;"></i>Aucun rendez-vous programmé aujourd\'hui.</p>';
+            }
+
+            // 3. NOUVEAUX PATIENTS
+            const { data: newPatients } = await supabase
+                .from('patients')
+                .select('nom, prenom, telephone, created_at')
+                .gte('created_at', today + 'T00:00:00')
+                .order('created_at', { ascending: false });
+
+            const patientsDiv = document.getElementById('rapport-patients');
+            document.getElementById('rapport-patients-count').textContent = newPatients ? newPatients.length : 0;
+            if (newPatients && newPatients.length > 0) {
+                patientsDiv.innerHTML = `
+                    <div style="display: grid; gap: 8px;">
+                        ${newPatients.map(p => {
+                            const t = new Date(p.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                            return `
+                            <div style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: var(--bg); border-radius: 10px; border: 1px solid var(--border);">
+                                <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(16,185,129,0.1); color: var(--secondary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;">${p.nom[0]}</div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 0.9rem;">${p.nom} ${p.prenom || ''}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-light);">${p.telephone || 'Pas de téléphone'}</div>
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-light);">Inscrit à ${t}</div>
+                            </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else {
+                patientsDiv.innerHTML = '<p style="color: var(--text-light); font-size: 0.85rem;"><i class="fa-solid fa-user-check" style="margin-right: 6px;"></i>Aucun nouveau patient enregistré aujourd\'hui.</p>';
+            }
+
+            // 4. STOCKS EN ALERTE
+            const { data: alertStocks } = await supabase
+                .from('stocks')
+                .select('nom, categorie, quantite, seuil_alerte')
+                .lt('quantite', 10)
+                .order('quantite', { ascending: true });
+
+            const stocksDiv = document.getElementById('rapport-stocks');
+            if (alertStocks && alertStocks.length > 0) {
+                stocksDiv.innerHTML = `
+                    <div style="display: grid; gap: 8px;">
+                        ${alertStocks.map(s => `
+                            <div style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: rgba(239,68,68,0.04); border-radius: 10px; border: 1px solid rgba(239,68,68,0.15);">
+                                <i class="fa-solid fa-triangle-exclamation" style="color: var(--danger); font-size: 1rem;"></i>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 0.9rem;">${s.nom}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-light);">${s.categorie || 'Non classé'}</div>
+                                </div>
+                                <div style="font-weight: 700; color: var(--danger); font-size: 1.1rem; font-family: 'Space Grotesk';">${s.quantite}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                stocksDiv.innerHTML = '<p style="color: var(--secondary); font-size: 0.85rem;"><i class="fa-solid fa-check-circle" style="margin-right: 6px;"></i>Tous les stocks sont à un niveau correct.</p>';
+            }
+        }
+
+        // ==========================================
+        //  FONCTIONS D'INTELLIGENCE & CHARTS
+        // ==========================================
+        async function initActivityChart() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const now = new Date();
+            const last7Days = [];
+            const labels = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(now.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                last7Days.push(dateStr);
+                labels.push(d.toLocaleDateString('fr-FR', { weekday: 'short' }));
+            }
+
+            const { data } = await supabase
+                .from('consultations')
+                .select('date')
+                .gte('date', last7Days[0])
+                .lte('date', last7Days[6]);
+
+            const counts = last7Days.map(day => {
+                return data ? data.filter(c => c.date === day).length : 0;
+            });
+
+            const ctx = document.getElementById('activityChart').getContext('2d');
+            
+            if (window.myActivityChart) window.myActivityChart.destroy();
+
+            window.myActivityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Consultations',
+                        data: counts,
+                        borderColor: '#2a9d8f',
+                        backgroundColor: 'rgba(42, 157, 143, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#2a9d8f',
+                        pointBorderColor: '#fff',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { stepSize: 1, precision: 0 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        async function updateAISuggestions() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const aiDiv = document.getElementById('ai-suggestion');
+            const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const role = user.role || 'medecin';
+            
+            // Données de base pour l'analyse
+            const { data: stocks } = await supabase.from('stocks').select('nom, quantite, stock_minimum');
+            const critical = stocks ? stocks.filter(s => s.quantite <= (s.stock_minimum || 5)) : [];
+            
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            const { count: rdvTomorrow } = await supabase
+                .from('rendez_vous')
+                .select('*', { count: 'exact', head: true })
+                .eq('date', tomorrowStr);
+
+            let suggestion = "";
+
+            if (role === 'infirmiere') {
+                if (critical.length > 0) {
+                    suggestion = `Il y a <strong>${critical.length} produits</strong> à réapprovisionner d'urgence pour vos soins de demain.`;
+                } else {
+                    suggestion = "Tous vos kits de soins sont prêts. Pensez à vérifier les dates de péremption dans le catalogue.";
+                }
+            } 
+            else if (role === 'receptionniste') {
+                if (rdvTomorrow > 0) {
+                    suggestion = `Vous avez <strong>${rdvTomorrow} rendez-vous</strong> prévus demain. Pensez à confirmer les présences par téléphone.`;
+                } else {
+                    suggestion = "Journée calme demain. C'est le moment idéal pour classer les nouveaux dossiers patients.";
+                }
+            } 
+            else { // Médecin par défaut
+                if (critical.length > 0) {
+                    suggestion = `Analyse : <strong>${critical.length} ruptures de stock</strong> détectées. Cela pourrait freiner l'activité demain.`;
+                } else if (rdvTomorrow > 5) {
+                    suggestion = `Prédiction : Forte affluence demain (<strong>${rdvTomorrow} patients</strong>). Prévoyez un renfort si possible.`;
+                } else {
+                    suggestion = "La clinique fonctionne de manière optimale. Aucun point de vigilance majeur détecté.";
+                }
+            }
+
+            aiDiv.innerHTML = `<i class="fa-solid fa-quote-left" style="margin-right: 8px; opacity: 0.3;"></i>${suggestion}`;
+        }
+
+        async function updateNotificationWall() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const wall = document.getElementById('notification-wall');
+            
+            const { data: mouvements } = await supabase
+                .from('stock_mouvements')
+                .select(`type_mouvement, quantite, motif, utilisateur, created_at, stocks(nom)`)
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            if (!mouvements || mouvements.length === 0) {
+                wall.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 20px;">Aucune activité récente.</p>';
+                return;
+            }
+
+            wall.innerHTML = mouvements.map(m => {
+                const time = new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                const isSoin = m.motif && m.motif.includes('Soin :');
+                const icon = isSoin ? 'fa-syringe' : (m.type_mouvement === 'entree' ? 'fa-box' : 'fa-minus-circle');
+                const color = isSoin ? '#8b5cf6' : (m.type_mouvement === 'entree' ? '#22c55e' : '#f43f5e');
+                
+                return `
+                    <div style="display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.85rem;">
+                        <div style="width: 32px; height: 32px; border-radius: 8px; background: ${color}15; color: ${color}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="fa-solid ${icon}"></i>
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.motif || 'Mouvement de stock'}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 2px;">
+                                <span style="font-weight: 600; color: ${color};">${m.type_mouvement === 'entree' ? '+' : '-'}${m.quantite} ${m.stocks?.nom || ''}</span> 
+                                • Par ${m.utilisateur || 'Système'}
+                            </div>
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--text-light); white-space: nowrap;">${time}</div>
+                    </div>
+                `;
+            }).join('');
         }
     </script>
 </body>

@@ -1191,6 +1191,16 @@
           <label for="tel">Téléphone *</label>
           <input type="tel" id="tel" name="tel" placeholder="+225 XX XX XX XX" required>
         </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="rdv-date">Date souhaitée *</label>
+            <input type="date" id="rdv-date" name="date" required>
+          </div>
+          <div class="form-group">
+            <label for="rdv-time">Heure souhaitée *</label>
+            <input type="time" id="rdv-time" name="heure" required>
+          </div>
+        </div>
         <div class="form-group">
           <label for="specialite">Spécialité souhaitée *</label>
           <select id="specialite" name="specialite" required>
@@ -1270,6 +1280,8 @@
 <!-- Toast -->
 <div id="toast">✅ Demande envoyée ! Nous vous contacterons bientôt.</div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script>
   /* ── Navbar scroll behavior ── */
   const navbar = document.getElementById('navbar');
@@ -1304,31 +1316,40 @@
   document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
   /* ── Form submit ── */
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const form = document.getElementById('rdvForm');
     const prenom = document.getElementById('prenom').value.trim();
     const nom = document.getElementById('nom').value.trim();
     const tel = document.getElementById('tel').value.trim();
+    const date = document.getElementById('rdv-date').value;
+    const time = document.getElementById('rdv-time').value;
     const spec = document.getElementById('specialite').value;
+    const message = document.getElementById('message').value.trim();
 
-    if (!prenom || !nom || !tel || !spec) {
+    if (!prenom || !nom || !tel || !date || !time || !spec) {
       const fields = [
         [prenom, 'prenom'], [nom, 'nom'],
-        [tel, 'tel'], [spec, 'specialite']
+        [tel, 'tel'], [date, 'rdv-date'],
+        [time, 'rdv-time'], [spec, 'specialite']
       ];
       fields.forEach(([val, id]) => {
         const el = document.getElementById(id);
-        el.style.borderColor = val ? '#e2e8f0' : 'var(--accent)';
-        el.style.boxShadow = val ? '' : '0 0 0 3px rgba(230,57,70,0.1)';
+        if(el) {
+            el.style.borderColor = val ? '#e2e8f0' : 'var(--accent)';
+            el.style.boxShadow = val ? '' : '0 0 0 3px rgba(230,57,70,0.1)';
+        }
       });
       return;
     }
 
     // Reset borders
-    ['prenom','nom','tel','specialite'].forEach(id => {
-      document.getElementById(id).style.borderColor = '#e2e8f0';
-      document.getElementById(id).style.boxShadow = '';
+    ['prenom','nom','tel','rdv-date','rdv-time','specialite'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) {
+          el.style.borderColor = '#e2e8f0';
+          el.style.boxShadow = '';
+      }
     });
 
     const btn = form.querySelector('.btn-submit');
@@ -1336,13 +1357,94 @@
     btn.disabled = true;
     btn.style.opacity = '0.7';
 
-    setTimeout(() => {
-      form.reset();
-      btn.textContent = 'Envoyer la demande →';
-      btn.disabled = false;
-      btn.style.opacity = '1';
-      showToast();
-    }, 1200);
+    try {
+        const supabase = await window.SupabaseAPI.initSupabase();
+        if (!supabase) throw new Error("Connexion à la base de données impossible.");
+
+        console.log("📡 Début de la prise de RDV...");
+
+        // 1. Chercher si le patient existe par téléphone
+        let patientId = null;
+        const { data: patients, error: pErr } = await supabase
+            .from('patients')
+            .select('id')
+            .eq('telephone', tel)
+            .limit(1);
+
+        console.log("🔍 Recherche patient:", { patients, pErr });
+
+        if (pErr) {
+            console.warn("⚠️ Erreur recherche patient (ignorée, on va créer):", pErr.message);
+        }
+
+        if (patients && patients.length > 0) {
+            patientId = patients[0].id;
+            console.log("✅ Patient existant trouvé, ID:", patientId);
+        } else {
+            // 2. Créer le patient s'il n'existe pas
+            console.log("👤 Création du nouveau patient...");
+            const { data: newP, error: iErr } = await supabase
+                .from('patients')
+                .insert([{ nom: nom, prenom: prenom, telephone: tel }])
+                .select('id');
+            
+            console.log("👤 Résultat création patient:", { newP, iErr });
+
+            if (iErr) {
+                console.error("❌ Erreur création patient:", iErr);
+                throw new Error("Impossible de créer le dossier patient: " + iErr.message);
+            }
+
+            if (newP && newP.length > 0) {
+                patientId = newP[0].id;
+            } else {
+                // Fallback: si .select() ne retourne rien, re-chercher par téléphone
+                console.log("🔄 Fallback: recherche du patient juste créé...");
+                const { data: retry } = await supabase
+                    .from('patients')
+                    .select('id')
+                    .eq('telephone', tel)
+                    .limit(1);
+                if (retry && retry.length > 0) {
+                    patientId = retry[0].id;
+                }
+            }
+        }
+
+        if (!patientId) throw new Error("Impossible de déterminer le patient.");
+        console.log("✅ Patient ID final:", patientId);
+
+        // 3. Insérer la demande de rendez-vous
+        const rdv = {
+            patient_id: patientId,
+            date: date,
+            heure: time,
+            motif: spec,
+            notes: message || null,
+            statut: 'en_attente'
+        };
+
+        console.log("📅 Insertion du RDV:", rdv);
+        const { data: rdvData, error: rErr } = await supabase.from('rendez_vous').insert([rdv]).select();
+        if (rErr) {
+            console.error("❌ Erreur insertion RDV:", rErr);
+            throw new Error("Impossible d'enregistrer le rendez-vous: " + rErr.message);
+        }
+
+        console.log("✅ RDV enregistré avec succès!", rdvData);
+
+        form.reset();
+        btn.textContent = 'Envoyer la demande →';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        showToast();
+    } catch (err) {
+        console.error("❌ Erreur complète:", err);
+        alert("Erreur: " + err.message);
+        btn.textContent = 'Envoyer la demande →';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    }
   }
 
   function showToast() {
