@@ -218,6 +218,23 @@
     }
     .btn-hero-outline:hover { background: rgba(255,255,255,0.12); border-color: white; }
 
+    .btn-hero-dashboard {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: #0d3a78; color: white !important;
+      padding: 15px 30px; border-radius: 50px;
+      font-weight: 700; font-size: 0.95rem;
+      text-decoration: none; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      transition: all 0.25s ease;
+    }
+    .btn-hero-dashboard:hover { 
+      transform: translateY(-3px); 
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4); 
+      background: #081f45;
+      border-color: rgba(255,255,255,0.4);
+    }
+
     .hero-stats {
       display: flex; gap: 0; flex-wrap: wrap;
       opacity: 0; animation: fadeUp 0.7s 0.7s ease forwards;
@@ -829,6 +846,9 @@
       <a href="#services" class="btn-hero-outline">
         Découvrir nos services →
       </a>
+      <a href="dashboard.html" class="btn-hero-dashboard">
+        <span>👨‍⚕️</span> MON ESPACE DASHBOARD
+      </a>
     </div>
     <div class="hero-stats">
       <div class="stat">
@@ -1437,6 +1457,7 @@
         btn.textContent = 'Envoyer la demande →';
         btn.disabled = false;
         btn.style.opacity = '1';
+
         showToast();
     } catch (err) {
         console.error("❌ Erreur complète:", err);
