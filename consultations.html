@@ -9,64 +9,27 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <link href="assets/premium-style.css" rel="stylesheet">
+    <link href="assets/ai-assistant.css" rel="stylesheet">
+    
+    <script src="assets/role-manager.js"></script>
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #ordonnance-print, #ordonnance-print * { visibility: visible; }
+            #ordonnance-print { position: fixed; top: 0; left: 0; width: 100%; padding: 40px; }
+        }
+    </style>
 </head>
 
 <body>
     <div class="dashboard-container">
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
-                    <div class="logo-text"><h1>Clinique Refontiq</h1><p>Espace Médical</p></div>
-                </div>
-
-                <div class="sidebar-search">
-                    <div class="search-wrapper">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Rechercher un patient...">
-                    </div>
-                </div>
-
-                <div class="user-info">
-                    <div class="user-avatar" id="side-avatar">DR</div>
-                    <div class="user-details"><h3 id="side-name">Dr. Duval <span class="online-indicator" style="margin-left: 5px;"></span></h3><p id="side-role">Médecin</p></div>
-                </div>
-            </div>
-            <nav class="nav-menu">
-
-                <a href="dashboard.html" class="nav-item" id="menu-dashboard"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
-                <a href="patients.html" class="nav-item" id="menu-patients"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
-                <a href="consultations.html" class="nav-item active" id="menu-consultations"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
-                <a href="rendez-vous.html" class="nav-item" id="menu-rendezvous"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
-                
-                <hr class="nav-separator" id="sep-finance">
-                
-                <a href="finance.html" class="nav-item" id="menu-finance"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
-                <a href="stocks.html" class="nav-item" id="menu-stocks"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
-                
-                <hr class="nav-separator">
-                
-                <a href="messagerie.html" class="nav-item" id="menu-messagerie"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
-                <a href="alertes.html" class="nav-item" id="menu-alertes"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
-                <a href="parametres.html" class="nav-item" id="menu-parametres"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
-            
-            </nav>
-        </aside>
+        <div id="sidebar-container"></div>
 
         <main class="main-content">
             <div class="focus-mode-backdrop"></div>
             
-            <header class="mobile-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <button class="header-btn" onclick="toggleMobileSidebar()" style="background:none; border:none; font-size:1.5rem; color:white; cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
-                    <div style="width: 35px; height: 35px; background: rgba(255,255,255,0.2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
-                        <i class="fa-solid fa-hospital"></i>
-                    </div>
-                    <div style="font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">Clinique Refontiq</div>
-                </div>
-                <div style="font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 8px; text-transform: uppercase;">Consultations</div>
-            </header>
+            
 
 
             <div class="top-bar">
@@ -78,6 +41,8 @@
                         <h1>Nouvelle Consultation</h1>
                         <p>Enregistrement d'une nouvelle visite</p>
                     </div>
+                </div>
+                <div class="top-actions">
                 </div>
             </div>
 
@@ -101,9 +66,9 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Choisir un Patient *</label>
-                            <select id="c-patient" required onchange="onPatientChange()">
-                                <option value="">Sélectionner un patient...</option>
-                            </select>
+                            <input list="patients-list" id="c-patient-search" class="form-control" placeholder="Taper le nom du patient..." required onchange="onPatientSearchChange()">
+                            <datalist id="patients-list"></datalist>
+                            <input type="hidden" id="c-patient">
                         </div>
                         <div class="form-group">
                             <label>Type de Consultation</label>
@@ -132,6 +97,19 @@
                         <textarea id="c-trait" placeholder="Médicaments prescrits, posologie, recommandations..."></textarea>
                     </div>
 
+                    <!-- Catalogue des Interventions -->
+                    <div style="margin-top: 32px; padding: 24px; background: var(--bg); border-radius: 16px; border: 1px solid var(--border);">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="fa-solid fa-file-invoice-dollar" style="color: var(--primary); margin-right: 8px;"></i> Catalogue des Interventions</span>
+                            <span id="total-price" style="background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem;">0 FCFA</span>
+                        </h3>
+                        <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 20px;">Sélectionnez les actes réalisés pour générer automatiquement la facturation.</p>
+                        
+                        <div id="actes-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;">
+                            <p style="grid-column: 1 / -1; text-align: center; color: var(--text-light);">Chargement du catalogue...</p>
+                        </div>
+                    </div>
+
                     <div style="display: flex; justify-content: flex-end; gap: 16px; margin-top: 24px;">
                         <button type="button" class="btn" style="background: var(--bg); color: var(--text-light);" onclick="goBack()">Annuler</button>
                         <button type="submit" class="btn btn-primary" id="btn-save"><i class="fa-solid fa-save" style="margin-right: 6px;"></i>Enregistrer la consultation</button>
@@ -148,6 +126,8 @@
                     <p style="color: var(--text-light); padding: 16px 0;">Chargement...</p>
                 </div>
             </div>
+            <!-- Zone Print Ordonnance (cachée jusqu'à la sauvegarde) -->
+            <div id="ordonnance-print" style="display:none;"></div>
         </main>
     </div>
 
@@ -157,8 +137,8 @@
         let allPatients = [];
 
         document.addEventListener('DOMContentLoaded', async () => {
-            initUser();
             await chargerPatients();
+            await chargerActes();
             await chargerDernieresConsultations();
             
             // Si on vient d'un dossier patient, pré-sélectionner
@@ -170,15 +150,7 @@
             }
         });
 
-        function initUser() {
-            const u = localStorage.getItem('currentUser');
-            if (u) {
-                const user = JSON.parse(u);
-                document.getElementById('side-name').textContent = user.name || 'Utilisateur';
-                document.getElementById('side-role').textContent = user.role;
-                document.getElementById('side-avatar').textContent = (user.name || 'U').substring(0, 2).toUpperCase();
-            }
-        }
+
 
         function goBack() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -194,11 +166,20 @@
 
         async function chargerPatients() {
             const supabase = await window.SupabaseAPI.initSupabase();
-            const { data } = await supabase.from('patients').select('id, nom, prenom').order('nom');
-            const select = document.getElementById('c-patient');
-            if (data) {
-                allPatients = data;
-                data.forEach(p => select.innerHTML += `<option value="${p.id}">${p.nom} ${p.prenom || ''}</option>`);
+            const { data: pts } = await supabase.from('patients').select('id, nom, prenom').order('nom');
+            window.allPatients = pts || [];
+            const list = document.getElementById('patients-list');
+            if (pts) {
+                list.innerHTML = pts.map(p => `<option value="${p.nom} ${p.prenom}">${p.id}</option>`).join('');
+            }
+        }
+
+        function onPatientSearchChange() {
+            const val = document.getElementById('c-patient-search').value;
+            const p = window.allPatients.find(x => `${x.nom} ${x.prenom}` === val);
+            if (p) {
+                document.getElementById('c-patient').value = p.id;
+                onPatientChange();
             }
         }
 
@@ -220,7 +201,7 @@
             const supabase = await window.SupabaseAPI.initSupabase();
             const { data } = await supabase
                 .from('consultations')
-                .select('*, patients(nom, prenom)')
+                .select('*, patients(nom, prenom, telephone)')
                 .order('created_at', { ascending: false })
                 .limit(5);
 
@@ -234,6 +215,11 @@
                 const patientName = c.patients ? `${c.patients.nom} ${c.patients.prenom || ''}` : 'Patient inconnu';
                 const dateStr = new Date(c.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
                 const heureStr = c.heure ? c.heure.substring(0, 5) : '';
+                
+                const statusClass = c.status === 'reception' ? 'status-planned' : 'status-ongoing';
+                const statusText = c.status === 'reception' ? 'Attente Paiement' : 'Vers Infirmerie';
+                const waMsg = encodeURIComponent(`Bonjour ${c.patients?.nom || ''}, votre dossier est prêt. Veuillez passer à la caisse pour régler vos frais.`);
+                
                 return `
                     <div style="display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s;" onmouseover="this.style.paddingLeft='8px'" onmouseout="this.style.paddingLeft='0'">
                         <div style="width: 42px; height: 42px; border-radius: 12px; background: ${c.status === 'termine' ? 'rgba(42, 157, 143, 0.1)' : 'rgba(245, 158, 11, 0.1)'}; color: ${c.status === 'termine' ? 'var(--secondary)' : 'var(--accent)'}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -242,6 +228,9 @@
                         <div style="flex: 1; min-width: 0;">
                             <div style="font-weight: 600; font-size: 0.9rem;">${patientName}</div>
                             <div style="font-size: 0.8rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.motif || 'Consultation'} — ${c.notes || '--'}</div>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <a href="https://wa.me/${c.patients?.telephone?.replace(/\s/g,'')}?text=${waMsg}" target="_blank" class="btn" style="padding:6px; font-size:0.7rem; background:#25d366; color:white;"><i class="fa-brands fa-whatsapp"></i></a>
                         </div>
                         <div style="text-align: right; flex-shrink: 0;">
                             <div style="font-size: 0.8rem; font-weight: 600; color: var(--primary);">${dateStr}</div>
@@ -252,16 +241,62 @@
             }).join('');
         }
 
+        let allActes = [];
+        let selectedActes = [];
+
+        async function chargerActes() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data } = await supabase.from('actes_medicaux').select('*').order('nom');
+            const container = document.getElementById('actes-list');
+            
+            if (data) {
+                allActes = data;
+                container.innerHTML = data.map(a => `
+                    <label class="acte-item" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--card); border-radius: 12px; border: 1.5px solid var(--border); cursor: pointer; transition: 0.2s;">
+                        <input type="checkbox" value="${a.id}" onchange="toggleActe('${a.id}')" style="width: 18px; height: 18px; cursor: pointer;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 0.85rem; font-weight: 600; line-height: 1.2;">${a.nom}</div>
+                            <div style="font-size: 0.75rem; color: var(--primary); font-weight: 700;">${a.prix.toLocaleString()} FCFA</div>
+                        </div>
+                    </label>
+                `).join('');
+            }
+        }
+
+        function toggleActe(id) {
+            const index = selectedActes.indexOf(id);
+            if (index > -1) selectedActes.splice(index, 1);
+            else selectedActes.push(id);
+            updateTotal();
+        }
+
+        function updateTotal() {
+            let total = 0;
+            selectedActes.forEach(id => {
+                const acte = allActes.find(a => a.id == id);
+                if (acte) total += acte.prix;
+            });
+            document.getElementById('total-price').textContent = total.toLocaleString() + ' FCFA';
+        }
+
         async function handleConsultation(e) {
             e.preventDefault();
+            const patientId = document.getElementById('c-patient').value;
+            if (!patientId) {
+                window.notifier("Veuillez sélectionner un patient", 'error');
+                return;
+            }
+
             const btn = document.getElementById('btn-save');
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin" style="margin-right: 6px;"></i>Enregistrement...';
 
             const supabase = await window.SupabaseAPI.initSupabase();
             const now = new Date();
+            
+            // 1. Enregistrer la consultation
             const consult = {
-                patient_id: document.getElementById('c-patient').value,
+                patient_id: patientId,
                 motif: document.getElementById('c-type').value,
                 symptomes: document.getElementById('c-symptomes').value || null,
                 notes: document.getElementById('c-diag').value,
@@ -271,26 +306,107 @@
                 status: 'termine'
             };
 
-            const { error } = await supabase.from('consultations').insert([consult]);
+            const { data: cData, error: cError } = await supabase.from('consultations').insert([consult]).select().single();
             
-            if (error) {
-                window.notifier("Erreur : " + error.message, 'error');
+            if (cError) {
+                window.notifier("Erreur : " + cError.message, 'error');
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-save" style="margin-right: 6px;"></i>Enregistrer la consultation';
-            } else {
-                window.notifier("Consultation enregistrée avec succès !");
-                setTimeout(() => {
-                    window.location.href = `dossier-patient.html?id=${consult.patient_id}`;
-                }, 1500);
+                return;
+            }
+
+            // 2. Facturation Automatique
+            let totalFacture = 0;
+            const detailsActes = [];
+            selectedActes.forEach(id => {
+                const acte = allActes.find(a => a.id == id);
+                if (acte) {
+                    totalFacture += acte.prix;
+                    detailsActes.push(acte.nom);
+                }
+            });
+
+            if (totalFacture > 0) {
+                const paiement = {
+                    patient_id: patientId,
+                    montant: totalFacture,
+                    type: 'Acte Médical',
+                    motif: `Consultation + ${detailsActes.join(', ')}`,
+                    statut: 'En attente'
+                };
+                await supabase.from('paiements').insert([paiement]);
+            }
+
+            // Sauvegarder les données pour l'impression
+            window._lastConsultData = {
+                patient: allPatients.find(p => p.id === patientId),
+                diag: consult.notes,
+                traitement: consult.historique,
+                actes: detailsActes,
+                total: totalFacture,
+                date: new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
+            };
+
+            window.notifier("Consultation enregistrée !");
+
+            // Afficher le bouton imprimer au lieu de rediriger immédiatement
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-save" style="margin-right: 6px;"></i>Enregistrer la consultation';
+            
+            // Bouton impression
+            const actionZone = document.querySelector('.top-actions');
+            if (actionZone) {
+                actionZone.innerHTML = `
+                    <button class="btn" style="background:#10b981; color:white; font-weight:700;" onclick="imprimerOrdonnance()">
+                        <i class="fa-solid fa-print"></i> Imprimer l'Ordonnance
+                    </button>
+                    <button class="btn btn-primary" onclick="window.location.href='dashboard.html'">
+                        <i class="fa-solid fa-arrow-right"></i> Patient suivant
+                    </button>
+                `;
             }
         }
 
-        function toggleMobileSidebar() {
-            const s = document.querySelector('.sidebar');
-            const o = document.getElementById('sidebarOverlay');
-            s.classList.toggle('active');
-            o.classList.toggle('active');
+        function imprimerOrdonnance() {
+            const d = window._lastConsultData;
+            if (!d) return;
+            const nom = d.patient ? `${d.patient.nom} ${d.patient.prenom || ''}` : 'Patient';
+            document.getElementById('ordonnance-print').innerHTML = `
+                <div style="font-family: Georgia, serif; max-width: 700px; margin: 0 auto;">
+                    <div style="display:flex; justify-content:space-between; border-bottom:2px solid #0f172a; padding-bottom:16px; margin-bottom:24px;">
+                        <div>
+                            <div style="font-size:1.5rem; font-weight:700;">Clinique Médicale Eden</div>
+                            <div style="color:#64748b; font-size:0.9rem;">Clinique Refontiq — Espace Médical</div>
+                        </div>
+                        <div style="text-align:right; font-size:0.85rem; color:#64748b;">
+                            <div><strong>Date :</strong> ${d.date}</div>
+                            <div><strong>N° Ordonnance :</strong> ${Date.now().toString().slice(-6)}</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <strong>Patient :</strong> ${nom}
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <div style="font-weight:700; text-transform:uppercase; font-size:0.8rem; color:#64748b; margin-bottom:6px;">Diagnostic</div>
+                        <div style="padding:12px; background:#f8fafc; border-left:3px solid #0f172a;">${d.diag || 'Voir dossier'}</div>
+                    </div>
+                    <div style="margin-bottom:24px;">
+                        <div style="font-weight:700; text-transform:uppercase; font-size:0.8rem; color:#64748b; margin-bottom:6px;">Traitement prescrit</div>
+                        <div style="padding:12px; background:#f8fafc; border-left:3px solid #10b981; white-space:pre-wrap;">${d.traitement || 'Aucun traitement prescrit'}</div>
+                    </div>
+                    ${d.actes.length > 0 ? `<div style="margin-bottom:24px;"><div style="font-weight:700; font-size:0.8rem; color:#64748b; margin-bottom:6px;">ACTES RÉALISÉS</div><ul>${d.actes.map(a => `<li>${a}</li>`).join('')}</ul><strong>Total : ${d.total.toLocaleString()} FCFA</strong></div>` : ''}
+                    <div style="margin-top:60px; display:flex; justify-content:flex-end;">
+                        <div style="text-align:center;">
+                            <div style="width:150px; border-top:1px solid #0f172a; padding-top:8px; font-size:0.85rem;">Signature & Cachet</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('ordonnance-print').style.display = 'block';
+            window.print();
         }
+
+
     </script>
 </body>
 </html>

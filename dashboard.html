@@ -11,99 +11,183 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <link href="assets/premium-style.css" rel="stylesheet">
+    <link href="assets/ai-assistant.css" rel="stylesheet">
+    
+    <script src="assets/role-manager.js"></script>
     <style>
+        /* Optimisation Tablette et Mobile */
+        @media (max-width: 1024px) {
+            .intelligence-grid, .stats-grid {
+                grid-template-columns: 1fr !important;
+                gap: 16px !important;
+            }
+        }
         /* Optimisation Mobile pour les nouveaux éléments */
         @media (max-width: 992px) {
             .intelligence-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
             .main-content-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
             .intelligence-grid .card { min-height: auto !important; }
-            #ai-suggestion { font-size: 1rem !important; }
-            .mobile-header { 
-                position: fixed !important; 
-                top: 0; 
-                left: 0;
-                right: 0;
-                width: 100%;
-                z-index: 2000; 
-                background: #0f172a !important; /* On force le fond sombre pour qu'il soit opaque */
-                box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
-                padding: 12px 20px !important;
-            }
-            .main-content {
-                padding-top: 85px !important; 
-            }
+        }
+        @keyframes flashAlert {
+            0% { background-color: rgba(239, 68, 68, 0.1); }
+            50% { background-color: rgba(239, 68, 68, 0.3); }
+            100% { background-color: rgba(239, 68, 68, 0.1); }
+        }
+        .waiting-alert {
+            animation: flashAlert 1.5s infinite;
+            border-left: 4px solid #ef4444 !important;
+        }
+        @keyframes pulseGreen {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+        .status-ready-pulse {
+            width: 12px; height: 12px; background: #22c55e; border-radius: 50%;
+            display: inline-block; animation: pulseGreen 2s infinite; margin-right: 8px;
+        }
+
+        /* Widget Période de Date */
+        .date-filter-container {
+            position: relative;
+            display: inline-block;
+        }
+        .btn-date-filter {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 9px 16px;
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .btn-date-filter i {
+            color: var(--primary);
+            font-size: 1rem;
+        }
+        .btn-date-filter:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .date-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 280px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+            z-index: 2100;
+            padding: 20px;
+            display: none;
+            backdrop-filter: blur(20px);
+            animation: fadeInScale 0.2s ease-out;
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .date-dropdown.active {
+            display: block;
+        }
+        .date-presets {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .preset-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+        .preset-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .preset-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        .custom-range {
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+        }
+        .custom-range p {
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .date-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .date-input-group label {
+            display: block;
+            font-size: 0.65rem;
+            color: var(--text-light);
+            margin-bottom: 4px;
+            margin-left: 4px;
+        }
+        .date-inputs input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: var(--text);
+            font-family: inherit;
+        }
+        .btn-apply-filter {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), #00b4d8);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 119, 182, 0.3);
+        }
+        .btn-apply-filter:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 119, 182, 0.4);
         }
     </style>
 </head>
 
 <body>
-    <!-- Masquage immédiat des éléments réservés au médecin (évite le flash) -->
-    <script>
-        (function() {
-            try {
-                var u = JSON.parse(localStorage.getItem('currentUser') || '{}');
-                if (u.role === 'receptionniste' || u.role === 'infirmiere') {
-                    var style = document.createElement('style');
-                    style.id = 'role-hide';
-                    style.textContent = '[onclick*="finance.html"], #rapport-journalier, #btn-rapport { display: none !important; }';
-                    document.head.appendChild(style);
-                }
-            } catch(e) {}
-        })();
-    </script>
+
     <div class="dashboard-container">
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
-                    <div class="logo-text"><h1>Clinique Refontiq</h1><p>Espace Médical</p></div>
-                </div>
-                
-                <div class="sidebar-search">
-                    <div class="search-wrapper">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Rechercher un patient...">
-                    </div>
-                </div>
-
-                <div class="user-info">
-                    <div class="user-avatar" id="side-avatar">DR</div>
-                    <div class="user-details"><h3 id="side-name">Dr. Duval <span class="online-indicator" style="margin-left: 5px;"></span></h3><p id="side-role">Médecin</p></div>
-                </div>
-            </div>
-            <nav class="nav-menu">
-
-                <a href="dashboard.html" class="nav-item active" id="menu-dashboard"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
-                <a href="patients.html" class="nav-item" id="menu-patients"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
-                <a href="consultations.html" class="nav-item" id="menu-consultations"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
-                <a href="rendez-vous.html" class="nav-item" id="menu-rendezvous"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
-                
-                <hr class="nav-separator" id="sep-1">
-                
-                <a href="finance.html" class="nav-item" id="menu-finance"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
-                <a href="stocks.html" class="nav-item" id="menu-stocks"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
-                
-                <hr class="nav-separator" id="sep-2">
-                
-                <a href="messagerie.html" class="nav-item" id="menu-messagerie"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
-                <a href="alertes.html" class="nav-item" id="menu-alertes"><i class="fa-solid fa-bell glass-icon"></i> Alertes <span class="nav-badge">0</span></a>
-                <a href="parametres.html" class="nav-item" id="menu-parametres"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
-            
-            </nav>
-        </aside>
+        <div id="sidebar-container"></div>
 
         <main class="main-content">
-            <header class="mobile-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <button class="header-btn" onclick="toggleMobileSidebar()" style="background:none; border:none; font-size:1.5rem; color:white; cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
-                    <div style="width: 35px; height: 35px; background: rgba(255,255,255,0.2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
-                        <i class="fa-solid fa-hospital"></i>
-                    </div>
-                    <div style="font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">Clinique Refontiq</div>
-                </div>
-                <div style="font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 8px; text-transform: uppercase;">Dashboard</div>
-            </header>
+            
 
             <div class="top-bar">
                 <div class="page-title">
@@ -111,13 +195,191 @@
                     <p id="currentDateDisplay">Chargement...</p>
                 </div>
                 <div class="top-actions">
+                    <div class="date-filter-container">
+                        <button class="btn-date-filter" onclick="toggleDateFilter()" id="dateFilterBtn">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            <span id="selected-period">Aujourd'hui</span>
+                            <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; opacity: 0.5;"></i>
+                        </button>
+                        <div class="date-dropdown" id="dateFilterDropdown">
+                            <div class="date-presets">
+                                <button class="preset-btn" onclick="selectPreset('today', 'Aujourd\'hui')">Aujourd'hui</button>
+                                <button class="preset-btn" onclick="selectPreset('yesterday', 'Hier')">Hier</button>
+                                <button class="preset-btn" onclick="selectPreset('7days', '7 Jours')">7 Jours</button>
+                                <button class="preset-btn" onclick="selectPreset('30days', '30 Jours')">30 Jours</button>
+                                <button class="preset-btn" onclick="selectPreset('thisMonth', 'Ce mois')">Ce mois</button>
+                                <button class="preset-btn" onclick="selectPreset('lastMonth', 'Mois dernier')">Mois dernier</button>
+                            </div>
+                            <div class="custom-range">
+                                <p>Personnalisé</p>
+                                <div class="date-inputs">
+                                    <div class="date-input-group">
+                                        <label>Du</label>
+                                        <input type="date" id="filter-start-date">
+                                    </div>
+                                    <div class="date-input-group">
+                                        <label>Au</label>
+                                        <input type="date" id="filter-end-date">
+                                    </div>
+                                </div>
+                                <button class="btn-apply-filter" onclick="applyCustomFilter()">Appliquer</button>
+                            </div>
+                        </div>
+                <div class="top-actions" style="display: flex; gap: 12px; align-items: center;">
+                    <div id="realtime-status" style="display: flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
+                        <span class="pulse-dot"></span> Flux Temps Réel Actif
+                    </div>
                     <button class="btn" id="btn-rapport" style="display:none; background: linear-gradient(135deg, #0f172a, #1e293b); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.3);" onclick="document.getElementById('rapport-journalier').scrollIntoView({behavior:'smooth', block:'start'})"><i class="fa-solid fa-clipboard-list"></i> Rapport du jour</button>
                     <button class="btn btn-primary" id="action-btn" onclick="window.location.href='consultations.html'"><i class="fa-solid fa-plus"></i> Nouvelle Consultation</button>
-                    <button class="btn" style="background: var(--card); border: 1px solid var(--border);" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div> <!-- Fin de top-bar -->
+
+            <!-- VUE RÉCEPTIONNISTE -->
+            <div id="receptionist-dashboard" style="display: none;">
+                <!-- Barre d'actions rapides -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px;">
+                    <button onclick="window.location.href='patients.html?action=new'" class="card" style="padding: 24px; background: var(--primary); color: white; border: none; cursor: pointer; text-align: center; border-radius: 20px;">
+                        <i class="fa-solid fa-user-plus" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <div style="font-weight: 700; font-family: 'Space Grotesk';">Nouveau Patient</div>
+                    </button>
+                    <button onclick="window.location.href='consultations.html'" class="card" style="padding: 24px; background: #10b981; color: white; border: none; cursor: pointer; text-align: center; border-radius: 20px;">
+                        <i class="fa-solid fa-file-invoice" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <div style="font-weight: 700; font-family: 'Space Grotesk';">Enregistrer Consultation</div>
+                    </button>
+                    <button onclick="window.location.href='rendez-vous.html'" class="card" style="padding: 24px; background: #f59e0b; color: white; border: none; cursor: pointer; text-align: center; border-radius: 20px;">
+                        <i class="fa-solid fa-calendar-plus" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <div style="font-weight: 700; font-family: 'Space Grotesk';">Prendre RDV</div>
+                    </button>
+                </div>
+
+                <div class="intelligence-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+                    <div class="card" style="margin: 0; padding: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <h2 style="font-family: 'Space Grotesk'; font-size: 1.2rem; margin: 0;"><i class="fa-solid fa-list-ul" style="margin-right: 10px; color: var(--primary);"></i>Liste d'attente du jour</h2>
+                            <div class="search-box" style="width: 250px;">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" id="waitlist-search" placeholder="Rechercher..." onkeyup="filterWaitlist()">
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table style="width: 100%;">
+                                <thead><tr><th>Patient</th><th>Acte</th><th>Statut</th><th>Action</th></tr></thead>
+                                <tbody id="waitlist-body-recep"><tr><td colspan="4" style="text-align: center; padding: 40px;">Chargement...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <!-- Assistant Intelligent (Réception) -->
+                        <div class="card ai-card" id="ai-card-reception" style="margin: 0; padding: 24px; background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border: none; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px; transition: 0.4s;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                                    <div class="ai-icon-bg" style="width: 35px; height: 35px; border-radius: 10px; background: rgba(14, 165, 233, 0.2); color: #0ea5e9; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-brain"></i></div>
+                                    <h3 style="font-family: 'Space Grotesk'; font-size: 1rem;">Assistant IA</h3>
+                                </div>
+                                <div class="ai-suggestion-box" style="font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; min-height: 80px;">
+                                    Analyse du flux patient...
+                                </div>
+                            </div>
+                            <div style="padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                                <span class="ai-priority-label" style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase;">Flux Temps Réel</span>
+                                <div class="ai-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 10px #22c55e;"></div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin: 0; padding: 24px; border-left: 4px solid #10b981;">
+                            <h3 style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 16px;"><i class="fa-solid fa-money-bill-wave" style="margin-right: 10px; color: #10b981;"></i>Caisse Directe</h3>
+                            <div id="caisse-summary" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                        </div>
+                        <div class="card" style="margin: 0; padding: 24px; background: #1e293b; color: white;">
+                            <h3 style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 16px;"><i class="fa-solid fa-comments" style="margin-right: 10px;"></i>Notes au Médecin</h3>
+                            <textarea id="note-to-doc" placeholder="Ex: Patient pressé..." style="width:100%; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:10px; color:white; padding:12px; margin-bottom:12px; height:80px;"></textarea>
+                            <button class="btn btn-primary" onclick="sendNoteToDoc()" style="width:100%; font-weight:700;">Envoyer Note</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="stats-grid">
+            <!-- VUE INFIRMIÈRE -->
+            <div id="nurse-dashboard" style="display: none;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px;">
+                    <button onclick="window.location.href='vitals-tablet.html'" class="card" style="padding: 24px; background: #3b82f6; color: white; border: none; cursor: pointer; text-align: center; border-radius: 20px;">
+                        <i class="fa-solid fa-heart-pulse" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <div style="font-weight: 700; font-family: 'Space Grotesk';">Prendre Constantes</div>
+                    </button>
+                    <button onclick="window.location.href='stocks.html'" class="card" style="padding: 24px; background: #8b5cf6; color: white; border: none; cursor: pointer; text-align: center; border-radius: 20px;">
+                        <i class="fa-solid fa-pills" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <div style="font-weight: 700; font-family: 'Space Grotesk';">Inventaire / Pharmacie</div>
+                    </button>
+                    <button onclick="window.location.href='patients.html'" class="card" style="padding: 24px; background: #64748b; color: white; border: none; cursor: pointer; text-align: center; border-radius: 20px;">
+                        <i class="fa-solid fa-history" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <div style="font-weight: 700; font-family: 'Space Grotesk';">Historique Soins</div>
+                    </button>
+                </div>
+
+                <div class="intelligence-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+                    <div class="card" style="margin: 0; padding: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <h2 style="font-family: 'Space Grotesk'; font-size: 1.2rem; margin: 0;"><i class="fa-solid fa-stethoscope" style="margin-right: 10px; color: #3b82f6;"></i>Patients à préparer</h2>
+                            <span class="nav-badge" id="nurse-waitlist-count" style="background: #3b82f6;">0</span>
+                        </div>
+                        <div class="table-container">
+                            <table style="width: 100%;">
+                                <thead><tr><th>Patient</th><th>Motif</th><th>Priorité</th><th>Action</th></tr></thead>
+                                <tbody id="nurse-waitlist-body"><tr><td colspan="4" style="text-align: center; padding: 40px;">Aucun patient...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <!-- Assistant Intelligent (Infirmière) -->
+                        <div class="card ai-card" id="ai-card-nurse" style="margin: 0; padding: 24px; background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px; transition: 0.4s;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                                    <div class="ai-icon-bg" style="width: 35px; height: 35px; border-radius: 10px; background: rgba(139, 92, 246, 0.2); color: #a78bfa; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-brain"></i></div>
+                                    <h3 style="font-family: 'Space Grotesk'; font-size: 1rem;">Assistant IA</h3>
+                                </div>
+                                <div class="ai-suggestion-box" style="font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; min-height: 80px;">
+                                    Surveillance clinique en cours...
+                                </div>
+                            </div>
+                            <div style="padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                                <span class="ai-priority-label" style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase;">Vigie Médicale</span>
+                                <div class="ai-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 10px #22c55e;"></div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin: 0; padding: 24px; border-left: 4px solid #ef4444;">
+                            <h3 style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 16px;"><i class="fa-solid fa-triangle-exclamation" style="margin-right: 10px; color: #ef4444;"></i>Alertes Stock</h3>
+                            <div id="stock-alerts-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+                            <button onclick="window.location.href='stocks.html'" class="btn" style="width: 100%; margin-top: 15px; font-size: 0.8rem; background: var(--bg);">Signaler Rupture</button>
+                        </div>
+                        <div class="card" style="margin: 0; padding: 24px; background: linear-gradient(135deg, #0f172a, #1e293b); color: white;">
+                            <h3 style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 16px;"><i class="fa-solid fa-paper-plane" style="margin-right: 10px;"></i>Note au Docteur</h3>
+                            <textarea id="nurse-note" placeholder="Observations cliniques..." style="width:100%; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:10px; color:white; padding:12px; height:80px; margin-bottom:12px;"></textarea>
+                            <button class="btn btn-primary" id="btn-envoyer-doc" onclick="sendNurseNote()" style="width:100%; font-weight:700;">Envoyer au Docteur</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VUE MÉDICALE -->
+            <div id="medical-dashboard" style="display: none;">
+                <!-- Patients Prêts (Temps Réel) -->
+                <div class="card" style="margin-bottom: 24px; border-left: 4px solid #10b981;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h2 style="font-family: 'Space Grotesk'; font-size: 1.1rem; margin: 0; color: #10b981;"><i class="fa-solid fa-check-double" style="margin-right: 10px;"></i>Patients Prêts (Post-Infirmerie)</h2>
+                        <span id="realtime-ready-badge" class="nav-badge" style="background: #10b981; display: none;">NOUVEAU</span>
+                    </div>
+                    <div class="table-container">
+                        <table style="width: 100%;">
+                            <thead><tr><th>Patient</th><th>Motif</th><th>Action</th></tr></thead>
+                            <tbody id="medical-waitlist-body">
+                                <tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--text-light);">Chargement du flux temps réel...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
                 <div class="stat-card" onclick="window.location.href='patients.html'">
                     <div class="stat-header">
                         <div class="stat-icon" style="background: rgba(14, 165, 233, 0.1); color: var(--primary);"><i class="fa-solid fa-user-injured"></i></div>
@@ -149,6 +411,14 @@
                     </div>
                     <div class="stat-value" id="val-revenus" style="color: #7c3aed;">0 FCFA</div>
                     <div class="stat-label">Performance financière</div>
+                </div>
+                <div class="stat-card" onclick="window.location.href='hospitalisation.html'">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;"><i class="fa-solid fa-bed"></i></div>
+                        <div class="stat-trend" style="color: var(--text-light);"><i class="fa-solid fa-clock"></i> Observation</div>
+                    </div>
+                    <div class="stat-value" id="val-lits">0 / 20</div>
+                    <div class="stat-label">Lits Occupés</div>
                 </div>
             </div>
 
@@ -182,33 +452,64 @@
                 </div>
             </div>
 
+            <!-- File d'attente Médicale (Doctor View) -->
+            <div class="card" style="margin: 24px 0; padding: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h3 style="font-family: 'Space Grotesk'; margin: 0;"><i class="fa-solid fa-users-viewfinder" style="color: var(--primary); margin-right: 10px;"></i>File d'Attente Consultations</h3>
+                    <div style="display: flex; gap: 15px; font-size: 0.75rem;">
+                        <span>🟠 Accueil</span>
+                        <span>🔵 Infirmerie</span>
+                        <span>✅ Prêt</span>
+                    </div>
+                </div>
+                <div id="doctor-waitlist" style="display: flex; flex-direction: column; gap: 12px;">
+                    <p style="text-align: center; color: var(--text-light); padding: 20px;">Chargement de la file d'attente...</p>
+                </div>
+            </div>
+
             <!-- SECTION INTELLIGENCE (Charts + Assistant) -->
-            <div class="intelligence-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px;">
+            <div class="intelligence-grid" style="display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 24px; margin-bottom: 24px;">
                 <!-- Graphique d'activité -->
                 <div class="card" style="margin: 0; padding: 24px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3 style="font-family: 'Space Grotesk'; font-size: 1.1rem;"><i class="fa-solid fa-chart-line" style="margin-right: 10px; color: var(--primary);"></i>Activité de la semaine</h3>
-                        <div style="font-size: 0.75rem; color: var(--text-light); background: var(--bg); padding: 4px 10px; border-radius: 8px;">Patients / Jour</div>
+                        <h3 style="font-family: 'Space Grotesk'; font-size: 1.1rem;"><i class="fa-solid fa-chart-line" style="margin-right: 10px; color: var(--primary);"></i>Activité</h3>
+                        <div style="font-size: 0.7rem; color: var(--text-light); background: var(--bg); padding: 4px 10px; border-radius: 8px;">Consultations</div>
                     </div>
-                    <div style="height: 250px; width: 100%;">
+                    <div style="height: 180px; width: 100%;">
                         <canvas id="activityChart"></canvas>
                     </div>
                 </div>
 
+                <!-- Tendance Clinique (Nouveau) -->
+                <div id="vitals-trend-card" class="card" style="margin: 0; padding: 24px; border: 1px solid var(--border);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="font-family: 'Space Grotesk'; font-size: 1rem;"><i class="fa-solid fa-heart-pulse" style="margin-right: 10px; color: #ef4444;"></i>Tendance Santé</h3>
+                        <span id="vt-patient-name" style="font-size: 0.75rem; color: var(--text-light); font-weight: 600;">--</span>
+                    </div>
+                    <div style="height: 150px; width: 100%; position: relative;">
+                        <canvas id="vitalsTrendChart"></canvas>
+                        <div id="vitals-empty" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.8); font-size: 0.8rem; color: var(--text-light); text-align: center; display: none;">Aucune donnée clinique</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 0.75rem; color: var(--text-light);">
+                        <span><i class="fa-solid fa-circle" style="color: #ef4444; font-size: 0.5rem; margin-right: 4px;"></i> Temp.</span>
+                        <span><i class="fa-solid fa-circle" style="color: #3b82f6; font-size: 0.5rem; margin-right: 4px;"></i> Tension</span>
+                    </div>
+                </div>
+
                 <!-- Assistant Intelligent -->
-                <div class="card" style="margin: 0; padding: 24px; background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border: none; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px;">
+                <div class="card ai-card" id="ai-card-medical" style="margin: 0; padding: 24px; background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border: none; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px; transition: 0.4s;">
                     <div>
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-                            <div style="width: 35px; height: 35px; border-radius: 10px; background: rgba(14, 165, 233, 0.2); color: #0ea5e9; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-brain"></i></div>
+                            <div class="ai-icon-bg" style="width: 35px; height: 35px; border-radius: 10px; background: rgba(14, 165, 233, 0.2); color: #0ea5e9; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-brain"></i></div>
                             <h3 style="font-family: 'Space Grotesk'; font-size: 1rem;">Assistant IA</h3>
                         </div>
-                        <div id="ai-suggestion" style="font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; min-height: 80px;">
+                        <div class="ai-suggestion-box" style="font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; min-height: 80px;">
                             Analyse des données en cours...
                         </div>
                     </div>
                     <div style="padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase;">Mise à jour Live</span>
-                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 10px #22c55e;"></div>
+                        <span class="ai-priority-label" style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase;">Mise à jour Live</span>
+                        <div class="ai-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 10px #22c55e;"></div>
                     </div>
                 </div>
             </div>
@@ -295,6 +596,7 @@
                     </div>
                 </div>
             </div>
+            </div> <!-- Fin de medical-dashboard wrap -->
         </main>
     </div>
 
@@ -302,97 +604,252 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="supabase-config.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            // adapterMenuParRole() est appelé automatiquement par supabase-config.js
-            const isDark = localStorage.getItem('theme') === 'dark';
-            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        // Global variables for date filtering
+        let currentStartDate = new Date().toISOString().split('T')[0];
+        let currentEndDate = new Date().toISOString().split('T')[0];
 
-            await chargerStatsCompletes();
-            await chargerProchainPatient();
-            await chargerPatientsRecents();
-            await chargerAlertes();
-            
-            // Nouvelles fonctionnalités intelligentes
-            await initActivityChart();
-            await updateAISuggestions();
-            await updateNotificationWall();
+        function toggleDateFilter() {
+            const dropdown = document.getElementById('dateFilterDropdown');
+            dropdown.classList.toggle('active');
+        }
 
-            // Adapter le bouton d'action et le titre selon le rôle
-            adapterDashboardParRole();
-
-            // Rapport journalier (médecin uniquement)
-            const userJson = localStorage.getItem('currentUser');
-            if (userJson) {
-                const u = JSON.parse(userJson);
-                if (u.role === 'medecin') await chargerRapportJournalier();
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const container = document.querySelector('.date-filter-container');
+            const dropdown = document.getElementById('dateFilterDropdown');
+            if (container && !container.contains(e.target)) {
+                dropdown.classList.remove('active');
             }
         });
 
-        function adapterDashboardParRole() {
-            const userJson = localStorage.getItem('currentUser');
-            if (!userJson) return;
-            const user = JSON.parse(userJson);
-            const role = user.role;
+        function selectPreset(preset, label) {
+            const now = new Date();
+            let start, end;
+            
+            // Reset active state
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === label) btn.classList.add('active');
+            });
 
-            const titleEl = document.getElementById('dashboard-title');
-            const btn = document.getElementById('action-btn');
-            const statFinanceCard = document.querySelector('[onclick*="finance.html"]');
-
-            if (role === 'receptionniste') {
-                if (titleEl) titleEl.textContent = 'Gestion des Admissions';
-                if (btn) {
-                    btn.innerHTML = '<i class="fa-solid fa-plus"></i> Nouveau Patient';
-                    btn.onclick = () => window.location.href = 'patients.html';
-                }
-                if (statFinanceCard) statFinanceCard.style.display = 'none';
-
-            } else if (role === 'infirmiere') {
-                if (titleEl) titleEl.textContent = 'Suivi des Soins et Inventaire';
-                if (btn) {
-                    btn.innerHTML = '<i class="fa-solid fa-boxes-stacked"></i> Gérer les Stocks';
-                    btn.onclick = () => window.location.href = 'stocks.html';
-                }
-                if (statFinanceCard) statFinanceCard.style.display = 'none';
-
-            } else {
-                if (titleEl) titleEl.textContent = 'Tableau de Bord Médical';
+            switch(preset) {
+                case 'today':
+                    start = end = now.toISOString().split('T')[0];
+                    break;
+                case 'yesterday':
+                    const yesterday = new Date(now);
+                    yesterday.setDate(now.getDate() - 1);
+                    start = end = yesterday.toISOString().split('T')[0];
+                    break;
+                case '7days':
+                    const d7 = new Date(now);
+                    d7.setDate(now.getDate() - 7);
+                    start = d7.toISOString().split('T')[0];
+                    end = now.toISOString().split('T')[0];
+                    break;
+                case '30days':
+                    const d30 = new Date(now);
+                    d30.setDate(now.getDate() - 30);
+                    start = d30.toISOString().split('T')[0];
+                    end = now.toISOString().split('T')[0];
+                    break;
+                case 'thisMonth':
+                    start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+                    end = now.toISOString().split('T')[0];
+                    break;
+                case 'lastMonth':
+                    const firstOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    const lastOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                    start = firstOfLastMonth.toISOString().split('T')[0];
+                    end = lastOfLastMonth.toISOString().split('T')[0];
+                    break;
             }
 
-            // Afficher la date
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const today = new Date().toLocaleDateString('fr-FR', options);
-            const dateEl = document.getElementById('currentDateDisplay');
-            if (dateEl) dateEl.textContent = today.charAt(0).toUpperCase() + today.slice(1);
+            currentStartDate = start;
+            currentEndDate = end;
+            document.getElementById('selected-period').textContent = label;
+            document.getElementById('dateFilterDropdown').classList.remove('active');
+            refreshDashboard();
+        }
+
+        function applyCustomFilter() {
+            const start = document.getElementById('filter-start-date').value;
+            const end = document.getElementById('filter-end-date').value;
+            
+            if (!start || !end) {
+                alert("Veuillez sélectionner une date de début et de fin.");
+                return;
+            }
+
+            currentStartDate = start;
+            currentEndDate = end;
+            
+            const startStr = new Date(start).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+            const endStr = new Date(end).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+            
+            document.getElementById('selected-period').textContent = `${startStr} - ${endStr}`;
+            document.getElementById('dateFilterDropdown').classList.remove('active');
+            
+            // Highlight custom if needed or just remove presets active state
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+            
+            refreshDashboard();
+        }
+
+        async function refreshDashboard() {
+            console.log(`🔄 Rafraîchissement du dashboard pour la période: ${currentStartDate} au ${currentEndDate}`);
+            
+            // Reload stats with dates
+            chargerStatsCompletes(currentStartDate, currentEndDate).catch(err => console.error("❌ Erreur Stats:", err));
+            
+            // Optionally reload other widgets that depend on date
+            // For now, we focus on stats.
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log("🛠️ Initialisation du dashboard...");
+            
+            // Initialiser les dates du filtre
+            document.getElementById('filter-start-date').value = currentStartDate;
+            document.getElementById('filter-end-date').value = currentEndDate;
+
+            // 1. Appliquer le thème immédiatement
+            try {
+                const hour = new Date().getHours();
+                const savedTheme = localStorage.getItem('theme');
+                let theme = (hour >= 20 || hour < 6) ? 'dark' : 'light';
+                if (savedTheme) theme = savedTheme;
+                document.documentElement.setAttribute('data-theme', theme);
+                if (typeof updateThemeIcon === 'function') updateThemeIcon(theme);
+            } catch(e) { console.error("Erreur Thème:", e); }
+
+            // 2. Adapter l'interface (Date, Titre, Rôle) - CRITIQUE
+            try {
+                await adapterDashboardParRole();
+            } catch(e) { console.error("Erreur Adaptation Rôle:", e); }
+
+            // 3. Charger les données en parallèle (Non-bloquant pour l'UI)
+            const statsTasks = [
+                { name: 'Stats', fn: chargerStatsCompletes },
+                { name: 'Patient', fn: chargerProchainPatient },
+                { name: 'Récents', fn: chargerPatientsRecents },
+                { name: 'Alertes', fn: chargerAlertes },
+                { name: 'ChartAct', fn: initActivityChart },
+                { name: 'ChartVit', fn: initVitalsTrend },
+                { name: 'IA', fn: updateAISuggestions },
+                { name: 'Notifs', fn: updateNotificationWall }
+            ];
+
+            statsTasks.forEach(task => {
+                const call = (task.name === 'Stats') ? task.fn(currentStartDate, currentEndDate) : task.fn();
+                call.catch(err => console.error(`❌ Échec tâche [${task.name}]:`, err));
+            });
+
+            // 4. Rapport journalier (Si médecin)
+            try {
+                const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                if (user.role === 'medecin' && typeof chargerRapportJournalier === 'function') {
+                    chargerRapportJournalier();
+                }
+            } catch(e) {}
+        });
+
+        async function adapterDashboardParRole() {
+            try {
+                // 1. Mettre à jour la date immédiatement
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const today = new Date().toLocaleDateString('fr-FR', options);
+                const dateEl = document.getElementById('currentDateDisplay');
+                if (dateEl) dateEl.textContent = today.charAt(0).toUpperCase() + today.slice(1);
+
+                const userJson = localStorage.getItem('currentUser');
+                if (!userJson) return;
+                const user = JSON.parse(userJson);
+                const role = user.role;
+
+                const titleEl = document.getElementById('dashboard-title');
+                const btn = document.getElementById('action-btn');
+                
+                if (role === 'receptionniste') {
+                    if (titleEl) titleEl.textContent = 'Accueil & Encaissements';
+                    if (btn) btn.style.display = 'none';
+                    document.getElementById('medical-dashboard').style.display = 'none';
+                    document.getElementById('receptionist-dashboard').style.display = 'block';
+                    await initReceptionistView();
+                } else if (role === 'infirmiere') {
+                    if (titleEl) titleEl.textContent = 'Préparation & Soins';
+                    if (btn) btn.style.display = 'none';
+                    document.getElementById('medical-dashboard').style.display = 'none';
+                    document.getElementById('nurse-dashboard').style.display = 'block';
+                    await initNurseView();
+                } else {
+                    if (titleEl) titleEl.textContent = 'Tableau de Bord Médical';
+                    await initMedicalDashboard();
+                }
+            } catch (err) {
+                console.error("Erreur dans adapterDashboardParRole:", err);
+            }
         }
 
 
-        async function chargerStatsCompletes() {
+        async function chargerStatsCompletes(startDate, endDate) {
             const supabase = await window.SupabaseAPI.initSupabase();
+            if (!supabase) { console.error("Supabase non initialisé"); return; }
+            
+            const start = startDate || new Date().toISOString().split('T')[0];
+            const end = endDate || new Date().toISOString().split('T')[0];
+            
             const now = new Date();
-            const today = now.toISOString().split('T')[0];
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
             const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
 
-            // 1. Patients
+            // 1. Patients (Nouveaux patients sur la période)
+            const { count: newPatientsRange } = await supabase.from('patients')
+                .select('*', { count: 'exact', head: true })
+                .gte('created_at', start + 'T00:00:00')
+                .lte('created_at', end + 'T23:59:59');
+            
             const { count: totalPatients } = await supabase.from('patients').select('*', { count: 'exact', head: true });
-            const { count: lastMonthPatients } = await supabase.from('patients').select('*', { count: 'exact', head: true }).lt('created_at', startOfMonth);
-            document.getElementById('val-patients').textContent = totalPatients || 0;
-            updateTrend('trend-patients', totalPatients, lastMonthPatients);
+            
+            document.getElementById('val-patients').textContent = newPatientsRange || 0;
+            const patientLabel = document.querySelector('.stat-card[onclick*="patients.html"] .stat-label');
+            if (patientLabel) patientLabel.textContent = "Nouveaux Patients";
+            
+            // 2. Consultations (Sur la période)
+            const { count: rangeConsults } = await supabase.from('consultations')
+                .select('*', { count: 'exact', head: true })
+                .gte('created_at', start + 'T00:00:00')
+                .lte('created_at', end + 'T23:59:59');
+            
+            document.getElementById('val-consultations').textContent = rangeConsults || 0;
+            const consultLabel = document.querySelector('.stat-card[onclick*="consultations.html"] .stat-label');
+            if (consultLabel) consultLabel.textContent = "Consultations";
 
-            // 2. Consultations
-            const { count: monthConsults } = await supabase.from('consultations').select('*', { count: 'exact', head: true }).gte('created_at', startOfMonth);
-            const { count: lastMonthConsults } = await supabase.from('consultations').select('*', { count: 'exact', head: true }).gte('created_at', startOfLastMonth).lt('created_at', startOfMonth);
-            document.getElementById('val-consultations').textContent = monthConsults || 0;
-            updateTrend('trend-consultations', monthConsults, lastMonthConsults);
+            // 3. RDV (Sur la période)
+            const { count: rangeRdv } = await supabase.from('rendez_vous')
+                .select('*', { count: 'exact', head: true })
+                .gte('date', start)
+                .lte('date', end);
+            
+            document.getElementById('val-rdv').textContent = rangeRdv || 0;
+            
+            // 4. Lits Occupés
+            const { count: countLits } = await supabase.from('hospitalisations').select('*', { count: 'exact', head: true }).eq('actif', true);
+            document.getElementById('val-lits').textContent = `${countLits || 0} / 20`;
+            const rdvLabel = document.querySelector('.stat-card[onclick*="rendez-vous.html"] .stat-label');
+            if (rdvLabel) rdvLabel.textContent = "Rendez-vous";
 
-            // 3. RDV Jour
-            const { count: todayRdv } = await supabase.from('rendez_vous').select('*', { count: 'exact', head: true }).eq('date', today);
-            document.getElementById('val-rdv').textContent = todayRdv || 0;
-
-            // 4. Revenus Jour
-            const { data: pay } = await supabase.from('paiements').select('montant').eq('statut', 'Payé').gte('created_at', today);
+            // 4. Revenus (Sur la période)
+            const { data: pay } = await supabase.from('paiements')
+                .select('montant')
+                .eq('statut', 'Payé')
+                .gte('created_at', start + 'T00:00:00')
+                .lte('created_at', end + 'T23:59:59');
+            
             const total = pay ? pay.reduce((sum, p) => sum + p.montant, 0) : 0;
             document.getElementById('val-revenus').textContent = total.toLocaleString() + ' FCFA';
+            const financeLabel = document.querySelector('.stat-card[onclick*="finance.html"] .stat-label');
+            if (financeLabel) financeLabel.textContent = "Revenus";
         }
 
         function updateTrend(id, current, previous) {
@@ -404,9 +861,136 @@
             el.className = 'stat-trend ' + (diff >= 0 ? 'positive' : 'negative');
         }
 
+        async function chargerRapportJournalier() {
+            const rapport = document.getElementById('rapport-journalier');
+            if (!rapport) return;
+            rapport.style.display = 'block';
+            const btnRapport = document.getElementById('btn-rapport');
+            if (btnRapport) btnRapport.style.display = 'inline-flex';
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const dateEl = document.getElementById('rapport-date');
+            if (dateEl) dateEl.textContent = now.toLocaleDateString('fr-FR', options);
+
+            // 1. ÉQUIPE
+            const { data: equipe } = await supabase.from('users').select('nom, email, role, est_connecte, derniere_activite').in('role', ['infirmiere', 'receptionniste']).order('derniere_activite', { ascending: false });
+            const presenceDiv = document.getElementById('rapport-presence');
+            if (presenceDiv && equipe) {
+                presenceDiv.innerHTML = equipe.map(u => `
+                    <div style="display:flex; align-items:center; gap:10px; padding:10px; background:var(--bg); border-radius:10px; margin-bottom:8px;">
+                        <div style="font-weight:600;">${u.nom || u.email}</div>
+                        <div style="font-size:0.7rem; color:${u.est_connecte ? '#22c55e' : '#94a3b8'}; margin-left:auto;">${u.est_connecte ? 'En ligne' : 'Dernière activité: ' + new Date(u.derniere_activite).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+                    </div>
+                `).join('');
+            }
+
+            // 2. RDV
+            const { data: rdvs } = await supabase.from('rendez_vous').select('*, patients(nom, prenom, telephone)').eq('date', today).order('heure', { ascending: true });
+            const countEl = document.getElementById('rapport-rdv-count');
+            if (countEl) countEl.textContent = rdvs ? rdvs.length : 0;
+            const rdvDiv = document.getElementById('rapport-rdv');
+            if (rdvDiv && rdvs) {
+                rdvDiv.innerHTML = rdvs.map(r => `
+                    <div style="padding:10px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; gap:12px;">
+                            <span style="font-weight:700; color:var(--primary);">${r.heure.substring(0,5)}</span>
+                            <span>${r.patients.nom} ${r.patients.prenom || ''}</span>
+                        </div>
+                        <button onclick="sendWhatsAppReminder('${r.patients.nom}', '${r.date}', '${r.heure}', '${r.patients.telephone}')" style="background:#25D366; color:white; border:none; padding:4px 8px; border-radius:6px; font-size:0.7rem; cursor:pointer; display:flex; align-items:center; gap:4px;" title="Envoyer rappel WhatsApp">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Note: isMedicalSubscribed est déclaré une seule fois en bas du script
+        async function initMedicalDashboard() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            await chargerFileAttenteMedecin();
+            
+            if (!isMedicalSubscribed) {
+                supabase.channel('suivi-patients')
+                    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'consultations' }, payload => {
+                        console.log('[REALTIME] Mise à jour consultation ->', payload.new.status);
+                        // BUG FIX: Le statut écrit par vitals-tablet.html est 'medecin', pas 'pret'
+                        if (payload.new.status === 'medecin') {
+                            if (window.notifier) window.notifier("Nouveau patient prêt pour consultation !", "success");
+                            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+                            audio.play().catch(() => {});
+                        }
+                        chargerFileAttenteMedecin();
+                    })
+                    .subscribe((status) => {
+                        console.log('[REALTIME] Canal suivi-patients:', status);
+                    });
+                isMedicalSubscribed = true;
+            }
+            initCharts();
+        }
+
+        async function chargerFileAttenteMedecin() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            if (!supabase) return;
+            const { data: consults, error } = await supabase
+                .from('consultations')
+                .select('*, patients(nom, prenom)')
+                .neq('status', 'termine')
+                .order('created_at', { ascending: true });
+            
+            console.log('[DEBUG] chargerFileAttenteMedecin ->', { count: consults?.length, error });
+            if (error) console.error('[ERREUR] Consultations:', error.message, '| Code:', error.code);
+            const container = document.getElementById('doctor-waitlist');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (consults && consults.length > 0) {
+                consults.forEach(c => {
+                    let statusIcon = '🟠';
+                    let statusLabel = 'À l\'accueil';
+                    let readyPulse = '';
+                    
+                    if (c.status === 'infirmerie') {
+                        statusIcon = '🔵';
+                        statusLabel = 'Chez l\'infirmière';
+                    } else if (c.status === 'pret') {
+                        statusIcon = '✅';
+                        statusLabel = 'PRÊT';
+                        readyPulse = '<span class="status-ready-pulse"></span>';
+                    }
+
+                    container.innerHTML += `
+                        <div onclick="window.location.href='dossier-patient.html?id=${c.patient_id}'" class="card" style="margin:0; padding:15px; background:var(--bg); border:1px solid var(--border); cursor:pointer; transition:0.2s; display:flex; justify-content:space-between; align-items:center;">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div style="font-size:1.2rem;">${statusIcon}</div>
+                                <div>
+                                    <div style="font-weight:700; font-size:0.95rem;">${c.patients?.nom || 'Patient'} ${c.patients?.prenom || ''}</div>
+                                    <div style="font-size:0.75rem; color:var(--text-light);">${c.motif || 'Consultation'}</div>
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                ${readyPulse}
+                                <span style="font-size:0.7rem; font-weight:700; color:var(--text-light); text-transform:uppercase;">${statusLabel}</span>
+                                <i class="fa-solid fa-chevron-right" style="font-size:0.8rem; color:var(--border);"></i>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                container.innerHTML = '<p style="text-align:center; color:var(--text-light); padding:20px;">Aucun patient en attente.</p>';
+            }
+        }
+
         async function chargerPatientsRecents() {
             const supabase = await window.SupabaseAPI.initSupabase();
-            const { data } = await supabase.from('patients').select('id, nom, prenom, created_at').order('created_at', { ascending: false }).limit(5);
+            if (!supabase) return;
+            const { data, error } = await supabase.from('patients').select('id, nom, prenom, created_at').order('created_at', { ascending: false }).limit(5);
+            console.log('[DEBUG] chargerPatientsRecents ->', { count: data?.length, error });
+            if (error) console.error('[ERREUR] Patients:', error.message, '| Code:', error.code);
             const list = document.getElementById('recent-patients');
             if (!data) { list.innerHTML = 'Aucun patient.'; return; }
             list.innerHTML = data.map(p => {
@@ -429,19 +1013,36 @@
 
         async function chargerAlertes() {
             const supabase = await window.SupabaseAPI.initSupabase();
-            const { data } = await supabase.from('stocks').select('produit, quantite, seuil_alerte').lt('quantite', 10).limit(3);
+            if (!supabase) return;
+            // Comparaison dynamique sur le seuil de chaque produit
+            const { data, error } = await supabase
+                .from('stocks')
+                .select('nom, quantite, seuil_alerte')
+                .order('quantite', { ascending: true })
+                .limit(10);
+
+            console.log('[DEBUG] chargerAlertes ->', { data, error });
             const list = document.getElementById('critical-alerts');
-            if (!data || data.length === 0) { list.innerHTML = '<p style="color:var(--success);"><i class="fa-solid fa-check-circle"></i> Aucune alerte.</p>'; return; }
-            list.innerHTML = data.map(a => `
+            if (!list) return;
+
+            // Filtrer les produits dont la quantité est sous le seuil
+            const critiques = data ? data.filter(a => a.quantite <= (a.seuil_alerte || 10)) : [];
+
+            if (critiques.length === 0) {
+                list.innerHTML = '<p style="color:var(--success);"><i class="fa-solid fa-check-circle"></i> Tous les stocks sont OK.</p>';
+                return;
+            }
+            list.innerHTML = critiques.map(a => `
                 <div style="padding:10px; border-radius:8px; background:rgba(231,111,81,0.1); color:var(--danger); margin-bottom:8px; font-size:0.85rem; display:flex; align-items:center; gap:10px;">
                     <i class="fa-solid fa-triangle-exclamation"></i>
-                    <span>Stock faible : <strong>${a.produit}</strong> (${a.quantite} restants)</span>
+                    <span>Stock critique : <strong>${a.nom || 'Produit inconnu'}</strong> — ${a.quantite} restants (seuil: ${a.seuil_alerte || 10})</span>
                 </div>
             `).join('');
         }
 
         async function chargerProchainPatient() {
             const supabase = await window.SupabaseAPI.initSupabase();
+            if (!supabase) return;
             const now = new Date();
             const today = now.toISOString().split('T')[0];
             const currentTime = now.toTimeString().split(' ')[0].substring(0, 5);
@@ -485,29 +1086,35 @@
             document.getElementById('np-heure').textContent = rdv.heure.substring(0, 5);
             document.getElementById('np-link').href = `dossier-patient.html?id=${patient.id}`;
 
-            // Countdown dynamique
+            // Countdown intelligent
             function updateCountdown() {
                 const nowMs = new Date();
                 const rdvDate = new Date(rdv.date + 'T' + rdv.heure);
                 const diffMs = rdvDate - nowMs;
 
+                const el = document.getElementById('np-countdown');
                 if (diffMs <= 0) {
-                    document.getElementById('np-countdown').innerHTML = '<span style="animation: pulse 1s infinite;">Maintenant !</span>';
+                    el.innerHTML = '<span style="color:#22c55e; animation: pulse 1s infinite;">Maintenant !</span>';
                     return;
                 }
 
-                const hours = Math.floor(diffMs / 3600000);
-                const mins = Math.floor((diffMs % 3600000) / 60000);
+                const totalMins = Math.floor(diffMs / 60000);
+                const hours = Math.floor(totalMins / 60);
+                const mins = totalMins % 60;
 
-                if (hours > 0) {
-                    document.getElementById('np-countdown').textContent = `${hours}h ${mins}min`;
+                if (hours >= 24) {
+                    // Plus d'un jour : afficher la date directement
+                    const dateStr = rdvDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+                    el.textContent = dateStr;
+                } else if (hours > 0) {
+                    el.textContent = `${hours}h ${mins}min`;
                 } else {
-                    document.getElementById('np-countdown').textContent = `${mins} min`;
+                    el.textContent = `${mins} min`;
                 }
             }
 
             updateCountdown();
-            setInterval(updateCountdown, 30000); // Mise à jour toutes les 30s
+            setInterval(updateCountdown, 30000);
         }
 
         function toggleMobileSidebar() {
@@ -715,91 +1322,312 @@
             });
         }
 
+        async function initVitalsTrend() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const currentTime = now.toTimeString().split(' ')[0].substring(0, 5);
+
+            // 1. Trouver le prochain patient
+            let { data: rdv } = await supabase
+                .from('rendez_vous')
+                .select('patient_id, patients(nom, prenom)')
+                .eq('date', today)
+                .gte('heure', currentTime)
+                .order('heure', { ascending: true })
+                .limit(1);
+
+            if (!rdv || rdv.length === 0) {
+                document.getElementById('vitals-empty').style.display = 'flex';
+                return;
+            }
+
+            const p = rdv[0];
+            document.getElementById('vt-patient-name').textContent = p.patients?.nom || '--';
+
+            // 2. Charger ses constantes
+            const { data: c } = await supabase
+                .from('constantes')
+                .select('*')
+                .eq('patient_id', p.patient_id)
+                .order('created_at', { ascending: true })
+                .limit(5);
+
+            if (!c || c.length === 0) {
+                document.getElementById('vitals-empty').style.display = 'flex';
+                return;
+            }
+
+            const ctx = document.getElementById('vitalsTrendChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: c.map((_, i) => i + 1),
+                    datasets: [
+                        {
+                            label: 'Temp',
+                            data: c.map(x => x.temperature),
+                            borderColor: '#ef4444',
+                            tension: 0.4,
+                            pointRadius: 2
+                        },
+                        {
+                            label: 'Tension',
+                            data: c.map(x => x.tension_sys),
+                            borderColor: '#3b82f6',
+                            tension: 0.4,
+                            pointRadius: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { display: false }
+                    }
+                }
+            });
+        }
+
         async function updateAISuggestions() {
             const supabase = await window.SupabaseAPI.initSupabase();
-            const aiDiv = document.getElementById('ai-suggestion');
+            const aiBoxes = document.querySelectorAll('.ai-suggestion-box');
+            if (aiBoxes.length === 0) return;
+            
             const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
             const role = user.role || 'medecin';
             
-            // Données de base pour l'analyse
-            const { data: stocks } = await supabase.from('stocks').select('nom, quantite, stock_minimum');
-            const critical = stocks ? stocks.filter(s => s.quantite <= (s.stock_minimum || 5)) : [];
-            
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const tomorrowStr = tomorrow.toISOString().split('T')[0];
-            const { count: rdvTomorrow } = await supabase
-                .from('rendez_vous')
-                .select('*', { count: 'exact', head: true })
-                .eq('date', tomorrowStr);
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+
+            // 1. Requêtes communes
+            const [stocksRes, rdvRes, consultRes] = await Promise.all([
+                supabase.from('stocks').select('nom, quantite, seuil_alerte').order('quantite', { ascending: true }).limit(5),
+                supabase.from('rendez_vous').select('*, patients(nom, prenom)').eq('date', today).order('heure', { ascending: true }),
+                supabase.from('consultations').select('*, patients(nom, prenom)').eq('status', 'infirmerie')
+            ]);
+
+            const stockCritiques = stocksRes.data ? stocksRes.data.filter(s => s.quantite <= (s.seuil_alerte || 10)) : [];
+            const rdvAujourdhui = rdvRes.data || [];
+            const enAttenteInfirmerie = consultRes.data || [];
 
             let suggestion = "";
+            let priority = "low"; // low (blue/normal), high (red)
 
-            if (role === 'infirmiere') {
-                if (critical.length > 0) {
-                    suggestion = `Il y a <strong>${critical.length} produits</strong> à réapprovisionner d'urgence pour vos soins de demain.`;
+            if (role === 'receptionniste') {
+                const hour = now.getHours();
+                const { data: impayes } = await supabase.from('paiements').select('montant, patients(nom)').neq('statut', 'Payé').limit(1);
+                const firstWaiting = rdvAujourdhui.find(r => r.statut === 'en_attente');
+                const waitTime = firstWaiting && firstWaiting.heure ? Math.floor((now - new Date(today + 'T' + firstWaiting.heure)) / 60000) : 0;
+
+                if (hour >= 17) {
+                    // Mode Fin de journée : Résumé Business
+                    const { data: dayStats } = await supabase.from('paiements').select('montant, statut').gte('created_at', today + 'T00:00:00');
+                    const patientsRecus = rdvAujourdhui.filter(r => r.statut === 'termine' || r.statut === 'consulte').length;
+                    const caJour = dayStats ? dayStats.filter(p => p.statut === 'Payé').reduce((sum, p) => sum + p.montant, 0) : 0;
+                    const impayesJour = dayStats ? dayStats.filter(p => p.statut !== 'Payé').length : 0;
+
+                    suggestion = `<i class="fa-solid fa-trophy" style="color:#fbbf24;"></i> <strong>Belle journée !</strong> ${patientsRecus} patients reçus, ${impayesJour} impayé(s). Chiffre d'affaires : <strong>${caJour.toLocaleString()} FCFA</strong>.`;
+                    priority = "low";
+                } else if (impayes && impayes.length > 0) {
+                    suggestion = `<i class="fa-solid fa-coins"></i> <strong>Alerte Finance</strong> : Le patient <strong>${impayes[0].patients?.nom}</strong> a une dette de <strong>${impayes[0].montant.toLocaleString()} FCFA</strong>.`;
+                    priority = "high";
+                } else if (waitTime > 45) {
+                    suggestion = `<i class="fa-solid fa-hourglass-half"></i> <strong>Retard important</strong> : ${firstWaiting.patients?.nom} attend depuis <strong>${waitTime} min</strong>.`;
+                    priority = "high";
+                } else if (firstWaiting) {
+                    suggestion = `<i class="fa-solid fa-clock"></i> <strong>Temps d'attente</strong> : ${firstWaiting.patients?.nom} attend depuis ${waitTime} min. Dr Duval sera libre sous peu.`;
+                    priority = "low";
                 } else {
-                    suggestion = "Tous vos kits de soins sont prêts. Pensez à vérifier les dates de péremption dans le catalogue.";
+                    suggestion = `<i class="fa-solid fa-calendar-check"></i> <strong>Relances RDV</strong> : Planning fluide. Bon moment pour confirmer les rendez-vous de demain.`;
+                    priority = "low";
                 }
-            } 
-            else if (role === 'receptionniste') {
-                if (rdvTomorrow > 0) {
-                    suggestion = `Vous avez <strong>${rdvTomorrow} rendez-vous</strong> prévus demain. Pensez à confirmer les présences par téléphone.`;
+            } else if (role === 'infirmiere') {
+                const { data: litsNettoyage } = await supabase.from('hospitalisations').select('numero_lit').eq('statut', 'nettoyage').limit(1);
+                
+                if (enAttenteInfirmerie.length > 0) {
+                    suggestion = `<i class="fa-solid fa-heart-pulse"></i> <strong>Urgence signalée</strong> : Patient <strong>${enAttenteInfirmerie[0].patients?.nom}</strong> en attente de prise en charge immédiate.`;
+                    priority = "high";
+                } else if (stockCritiques.length > 0) {
+                    suggestion = `<i class="fa-solid fa-box-open"></i> <strong>Stock critique</strong> : <strong>${stockCritiques[0].nom}</strong> en rupture (${stockCritiques[0].quantite} restants).`;
+                    priority = "high";
+                } else if (litsNettoyage && litsNettoyage.length > 0) {
+                    suggestion = `<i class="fa-solid fa-broom"></i> <strong>Nettoyage</strong> : Le <strong>Lit #${litsNettoyage[0].numero_lit}</strong> est libéré et doit être nettoyé.`;
+                    priority = "low";
                 } else {
-                    suggestion = "Journée calme demain. C'est le moment idéal pour classer les nouveaux dossiers patients.";
+                    suggestion = `<i class="fa-solid fa-stethoscope"></i> <strong>Constantes</strong> : Aucun patient en attente. Unité de soins opérationnelle.`;
+                    priority = "low";
                 }
-            } 
-            else { // Médecin par défaut
-                if (critical.length > 0) {
-                    suggestion = `Analyse : <strong>${critical.length} ruptures de stock</strong> détectées. Cela pourrait freiner l'activité demain.`;
-                } else if (rdvTomorrow > 5) {
-                    suggestion = `Prédiction : Forte affluence demain (<strong>${rdvTomorrow} patients</strong>). Prévoyez un renfort si possible.`;
+            } else {
+                // Médecin
+                if (enAttenteInfirmerie.length > 0) {
+                    suggestion = `<i class="fa-solid fa-user-md"></i> <strong>${enAttenteInfirmerie.length} patient(s)</strong> en préparation. Prêt pour la suite ?`;
+                    priority = "low";
                 } else {
-                    suggestion = "La clinique fonctionne de manière optimale. Aucun point de vigilance majeur détecté.";
+                    suggestion = `<i class="fa-solid fa-brain"></i> <strong>Intelligence Live</strong> : Clinique optimale avec ${rdvAujourdhui.length} rendez-vous.`;
+                    priority = "low";
                 }
             }
 
-            aiDiv.innerHTML = `<i class="fa-solid fa-quote-left" style="margin-right: 8px; opacity: 0.3;"></i>${suggestion}`;
+            // Mise à jour visuelle des cartes IA
+            const cards = document.querySelectorAll('.ai-card');
+            cards.forEach(card => {
+                const iconBg = card.querySelector('.ai-icon-bg');
+                const priorityLabel = card.querySelector('.ai-priority-label');
+                const statusDot = card.querySelector('.ai-status-dot');
+                const contentBox = card.querySelector('.ai-suggestion-box');
+
+                if (priority === 'high') {
+                    card.style.background = "linear-gradient(135deg, #7f1d1d, #450a0a)";
+                    if (iconBg) { iconBg.style.background = "rgba(239, 68, 68, 0.2)"; iconBg.style.color = "#f87171"; }
+                    if (priorityLabel) { priorityLabel.textContent = "Priorité Haute"; priorityLabel.style.color = "#fca5a5"; }
+                    if (statusDot) { statusDot.style.background = "#ef4444"; statusDot.style.boxShadow = "0 0 10px #ef4444"; }
+                    if (contentBox) contentBox.style.color = "#fee2e2";
+                } else {
+                    card.style.background = "linear-gradient(135deg, #1e293b, #0f172a)";
+                    if (iconBg) { iconBg.style.background = "rgba(14, 165, 233, 0.2)"; iconBg.style.color = "#0ea5e9"; }
+                    if (priorityLabel) { priorityLabel.textContent = "Priorité Info"; priorityLabel.style.color = "#94a3b8"; }
+                    if (statusDot) { statusDot.style.background = "#3b82f6"; statusDot.style.boxShadow = "0 0 10px #3b82f6"; }
+                    if (contentBox) contentBox.style.color = "#cbd5e1";
+                }
+                contentBox.innerHTML = suggestion;
+            });
         }
 
         async function updateNotificationWall() {
             const supabase = await window.SupabaseAPI.initSupabase();
             const wall = document.getElementById('notification-wall');
+            if (!wall) return;
             
-            const { data: mouvements } = await supabase
-                .from('stock_mouvements')
-                .select(`type_mouvement, quantite, motif, utilisateur, created_at, stocks(nom)`)
-                .order('created_at', { ascending: false })
-                .limit(10);
-
+            const { data: mouvements } = await supabase.from('stock_mouvements').select('motif, type_mouvement, quantite, utilisateur, created_at, stocks(nom)').order('created_at', { ascending: false }).limit(10);
             if (!mouvements || mouvements.length === 0) {
-                wall.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 20px;">Aucune activité récente.</p>';
+                wall.innerHTML = '<p style="text-align:center; padding:20px;">Aucune activité récente.</p>';
                 return;
             }
-
-            wall.innerHTML = mouvements.map(m => {
-                const time = new Date(m.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-                const isSoin = m.motif && m.motif.includes('Soin :');
-                const icon = isSoin ? 'fa-syringe' : (m.type_mouvement === 'entree' ? 'fa-box' : 'fa-minus-circle');
-                const color = isSoin ? '#8b5cf6' : (m.type_mouvement === 'entree' ? '#22c55e' : '#f43f5e');
-                
-                return `
-                    <div style="display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.85rem;">
-                        <div style="width: 32px; height: 32px; border-radius: 8px; background: ${color}15; color: ${color}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <i class="fa-solid ${icon}"></i>
-                        </div>
-                        <div style="flex: 1; min-width: 0;">
-                            <div style="font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.motif || 'Mouvement de stock'}</div>
-                            <div style="font-size: 0.75rem; color: var(--text-light); margin-top: 2px;">
-                                <span style="font-weight: 600; color: ${color};">${m.type_mouvement === 'entree' ? '+' : '-'}${m.quantite} ${m.stocks?.nom || ''}</span> 
-                                • Par ${m.utilisateur || 'Système'}
-                            </div>
-                        </div>
-                        <div style="font-size: 0.7rem; color: var(--text-light); white-space: nowrap;">${time}</div>
-                    </div>
-                `;
-            }).join('');
+            wall.innerHTML = mouvements.map(m => `
+                <div style="display:flex; gap:12px; padding:12px; border-bottom:1px solid var(--border); font-size:0.8rem;">
+                    <div style="font-weight:600;">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+                    <div style="flex:1;"><strong>${m.motif}</strong><br><small>${m.utilisateur}</small></div>
+                </div>
+            `).join('');
         }
+
+        function sendWhatsAppReminder(nom, date, heure, telephone) {
+            if (!telephone) {
+                if (window.notifier) window.notifier("Numéro de téléphone manquant pour ce patient.", 'error');
+                return;
+            }
+            
+            const cleanPhone = telephone.replace(/\D/g, '');
+            const finalPhone = cleanPhone.length === 10 ? '225' + cleanPhone : cleanPhone;
+            
+            const dateObj = new Date(date);
+            const dateStr = dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+            const heureStr = heure.substring(0, 5);
+            
+            const message = `Bonjour ${nom}, c'est la Clinique Refontiq. Nous vous confirmons votre rendez-vous le ${dateStr} à ${heureStr}. Merci de nous prévenir en cas d'empêchement.`;
+            const encodedMsg = encodeURIComponent(message);
+            
+            window.open(`https://wa.me/${finalPhone}?text=${encodedMsg}`, '_blank');
+        }
+
+        function filterWaitlist() {
+            const val = document.getElementById('waitlist-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#waitlist-body-recep tr');
+            rows.forEach(row => { row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none'; });
+        }
+
+        function initCharts() {
+            initActivityChart();
+            initVitalsTrend();
+        }
+
+        let isReceptionSubscribed = false;
+        async function initReceptionistView() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            if (!isReceptionSubscribed) {
+                supabase.channel('reception-sync').on('postgres_changes', { event: '*', schema: 'public', table: 'consultations' }, () => refreshWaitlistReception()).subscribe();
+                isReceptionSubscribed = true;
+            }
+            await refreshWaitlistReception();
+        }
+
+        async function refreshWaitlistReception() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data: waitlist } = await supabase.from('consultations').select('*, patients(nom, prenom, telephone)').neq('status', 'termine').order('created_at', { ascending: false });
+            const tbody = document.getElementById('waitlist-body-recep');
+            if (!tbody) return;
+            tbody.innerHTML = (waitlist && waitlist.length > 0) ? waitlist.map(c => `<tr><td>${c.patients.nom}</td><td>${c.motif}</td><td>${c.status}</td><td><button class="btn">Encaisser</button></td></tr>`).join('') : '<tr><td colspan="4">Vide</td></tr>';
+        }
+
+        let isNurseSubscribed = false;
+        async function initNurseView() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            if (!isNurseSubscribed) {
+                supabase.channel('nurse-sync').on('postgres_changes', { event: '*', schema: 'public', table: 'consultations' }, () => refreshNurseWaitlist()).subscribe();
+                isNurseSubscribed = true;
+            }
+            // refreshNurseWaitlist est déjà appelé via Promise.all indirectement ou ici
+            await refreshNurseWaitlist();
+        }
+
+        async function refreshNurseWaitlist() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data: waitlist } = await supabase.from('consultations').select('*, patients(nom, prenom)').eq('status', 'infirmerie').order('created_at', { ascending: true });
+            const tbody = document.getElementById('nurse-waitlist-body');
+            if (!tbody) return;
+            tbody.innerHTML = (waitlist && waitlist.length > 0) ? waitlist.map(c => `<tr><td>${c.patients.nom}</td><td>${c.motif}</td><td><button class="btn btn-primary" onclick="window.location.href='vitals-tablet.html?id=${c.id}'">Saisir Constantes</button></td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center; padding:20px;">Aucun patient en attente</td></tr>';
+            const count = document.getElementById('nurse-waitlist-count');
+            if (count) count.textContent = waitlist ? waitlist.length : 0;
+        }
+
+        // BUG FIX: isMedicalSubscribed est déjà déclaré dans initMedicalDashboard.
+        // initMedicalView est un alias pour éviter la rupture avec le RoleManager.
+        async function initMedicalView() {
+            await initMedicalDashboard();
+            await refreshMedicalWaitlist();
+        }
+
+        async function refreshMedicalWaitlist() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            // On récupère les patients dont le statut est 'medecin' (prêt après infirmerie)
+            const { data: waitlist } = await supabase.from('consultations')
+                .select('*, patients(nom, prenom)')
+                .eq('status', 'medecin')
+                .order('created_at', { ascending: true });
+            
+            const tbody = document.getElementById('medical-waitlist-body');
+            if (!tbody) return;
+
+            if (waitlist && waitlist.length > 0) {
+                tbody.innerHTML = waitlist.map(c => `
+                    <tr class="ready-row">
+                        <td><span class="status-badge" style="background:#10b981; color:white; padding:2px 8px; border-radius:4px; font-size:0.7rem; margin-right:8px;">PRÊT</span> ${c.patients.nom} ${c.patients.prenom || ''}</td>
+                        <td>${c.motif}</td>
+                        <td><button class="btn btn-primary" onclick="window.location.href='consultations.html?id=${c.id}'">Consulter</button></td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:var(--text-light);">Aucun patient prêt.</td></tr>';
+            }
+        }
+
+        function sendNoteToDoc() {
+            const note = document.getElementById('note-to-doc').value;
+            if (!note) return alert("Veuillez saisir une note.");
+            alert("Note envoyée au médecin !");
+            document.getElementById('note-to-doc').value = '';
+        }
+
+        function sendNurseNote() {
+            const note = document.getElementById('nurse-note').value;
+            if (!note) return alert("Veuillez saisir vos observations.");
+            alert("Observations envoyées au médecin !");
+            document.getElementById('nurse-note').value = '';
+        }
+    </script>
     </script>
 </body>
 </html>

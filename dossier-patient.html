@@ -9,6 +9,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <link href="assets/premium-style.css" rel="stylesheet">
+    <link href="assets/ai-assistant.css" rel="stylesheet">
+    
+    <script src="assets/role-manager.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* Dossier Layout Spécifique */
         .dossier-grid { display: grid; grid-template-columns: 350px 1fr; gap: 24px; }
@@ -27,8 +31,14 @@
         .history-diag { font-weight: 700; margin-bottom: 4px; }
         .history-trait { font-size: 0.9rem; color: var(--secondary); font-weight: 500; }
 
+        .chart-container { height: 180px; position: relative; margin-top: 10px; }
+        .vitals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+        .vital-mini-card { background: var(--bg); padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 12px; }
+        .vital-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+
         @media (max-width: 768px) {
             .dossier-grid { grid-template-columns: 1fr; }
+            .vitals-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -36,57 +46,10 @@
 <body>
     <div class="dashboard-container">
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
-                    <div class="logo-text"><h1>Clinique Refontiq</h1><p>Espace Médical</p></div>
-                </div>
-
-                <div class="sidebar-search">
-                    <div class="search-wrapper">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Rechercher un patient...">
-                    </div>
-                </div>
-
-                <div class="user-info">
-                    <div class="user-avatar" id="side-avatar">DR</div>
-                    <div class="user-details"><h3 id="side-name">Dr. Duval <span class="online-indicator" style="margin-left: 5px;"></span></h3><p id="side-role">Médecin</p></div>
-                </div>
-            </div>
-            <nav class="nav-menu">
-
-                <a href="dashboard.html" class="nav-item" id="menu-dashboard"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
-                <a href="patients.html" class="nav-item" id="menu-patients"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
-                <a href="consultations.html" class="nav-item" id="menu-consultations"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
-                <a href="rendez-vous.html" class="nav-item" id="menu-rendezvous"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
-                
-                <hr class="nav-separator" id="sep-finance">
-                
-                <a href="finance.html" class="nav-item" id="menu-finance"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
-                <a href="stocks.html" class="nav-item" id="menu-stocks"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
-                
-                <hr class="nav-separator">
-                
-                <a href="messagerie.html" class="nav-item" id="menu-messagerie"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
-                <a href="alertes.html" class="nav-item" id="menu-alertes"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
-                <a href="parametres.html" class="nav-item" id="menu-parametres"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
-            
-            </nav>
-        </aside>
+        <div id="sidebar-container"></div>
 
         <main class="main-content">
-            <header class="mobile-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <button class="header-btn" onclick="toggleMobileSidebar()" style="background:none; border:none; font-size:1.5rem; color:white; cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
-                    <div style="width: 35px; height: 35px; background: rgba(255,255,255,0.2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
-                        <i class="fa-solid fa-hospital"></i>
-                    </div>
-                    <div style="font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">Clinique Refontiq</div>
-                </div>
-                <div style="font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 8px; text-transform: uppercase;">Dossier</div>
-            </header>
+            
 
 
             <div id="loader" style="text-align: center; padding: 100px;">
@@ -100,8 +63,9 @@
                         <h1>Dossier Médical</h1>
                         <p id="p-ref">Référence: --</p>
                     </div>
-                    <div style="display: flex; gap: 12px;">
+                    <div style="display: flex; gap: 12px; align-items: center;">
                         <a href="patients.html" class="btn" style="background: var(--border); color: var(--text);"><i class="fa-solid fa-arrow-left"></i> Retour</a>
+                        <button class="btn" style="background: var(--border); color: var(--text);" onclick="ouvrirConstantesModal()"><i class="fa-solid fa-heart-pulse"></i> Prendre Constantes</button>
                         <button class="btn" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; border: none;" onclick="ouvrirSoinModal()"><i class="fa-solid fa-syringe"></i> Enregistrer un Soin</button>
                         <a id="btn-nouvelle-consult" href="#" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouvelle Consultation</a>
                     </div>
@@ -137,6 +101,38 @@
                     <!-- Colonne Droite: Détails et Historique -->
                     <div>
                         <div class="info-card">
+                            <div class="info-title" style="justify-content: space-between;">
+                                <span><i class="fa-solid fa-chart-line"></i> Tableau de Bord des Constantes</span>
+                                <span style="font-size: 0.75rem; color: var(--text-light); font-weight: 400;">Derniers 7 jours</span>
+                            </div>
+                            
+                            <div class="vitals-grid">
+                                <div>
+                                    <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;"><i class="fa-solid fa-temperature-half" style="color: #ef4444;"></i> Température (°C)</div>
+                                    <div class="chart-container"><canvas id="tempChart"></canvas></div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;"><i class="fa-solid fa-droplet" style="color: #3b82f6;"></i> Tension Artérielle (mmHg)</div>
+                                    <div class="chart-container"><canvas id="tensionChart"></canvas></div>
+                                </div>
+                            </div>
+
+                            <div class="vitals-grid" style="margin-top: 24px; border-top: 1px solid var(--bg); padding-top: 16px;">
+                                <div class="vital-mini-card">
+                                    <div class="vital-icon" style="background: #ecfdf5; color: #10b981;"><i class="fa-solid fa-heartbeat"></i></div>
+                                    <div><div style="font-size:0.7rem; color:var(--text-light);">Pouls</div><div id="v-pouls" style="font-weight:700;">-- bpm</div></div>
+                                </div>
+                                <div class="vital-mini-card">
+                                    <div class="vital-icon" style="background: #eff6ff; color: #3b82f6;"><i class="fa-solid fa-lungs"></i></div>
+                                    <div><div style="font-size:0.7rem; color:var(--text-light);">SpO2</div><div id="v-spo2" style="font-weight:700;">-- %</div></div>
+                                </div>
+                            </div>
+                            <div id="v-author" style="margin-top: 12px; font-size: 0.7rem; color: var(--text-light); text-align: right; font-style: italic;">
+                                --
+                            </div>
+                        </div>
+
+                        <div class="info-card">
                             <div class="info-title"><i class="fa-solid fa-file-medical"></i> Antécédents Médicaux</div>
                             <p id="p-antecedents" style="line-height: 1.6; color: var(--text-light);">Aucun antécédent particulier déclaré.</p>
                         </div>
@@ -151,6 +147,56 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Modal Prise de Constantes -->
+    <div class="modal" id="constantesModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 2000; padding: 20px;">
+        <div class="modal-content" style="background: white; padding: 32px; border-radius: 20px; width: 100%; max-width: 450px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="font-family:'Space Grotesk'; font-size: 1.3rem;">🌡️ Prise de Constantes</h2>
+                <button class="action-btn-sm" onclick="document.getElementById('constantesModal').style.display = 'none'" style="background:none; border:none; cursor:pointer;"><i class="fa-solid fa-xmark fa-xl"></i></button>
+            </div>
+            
+            <form onsubmit="handleSaveConstantes(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label>Température (°C)</label>
+                        <input type="number" id="c-temp" step="0.1" placeholder="37.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Poids (kg)</label>
+                        <input type="number" id="c-poids" step="0.1" placeholder="70.0">
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label>Tension Sys (max)</label>
+                        <input type="number" id="c-sys" placeholder="120" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tension Dia (min)</label>
+                        <input type="number" id="c-dia" placeholder="80" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                    <div class="form-group">
+                        <label>Pouls (bpm)</label>
+                        <input type="number" id="c-pouls" placeholder="72">
+                    </div>
+                    <div class="form-group">
+                        <label>SpO2 (%)</label>
+                        <input type="number" id="c-spo2" placeholder="98">
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:12px;">
+                    <button type="button" class="btn" onclick="document.getElementById('constantesModal').style.display = 'none'" style="flex:1;">Annuler</button>
+                    <button type="submit" class="btn btn-primary" style="flex:1;" id="btn-save-const">Enregistrer</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Modal Enregistrement de Soin -->
@@ -184,18 +230,42 @@
     <script src="supabase-config.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
+            const hour = new Date().getHours();
+            const savedTheme = localStorage.getItem('theme');
+            let theme = (hour >= 20 || hour < 6) ? 'dark' : 'light';
+            if (savedTheme) theme = savedTheme;
+            
+            document.documentElement.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+            
             initUser();
             await chargerDossier();
         });
 
-        function initUser() {
-            const u = localStorage.getItem('currentUser');
-            if (u) {
-                const user = JSON.parse(u);
-                document.getElementById('side-name').textContent = user.name || 'Utilisateur';
-                document.getElementById('side-role').textContent = user.role;
-                document.getElementById('side-avatar').textContent = (user.name || 'U').substring(0, 2).toUpperCase();
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
+            updateThemeIcon(target);
+        }
+
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('theme-toggle');
+            const icon = btn.querySelector('i');
+            if (icon) {
+                if (theme === 'dark') {
+                    icon.className = 'fa-solid fa-sun';
+                    icon.style.color = '#fbbf24';
+                } else {
+                    icon.className = 'fa-solid fa-moon';
+                    icon.style.color = 'var(--text)';
+                }
             }
+        }
+
+        function initUser() {
+            // Géré automatiquement par assets/role-manager.js
         }
 
         async function chargerDossier() {
@@ -271,6 +341,189 @@
 
             document.getElementById('loader').style.display = 'none';
             document.getElementById('dossier-content').style.display = 'block';
+
+            // 3. Charger les graphiques
+            await chargerGraphiques(id);
+
+            // 4. Action automatique (ex: ouverture modal constantes)
+            if (urlParams.get('action') === 'vitals') {
+                ouvrirConstantesModal();
+            }
+        }
+
+        // === GESTION DES CONSTANTES & GRAPHIQUES ===
+        let tempChart, tensionChart;
+
+        async function chargerGraphiques(patientId) {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data: c } = await supabase.from('constantes')
+                .select('*, users(nom, prenom)')
+                .eq('patient_id', patientId)
+                .order('created_at', { ascending: true })
+                .limit(10);
+
+            if (!c || c.length === 0) return;
+
+            const labels = c.map(x => new Date(x.created_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'short' }));
+            
+            // Mise à jour des valeurs "Dernière"
+            const last = c[c.length - 1];
+            document.getElementById('v-pouls').textContent = (last.pouls || '--') + ' bpm';
+            document.getElementById('v-spo2').textContent = (last.spo2 || '--') + ' %';
+            
+            if (last.users) {
+                document.getElementById('v-author').textContent = `Dernière prise par : ${last.users.nom} ${last.users.prenom || ''}`;
+            }
+
+            // Graphique Température
+            const ctxTemp = document.getElementById('tempChart').getContext('2d');
+            if (tempChart) tempChart.destroy();
+            tempChart = new Chart(ctxTemp, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Temp',
+                        data: c.map(x => x.temperature),
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#ef4444'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { min: 35, max: 42 }, x: { display: true } }
+                }
+            });
+
+            // Graphique Tension
+            const ctxTension = document.getElementById('tensionChart').getContext('2d');
+            if (tensionChart) tensionChart.destroy();
+            tensionChart = new Chart(ctxTension, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Sys',
+                            data: c.map(x => x.tension_sys),
+                            borderColor: '#3b82f6',
+                            tension: 0.4,
+                            pointRadius: 3
+                        },
+                        {
+                            label: 'Dia',
+                            data: c.map(x => x.tension_dia),
+                            borderColor: '#60a5fa',
+                            tension: 0.4,
+                            pointRadius: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { min: 40, max: 200 } }
+                }
+            });
+        }
+
+        function ouvrirConstantesModal() {
+            document.getElementById('constantesModal').style.display = 'flex';
+            setupVitalsAlerts();
+        }
+
+        function setupVitalsAlerts() {
+            const thresholds = {
+                'c-temp': { high: 38, warning: 37.5, color: '#fee2e2', wColor: '#fef3c7' },
+                'c-sys': { high: 140, low: 90, color: '#fee2e2' },
+                'c-spo2': { low: 94, color: '#fee2e2' }
+            };
+
+            Object.keys(thresholds).forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                
+                el.addEventListener('input', () => {
+                    const val = parseFloat(el.value);
+                    const group = el.closest('.input-group');
+                    const t = thresholds[id];
+                    
+                    if (group) group.style.background = 'transparent';
+                    
+                    if (val) {
+                        if (id === 'c-temp') {
+                            if (val >= t.high) group.style.background = t.color;
+                            else if (val >= t.warning) group.style.background = t.wColor;
+                        } else if (id === 'c-sys') {
+                            if (val >= t.high || val <= t.low) group.style.background = t.color;
+                        } else if (id === 'c-spo2') {
+                            if (val < t.low) group.style.background = t.color;
+                        }
+                    }
+                });
+            });
+        }
+
+        async function handleSaveConstantes(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-const');
+            btn.disabled = true; btn.textContent = 'Enregistrement...';
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('id');
+            const supabase = await window.SupabaseAPI.initSupabase();
+
+            // Récupérer l'ID de l'utilisateur connecté (infirmière ou médecin)
+            const userJson = localStorage.getItem('currentUser');
+            const currentUser = userJson ? JSON.parse(userJson) : null;
+
+            const data = {
+                patient_id: patientId,
+                infirmiere_id: currentUser ? currentUser.id : null,
+                temperature: parseFloat(document.getElementById('c-temp').value),
+                poids: parseFloat(document.getElementById('c-poids').value) || null,
+                tension_sys: parseInt(document.getElementById('c-sys').value),
+                tension_dia: parseInt(document.getElementById('c-dia').value),
+                pouls: parseInt(document.getElementById('c-pouls').value) || null,
+                spo2: parseInt(document.getElementById('c-spo2').value) || null
+            };
+
+            const { error } = await supabase.from('constantes').insert([data]);
+
+            if (!error) {
+                // Mise à jour du statut de la consultation
+                const { data: consult } = await supabase
+                    .from('consultations')
+                    .select('id')
+                    .eq('patient_id', patientId)
+                    .neq('status', 'termine')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                if (consult) {
+                    await supabase.from('consultations').update({ status: 'pret' }).eq('id', consult.id);
+                }
+
+                window.notifier('Constantes enregistrées avec succès !');
+                document.getElementById('constantesModal').style.display = 'none';
+                e.target.reset();
+                
+                // Redirection intelligente pour l'infirmière : retour au dashboard pour le patient suivant
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+            } else {
+                window.notifier('Erreur : ' + error.message, 'error');
+            }
+            btn.disabled = false; btn.textContent = 'Enregistrer';
         }
 
         // === GESTION DES SOINS (AUTOMATISATION STOCKS) ===
@@ -431,10 +684,8 @@
         }
 
         function toggleMobileSidebar() {
-            const s = document.querySelector('.sidebar');
-            const o = document.getElementById('sidebarOverlay');
-            s.classList.toggle('active');
-            o.classList.toggle('active');
+            document.querySelector('.sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
         }
     </script>
 </body>

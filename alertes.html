@@ -9,6 +9,22 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <link href="assets/premium-style.css" rel="stylesheet">
+    <link href="assets/ai-assistant.css" rel="stylesheet">
+    
+    <script src="assets/role-manager.js"></script>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else {
+                const hour = new Date().getHours();
+                if (hour >= 20 || hour < 6) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            }
+        })();
+    </script>
     <style>
         .alert-card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 16px; display: flex; align-items: center; gap: 20px; border-left: 5px solid var(--danger); transition: 0.2s; }
         .alert-card:hover { transform: translateX(8px); }
@@ -33,63 +49,18 @@
 <body>
     <div class="dashboard-container">
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
-                    <div class="logo-text"><h1>Clinique Refontiq</h1><p>Espace Médical</p></div>
-                </div>
-
-                <div class="sidebar-search">
-                    <div class="search-wrapper">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Rechercher un patient...">
-                    </div>
-                </div>
-
-                <div class="user-info">
-                    <div class="user-avatar" id="side-avatar">DR</div>
-                    <div class="user-details"><h3 id="side-name">Dr. Duval <span class="online-indicator" style="margin-left: 5px;"></span></h3><p id="side-role">Médecin</p></div>
-                </div>
-            </div>
-            <nav class="nav-menu">
-
-                <a href="dashboard.html" class="nav-item" id="menu-dashboard"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
-                <a href="patients.html" class="nav-item" id="menu-patients"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
-                <a href="consultations.html" class="nav-item" id="menu-consultations"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
-                <a href="rendez-vous.html" class="nav-item" id="menu-rendezvous"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
-                
-                <hr class="nav-separator" id="sep-finance">
-                
-                <a href="finance.html" class="nav-item" id="menu-finance"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
-                <a href="stocks.html" class="nav-item" id="menu-stocks"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
-                
-                <hr class="nav-separator">
-                
-                <a href="messagerie.html" class="nav-item" id="menu-messagerie"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
-                <a href="alertes.html" class="nav-item active" id="menu-alertes"><i class="fa-solid fa-bell glass-icon"></i> Alertes <span class="nav-badge">0</span></a>
-                <a href="parametres.html" class="nav-item" id="menu-parametres"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
-            
-            </nav>
-        </aside>
+        <div id="sidebar-container"></div>
 
         <main class="main-content">
-            <header class="mobile-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <button class="header-btn" onclick="toggleMobileSidebar()" style="background:none; border:none; font-size:1.5rem; color:white; cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
-                    <div style="width: 35px; height: 35px; background: rgba(255,255,255,0.2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
-                        <i class="fa-solid fa-hospital"></i>
-                    </div>
-                    <div style="font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">Clinique Refontiq</div>
-                </div>
-                <div style="font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 8px; text-transform: uppercase;">Alertes</div>
-            </header>
+            
 
 
             <div class="top-bar">
                 <div class="page-title">
                     <h1>Centre d'Alertes</h1>
                     <p>Surveillez les points critiques de la clinique</p>
+                </div>
+                <div class="top-actions">
                 </div>
             </div>
 
@@ -111,13 +82,7 @@
         });
 
         function initUser() {
-            const u = localStorage.getItem('currentUser');
-            if (u) {
-                const user = JSON.parse(u);
-                document.getElementById('side-name').textContent = user.name || 'Utilisateur';
-                document.getElementById('side-role').textContent = user.role;
-                document.getElementById('side-avatar').textContent = (user.name || 'U').substring(0, 2).toUpperCase();
-            }
+            // RoleManager handles user profile
         }
 
         async function chargerAlertes() {
@@ -181,7 +146,7 @@
 
             if (!hasAlerts) {
                 list.innerHTML = `
-                    <div style="text-align: center; padding: 60px; background: white; border-radius: 20px; border: 1px dashed var(--border);">
+                    <div style="text-align: center; padding: 60px; background: var(--card); border-radius: 20px; border: 1px dashed var(--border);">
                         <i class="fa-solid fa-check-circle fa-4x" style="color: var(--secondary); opacity: 0.2; margin-bottom: 20px;"></i>
                         <h2>Tout est sous contrôle</h2>
                         <p style="color: var(--text-light);">Aucune alerte critique n'a été détectée pour le moment.</p>
@@ -207,11 +172,36 @@
 
 
         function toggleMobileSidebar() {
-            const s = document.querySelector('.sidebar');
-            const o = document.getElementById('sidebarOverlay');
-            s.classList.toggle('active');
-            o.classList.toggle('active');
+            document.querySelector('.sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
         }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
+            updateThemeIcon(target);
+        }
+
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('theme-toggle');
+            const icon = btn.querySelector('i');
+            if (icon) {
+                if (theme === 'dark') {
+                    icon.className = 'fa-solid fa-sun';
+                    icon.style.color = '#fbbf24';
+                } else {
+                    icon.className = 'fa-solid fa-moon';
+                    icon.style.color = 'var(--text)';
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const theme = document.documentElement.getAttribute('data-theme') || 'light';
+            updateThemeIcon(theme);
+        });
     </script>
 </body>
 </html>

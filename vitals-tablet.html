@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Saisie Rapide Constantes - Refontiq</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="assets/premium-style.css" rel="stylesheet">
+    <style>
+        :root { --tablet-bg: #f8fafc; --tablet-card: #ffffff; }
+        [data-theme="dark"] {
+            --tablet-bg: #0f172a;
+            --tablet-card: #1e293b;
+            --bg: #1e293b;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --text-light: #94a3b8;
+            --border: #334155;
+        }
+        body { background: var(--tablet-bg); padding: 0; margin: 0; height: 100vh; overflow: hidden; transition: background 0.3s; }
+        .tablet-container { display: flex; flex-direction: column; max-width: 900px; margin: 0 auto; background: var(--tablet-card); height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.05); }
+        .tablet-header { padding: 20px 32px; background: var(--tablet-card); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .tablet-content { flex: 1; padding: 32px; overflow-y: auto; }
+        
+        .search-section { margin-bottom: 32px; position: relative; }
+        .search-input { width: 100%; padding: 20px 24px; padding-left: 60px; border-radius: 16px; border: 2px solid var(--border); font-size: 1.2rem; outline: none; transition: 0.3s; background: var(--tablet-card); color: var(--text); }
+        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
+        .search-icon { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); color: var(--text-light); font-size: 1.4rem; }
+
+        .results-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--tablet-card); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border); z-index: 100; max-height: 300px; overflow-y: auto; display: none; margin-top: 8px; }
+        .result-item { padding: 16px 24px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; gap: 16px; color: var(--text); }
+        .result-item:hover { background: var(--primary-light); color: var(--primary); }
+        .result-item:last-child { border: none; }
+
+        .selected-patient-card { background: var(--primary); color: white; padding: 24px; border-radius: 20px; margin-bottom: 32px; display: none; animation: slideDown 0.3s ease; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .vitals-form { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .input-box { background: var(--bg); padding: 24px; border-radius: 20px; border: 2px solid transparent; transition: 0.2s; }
+        .input-box:focus-within { border-color: var(--primary); background: var(--tablet-card); }
+        .input-box label { display: block; font-size: 0.9rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+        .input-box input { width: 100%; background: none; border: none; font-size: 2rem; font-weight: 700; font-family: 'Space Grotesk'; color: var(--text); outline: none; }
+        .input-box .unit { font-size: 1rem; color: var(--text-light); margin-left: 8px; }
+
+        .btn-save-tablet { width: 100%; padding: 24px; border-radius: 20px; border: none; background: var(--primary); color: white; font-size: 1.4rem; font-weight: 700; font-family: 'Space Grotesk'; cursor: pointer; margin-top: 40px; box-shadow: 0 10px 25px rgba(0, 119, 182, 0.3); transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .btn-save-tablet:active { transform: scale(0.98); }
+        .btn-save-tablet:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .role-badge { background: #eff6ff; color: #1e40af; padding: 4px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+
+        @media (max-width: 768px) {
+            .vitals-form { grid-template-columns: 1fr; gap: 16px; }
+            .tablet-content { padding: 20px; }
+            .input-box { padding: 16px; }
+            .input-box input { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="tablet-container">
+        <header class="tablet-header">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button onclick="window.location.href='dashboard.html'" style="background:none; border:none; color:var(--text); cursor:pointer; font-size:1.5rem;"><i class="fa-solid fa-arrow-left"></i></button>
+                <h1 style="margin:0; font-family:'Space Grotesk'; font-size:1.4rem;">Saisie Rapide</h1>
+            </div>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div class="role-badge"><i class="fa-solid fa-user-nurse"></i> Mode Infirmière</div>
+            </div>
+        </header>
+
+        <div class="tablet-content">
+            <!-- Recherche Patient -->
+            <div class="search-section">
+                <i class="fa-solid fa-search search-icon"></i>
+                <input type="text" id="patient-search" class="search-input" placeholder="Rechercher un patient..." autocomplete="off">
+                <div id="results-list" class="results-list"></div>
+            </div>
+
+            <!-- Patient Sélectionné -->
+            <div id="selected-patient" class="selected-patient-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-size:0.8rem; opacity:0.8; text-transform:uppercase;">Patient en cours</div>
+                        <div id="patient-name" style="font-size:1.5rem; font-weight:700; font-family:'Space Grotesk';">--</div>
+                    </div>
+                    <button onclick="resetSelection()" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:8px 16px; border-radius:10px; cursor:pointer;"><i class="fa-solid fa-times"></i></button>
+                </div>
+            </div>
+
+            <!-- Formulaire de Constantes -->
+            <form id="vitals-form" onsubmit="saveVitals(event)" style="opacity: 0.5; pointer-events: none;">
+                <div class="vitals-form">
+                    <div class="input-box">
+                        <label>Température</label>
+                        <div style="display:flex; align-items:baseline;">
+                            <input type="number" id="v-temp" step="0.1" placeholder="37.0" required>
+                            <span class="unit">°C</span>
+                        </div>
+                    </div>
+                    <div class="input-box">
+                        <label>Tension Sys (Max)</label>
+                        <div style="display:flex; align-items:baseline;">
+                            <input type="number" id="v-sys" placeholder="120" required>
+                            <span class="unit">mmHg</span>
+                        </div>
+                    </div>
+                    <div class="input-box">
+                        <label>Tension Dia (Min)</label>
+                        <div style="display:flex; align-items:baseline;">
+                            <input type="number" id="v-dia" placeholder="80" required>
+                            <span class="unit">mmHg</span>
+                        </div>
+                    </div>
+                    <div class="input-box">
+                        <label>Pouls</label>
+                        <div style="display:flex; align-items:baseline;">
+                            <input type="number" id="v-pouls" placeholder="72" required>
+                            <span class="unit">bpm</span>
+                        </div>
+                    </div>
+                    <div class="input-box">
+                        <label>SpO2</label>
+                        <div style="display:flex; align-items:baseline;">
+                            <input type="number" id="v-spo2" placeholder="98" required>
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+                    <div class="input-box">
+                        <label>Poids</label>
+                        <div style="display:flex; align-items:baseline;">
+                            <input type="number" id="v-poids" step="0.1" placeholder="70.0">
+                            <span class="unit">kg</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-save" class="btn-save-tablet">
+                    <i class="fa-solid fa-check-circle"></i> Enregistrer & Continuer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        let selectedPatientId = null;
+        let allPatients = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Theme initialized by RoleManager (auto-executing script in assets/role-manager.js)
+            await chargerPatients();
+            
+            // Récupérer l'ID de consultation depuis l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const consultId = urlParams.get('id');
+            if (consultId) {
+                await chargerConsultationSpecifique(consultId);
+            }
+            
+            const searchInput = document.getElementById('patient-search');
+            searchInput.addEventListener('input', (e) => filtrerResultats(e.target.value));
+
+            // Ajouter les alertes visuelles
+            setupAlerts();
+        });
+
+        function setupAlerts() {
+            const thresholds = {
+                'v-temp': { high: 38, warning: 37.5, color: '#fee2e2', wColor: '#fef3c7' },
+                'v-sys': { high: 140, low: 90, color: '#fee2e2' },
+                'v-spo2': { low: 94, color: '#fee2e2' }
+            };
+
+            Object.keys(thresholds).forEach(id => {
+                const el = document.getElementById(id);
+                el.addEventListener('input', () => {
+                    const val = parseFloat(el.value);
+                    const box = el.closest('.input-box');
+                    const t = thresholds[id];
+                    
+                    box.style.background = 'var(--bg)'; // Default
+                    
+                    if (id === 'v-temp') {
+                        if (val >= t.high) box.style.background = t.color;
+                        else if (val >= t.warning) box.style.background = t.wColor;
+                    } else if (id === 'v-sys') {
+                        if (val >= t.high || val <= t.low) box.style.background = t.color;
+                    } else if (id === 'v-spo2') {
+                        if (val < t.low) box.style.background = t.color;
+                    }
+                });
+            });
+        }
+
+        async function chargerPatients() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data } = await supabase.from('patients').select('id, nom, prenom').order('nom');
+            if (data) allPatients = data;
+        }
+
+        async function chargerConsultationSpecifique(id) {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data, error } = await supabase
+                .from('consultations')
+                .select('*, patients(id, nom, prenom)')
+                .eq('id', id)
+                .single();
+            
+            if (data && data.patients) {
+                selectPatient(data.patients.id, `${data.patients.nom} ${data.patients.prenom || ''}`);
+                // On stocke l'ID de consultation pour la mise à jour finale
+                window.currentConsultId = id;
+            }
+        }
+
+        function filtrerResultats(val) {
+            const list = document.getElementById('results-list');
+            if (val.length < 2) { list.style.display = 'none'; return; }
+
+            const filtered = allPatients.filter(p => 
+                p.nom.toLowerCase().includes(val.toLowerCase()) || 
+                p.prenom.toLowerCase().includes(val.toLowerCase())
+            ).slice(0, 5);
+
+            if (filtered.length > 0) {
+                list.style.display = 'block';
+                list.innerHTML = filtered.map(p => `
+                    <div class="result-item" onclick="selectPatient('${p.id}', '${p.nom} ${p.prenom}')">
+                        <div style="width:36px; height:36px; border-radius:50%; background:var(--bg); display:flex; align-items:center; justify-content:center; font-weight:700;">${p.nom[0]}</div>
+                        <div>${p.nom} ${p.prenom}</div>
+                    </div>
+                `).join('');
+            } else {
+                list.style.display = 'none';
+            }
+        }
+
+        function selectPatient(id, name) {
+            selectedPatientId = id;
+            document.getElementById('patient-name').textContent = name;
+            document.getElementById('selected-patient').style.display = 'block';
+            document.getElementById('results-list').style.display = 'none';
+            document.getElementById('patient-search').value = '';
+            
+            // Activer le formulaire
+            const form = document.getElementById('vitals-form');
+            form.style.opacity = '1';
+            form.style.pointerEvents = 'auto';
+            document.getElementById('v-temp').focus();
+        }
+
+        function resetSelection() {
+            selectedPatientId = null;
+            document.getElementById('selected-patient').style.display = 'none';
+            document.getElementById('vitals-form').style.opacity = '0.5';
+            document.getElementById('vitals-form').style.pointerEvents = 'none';
+            document.getElementById('vitals-form').reset();
+        }
+
+        async function saveVitals(e) {
+            e.preventDefault();
+            if (!selectedPatientId) return;
+
+            const btn = document.getElementById('btn-save');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enregistrement...';
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const userJson = localStorage.getItem('currentUser');
+            const user = userJson ? JSON.parse(userJson) : {};
+
+            const data = {
+                patient_id: selectedPatientId,
+                infirmiere_id: user.id || null,
+                temperature: parseFloat(document.getElementById('v-temp').value),
+                tension_sys: parseInt(document.getElementById('v-sys').value),
+                tension_dia: parseInt(document.getElementById('v-dia').value),
+                pouls: parseInt(document.getElementById('v-pouls').value),
+                spo2: parseInt(document.getElementById('v-spo2').value),
+                poids: parseFloat(document.getElementById('v-poids').value) || null
+            };
+
+            const { error } = await supabase.from('constantes').insert([data]);
+
+            if (!error) {
+                // MISE À JOUR DU STATUT POUR LE MÉDECIN (TEMPS RÉEL)
+                const consultId = window.currentConsultId || null;
+                if (consultId) {
+                    await supabase.from('consultations')
+                        .update({ status: 'medecin' })
+                        .eq('id', consultId);
+                }
+
+                window.notifier("Constantes enregistrées ! Patient envoyé au médecin.", "success");
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+            } else {
+                window.notifier("Erreur : " + error.message, 'error');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Enregistrer & Continuer';
+        }
+    </script>
+</body>
+</html>

@@ -39,38 +39,33 @@ const SUPABASE_CONFIG = {
 /**
  * Initialise la connexion à Supabase
  */
+let cachedSupabase = null;
 async function initSupabase() {
     try {
+        if (cachedSupabase) return cachedSupabase;
+
         // Vérifier si les clés sont configurées
         if (!SUPABASE_CONFIG.url || !SUPABASE_CONFIG.key || SUPABASE_CONFIG.url === 'VOTRE_URL_SUPABASE' || SUPABASE_CONFIG.key === 'VOTRE_CLE_ANON_SUPABASE') {
-            console.warn('⚠️ Supabase non configurée. Ouvrez supabase-config.js et ajoutez vos clés.');
+            console.warn('⚠️ Supabase non configurée.');
             return null;
         }
 
-        // Vérifier si la bibliothèque est chargée (avec retry si nécessaire)
         let supabaseLib = window.supabase;
         if (!supabaseLib) {
-            console.log('⏳ Attente du chargement de Supabase...');
             for (let i = 0; i < 5; i++) {
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 300));
                 supabaseLib = window.supabase;
                 if (supabaseLib) break;
             }
         }
 
-        if (!supabaseLib) {
-            console.error('❌ Erreur: La bibliothèque Supabase n\'est pas chargée après 2.5s.');
-            return null;
-        }
+        if (!supabaseLib) return null;
 
-        // Créer le client Supabase
-        const supabase = supabaseLib.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
-
-        // Tester la connexion (optionnel, on peut juste renvoyer le client)
-        console.log('✅ Tentative de connexion à Supabase...');
-        return supabase;
+        cachedSupabase = supabaseLib.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+        console.log('✅ Supabase connecté (Client mis en cache)');
+        return cachedSupabase;
     } catch (error) {
-        console.error('❌ Erreur d\'initialisation Supabase:', error.message);
+        console.error('❌ Erreur initialisation Supabase:', error.message);
         return null;
     }
 }
@@ -618,13 +613,11 @@ function afficherNotifRDV(rdv) {
 // Initialisation globale au chargement de chaque page
 document.addEventListener('DOMContentLoaded', () => {
     updateGlobalAlertBadges();
-    updateRdvPendingBadge();      // ← Badge RDV en attente
-    setupGlobalRdvListener();     // ← Écoute temps réel des nouveaux RDV
-    initSmartSearch();
-    initLogoNavigation();
-    adapterMenuParRole();   // ← Adaptation intelligente du menu
-    injecterBoutonDeconnexion(); // ← Bouton déconnexion sidebar
-    demarrerHeartbeat(); // ← Maintien de session (battement de cœur)
+    updateRdvPendingBadge();      
+    setupGlobalRdvListener();     
+    adapterMenuParRole();   
+    injecterBoutonDeconnexion(); 
+    demarrerHeartbeat(); 
 });
 
 /**

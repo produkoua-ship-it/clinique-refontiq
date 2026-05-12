@@ -5,81 +5,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patients - Clinique Refontiq</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <link href="assets/premium-style.css" rel="stylesheet">
+    <link href="assets/ai-assistant.css" rel="stylesheet">
+    <script src="assets/role-manager.js"></script>
 </head>
 
 <body>
     <div class="dashboard-container">
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
-                    <div class="logo-text"><h1>Clinique Refontiq</h1><p>Espace Médical</p></div>
-                </div>
-
-                <div class="sidebar-search">
-                    <div class="search-wrapper">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Rechercher un patient...">
-                    </div>
-                </div>
-
-                <div class="user-info">
-                    <div class="user-avatar" id="side-avatar">DR</div>
-                    <div class="user-details"><h3 id="side-name">Dr. Duval <span class="online-indicator" style="margin-left: 5px;"></span></h3><p id="side-role">Médecin</p></div>
-                </div>
-            </div>
-            <nav class="nav-menu">
-
-                <a href="dashboard.html" class="nav-item" id="menu-dashboard"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
-                <a href="patients.html" class="nav-item active" id="menu-patients"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
-                <a href="consultations.html" class="nav-item" id="menu-consultations"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
-                <a href="rendez-vous.html" class="nav-item" id="menu-rendezvous"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
-                
-                <hr class="nav-separator" id="sep-finance">
-                
-                <a href="finance.html" class="nav-item" id="menu-finance"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
-                <a href="stocks.html" class="nav-item" id="menu-stocks"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
-                
-                <hr class="nav-separator">
-                
-                <a href="messagerie.html" class="nav-item" id="menu-messagerie"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
-                <a href="alertes.html" class="nav-item" id="menu-alertes"><i class="fa-solid fa-bell glass-icon"></i> Alertes <span class="nav-badge">0</span></a>
-                <a href="parametres.html" class="nav-item" id="menu-parametres"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
-            
-            </nav>
-        </aside>
+        <div id="sidebar-container"></div>
 
         <main class="main-content">
-            <header class="mobile-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <button class="header-btn" onclick="toggleMobileSidebar()" style="background:none; border:none; font-size:1.5rem; color:white; cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
-                    <div style="width: 35px; height: 35px; background: rgba(255,255,255,0.2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
-                        <i class="fa-solid fa-hospital"></i>
-                    </div>
-                    <div style="font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">Clinique Refontiq</div>
-                </div>
-                <div style="font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 8px; text-transform: uppercase;">Patients</div>
-            </header>
-
             <div id="view-list">
                 <div class="top-bar">
                     <div class="page-title">
                         <h1>Base Patients</h1>
                         <p id="count-text">Chargement...</p>
                     </div>
-                    <div class="top-actions">
+                    <div class="top-actions" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                         <div class="search-box">
                             <i class="fa-solid fa-search"></i>
                             <input type="text" id="search-patient" placeholder="Rechercher..." onkeyup="filtrerPatients()">
                         </div>
+                        <select id="sort-order" class="btn" style="background: var(--card); border: 1px solid var(--border);" onchange="chargerPatients(1)">
+                            <option value="nom_asc">Nom (A-Z)</option>
+                            <option value="nom_desc">Nom (Z-A)</option>
+                            <option value="recent">Plus récents</option>
+                            <option value="ancien">Plus anciens</option>
+                        </select>
                         <button class="btn btn-primary" onclick="showSection('new')"><i class="fa-solid fa-plus"></i> Nouveau</button>
+                        <button class="btn" style="background:var(--primary-light); color:var(--primary);" onclick="document.getElementById('import-csv').click()" title="Importer des patients depuis un fichier CSV"><i class="fa-solid fa-file-import"></i> Importer CSV</button>
+                        <input type="file" id="import-csv" accept=".csv" style="display:none;" onchange="handleImport(this)">
                     </div>
                 </div>
 
@@ -106,12 +65,9 @@
                         </table>
                     </div>
                     
-                    <!-- Contrôles de pagination -->
                     <div id="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-top: 1px solid var(--border); background: var(--bg);">
                         <div id="pagination-info" style="font-size: 0.85rem; color: var(--text-light);">Chargement...</div>
-                        <div id="pagination-buttons" style="display: flex; gap: 8px;">
-                            <!-- Boutons générés dynamiquement -->
-                        </div>
+                        <div id="pagination-buttons" style="display: flex; gap: 8px;"></div>
                     </div>
                 </div>
             </div>
@@ -139,6 +95,10 @@
                                 </select>
                             </div>
                             <div class="form-group"><label>Date de naissance</label><input type="date" id="date_naissance"></div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Adresse *</label>
+                                <input type="text" id="adresse" placeholder="Ex: Koumassi, Rue des jardins..." required>
+                            </div>
                             <div class="form-group">
                                 <label>Groupe Sanguin</label>
                                 <select id="sang">
@@ -173,19 +133,8 @@
     <script src="supabase-config.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            initUser();
             await chargerPatients();
         });
-
-        function initUser() {
-            const u = localStorage.getItem('currentUser');
-            if (u) {
-                const user = JSON.parse(u);
-                document.getElementById('side-name').textContent = user.name || 'Utilisateur';
-                document.getElementById('side-role').textContent = user.role;
-                document.getElementById('side-avatar').textContent = (user.name || 'U').substring(0, 2).toUpperCase();
-            }
-        }
 
         let currentPage = 1;
         const itemsPerPage = 20;
@@ -201,21 +150,21 @@
             
             tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="color:var(--primary);"></i> Chargement...</td></tr>`;
 
-            // Construction de la requête avec count exact
             let query = supabase.from('patients').select('*', { count: 'exact' });
-            
-            // Recherche si définie
             if (searchQuery) {
                 query = query.or(`nom.ilike.%${searchQuery}%,prenom.ilike.%${searchQuery}%,telephone.ilike.%${searchQuery}%`);
             }
 
-            // Pagination logic (Supabase is 0-indexed for ranges)
             const from = (page - 1) * itemsPerPage;
             const to = from + itemsPerPage - 1;
 
-            const { data, count, error } = await query
-                .order('nom', { ascending: true })
-                .range(from, to);
+            const sortOrder = document.getElementById('sort-order').value;
+            if (sortOrder === 'nom_asc') query = query.order('nom', { ascending: true });
+            else if (sortOrder === 'nom_desc') query = query.order('nom', { ascending: false });
+            else if (sortOrder === 'recent') query = query.order('created_at', { ascending: false });
+            else if (sortOrder === 'ancien') query = query.order('created_at', { ascending: true });
+
+            const { data, count, error } = await query.range(from, to);
             
             if (error) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger);">Erreur : ${error.message}</td></tr>`;
@@ -232,7 +181,6 @@
 
             countText.textContent = `${count} patient${count > 1 ? 's' : ''} enregistré${count > 1 ? 's' : ''}`;
             
-            // Affichage des patients
             tbody.innerHTML = data.map(p => `
                 <tr onclick="window.location.href='dossier-patient.html?id=${p.id}'" style="cursor: pointer;">
                     <td>
@@ -251,7 +199,6 @@
                 </tr>
             `).join('');
 
-            // Affichage de la pagination
             const totalPages = Math.ceil(count / itemsPerPage);
             const actualEnd = Math.min(to + 1, count);
             pagInfo.textContent = `Affichage ${from + 1} à ${actualEnd} sur ${count}`;
@@ -266,6 +213,55 @@
             pagBtns.innerHTML = btnHTML;
         }
 
+        async function handleImport(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const text = e.target.result;
+                const rows = text.split('\n').filter(row => row.trim() !== '');
+                if (rows.length < 2) {
+                    window.notifier("Le fichier est vide ou mal formaté.", 'error');
+                    return;
+                }
+
+                const dataRows = rows.slice(1);
+                const patientsToImport = [];
+                dataRows.forEach(row => {
+                    const values = row.split(/[;,]/);
+                    if (values.length >= 3) {
+                        patientsToImport.push({
+                            nom: values[0]?.trim() || 'Importé',
+                            prenom: values[1]?.trim() || '',
+                            telephone: values[2]?.trim() || '',
+                            sexe: (values[3]?.trim() || 'M').toUpperCase().substring(0, 1),
+                            adresse: values[4]?.trim() || ''
+                        });
+                    }
+                });
+
+                if (patientsToImport.length === 0) {
+                    window.notifier("Aucune donnée valide trouvée.", 'error');
+                    return;
+                }
+
+                if (!confirm(`Importer ${patientsToImport.length} patients ?`)) return;
+
+                const supabase = await window.SupabaseAPI.initSupabase();
+                const { error } = await supabase.from('patients').insert(patientsToImport);
+
+                if (error) {
+                    window.notifier("Erreur d'importation : " + error.message, 'error');
+                } else {
+                    window.notifier(`${patientsToImport.length} patients importés avec succès !`);
+                    await chargerPatients();
+                }
+                input.value = '';
+            };
+            reader.readAsText(file);
+        }
+
         async function handleNewPatient(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-save');
@@ -277,6 +273,7 @@
                 nom: document.getElementById('nom').value,
                 prenom: document.getElementById('prenom').value,
                 telephone: document.getElementById('tel').value,
+                adresse: document.getElementById('adresse').value,
                 sexe: document.getElementById('sexe').value,
                 date_naissance: document.getElementById('date_naissance').value || null,
                 groupe_sanguin: document.getElementById('sang').value,
@@ -284,7 +281,7 @@
                 maladies: document.getElementById('maladies').value
             };
 
-            const { error } = await supabase.from('patients').insert([patient]);
+            const { data, error } = await supabase.from('patients').insert([patient]).select();
             
             if (error) {
                 window.notifier("Erreur : " + error.message, 'error');
@@ -292,11 +289,19 @@
                 btn.textContent = "Enregistrer le patient";
             } else {
                 window.notifier("Patient enregistré avec succès !");
-                showSection('list');
-                await chargerPatients();
-                btn.disabled = false;
-                btn.textContent = "Enregistrer le patient";
-                document.querySelector('form').reset();
+                const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                
+                setTimeout(() => {
+                    if (user.role === 'infirmiere') {
+                        window.location.href = `dossier-patient.html?id=${data[0].id}&action=vitals`;
+                    } else {
+                        showSection('list');
+                        chargerPatients();
+                        btn.disabled = false;
+                        btn.textContent = "Enregistrer le patient";
+                        document.querySelector('form').reset();
+                    }
+                }, 1000);
             }
         }
 
@@ -310,16 +315,10 @@
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 searchQuery = document.getElementById('search-patient').value.trim();
-                chargerPatients(1); // Retour à la première page avec la nouvelle recherche
-            }, 300); // 300ms de délai pour éviter de spammer la base de données pendant la frappe
-        }
-
-        function toggleMobileSidebar() {
-            const s = document.querySelector('.sidebar');
-            const o = document.getElementById('sidebarOverlay');
-            s.classList.toggle('active');
-            o.classList.toggle('active');
+                chargerPatients(1);
+            }, 300);
         }
     </script>
 </body>
+
 </html>

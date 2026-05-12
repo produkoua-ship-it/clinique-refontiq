@@ -7,10 +7,25 @@
     <title>Agenda Médical - Refontiq</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- FullCalendar CSS -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css' rel='stylesheet' />
+    <!-- FullCalendar v6 ne nécessite plus de fichier CSS séparé, il est géré par JS -->
     
     <link href="assets/premium-style.css" rel="stylesheet">
+    <link href="assets/ai-assistant.css" rel="stylesheet">
+    
+    <script src="assets/role-manager.js"></script>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else {
+                const hour = new Date().getHours();
+                if (hour >= 20 || hour < 6) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            }
+        })();
+    </script>
     <style>
         body { overflow: hidden; }
         .main-content { display: grid; grid-template-columns: 350px 1fr; height: 100vh; }
@@ -23,26 +38,39 @@
         .agenda-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; gap: 16px; }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 0 10px; gap: 16px; }
         .agenda-date h2 { font-family: 'Space Grotesk'; font-size: 1.8rem; font-weight: 700; color: var(--primary); }
-        .rdv-list { display: flex; flex-direction: column; gap: 16px; }
-        .rdv-item { background: var(--card); padding: 20px; border-radius: 16px; display: flex; align-items: center; gap: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: 0.2s; }
-        .rdv-item:hover { transform: translateX(10px); border-color: var(--primary); }
-        .rdv-time { min-width: 80px; font-weight: 700; font-size: 1.1rem; color: var(--primary); text-align: center; border-right: 2px solid var(--primary-light); }
-        .patient-info { flex: 1; }
-        .patient-name { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
-        .rdv-reason { font-size: 0.85rem; color: var(--text-light); display: flex; align-items: center; gap: 6px; }
-        .status-badge { padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
-        .status-confirmed { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-        .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        
+        /* Timeline Styles */
+        .timeline-container { position: relative; padding-left: 30px; margin-top: 10px; }
+        .timeline-container::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--border); }
+        .timeline-card { position: relative; background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s; }
+        .timeline-card:hover { transform: translateX(5px); }
+        .timeline-card::before { content: ''; position: absolute; left: -36px; top: 24px; width: 14px; height: 14px; border-radius: 50%; background: var(--primary); border: 3px solid var(--bg); }
+        
+        .type-consultation { border-left-color: #3b82f6; }
+        .type-consultation::before { background: #3b82f6; }
+        .type-examen { border-left-color: #10b981; }
+        .type-examen::before { background: #10b981; }
+        .type-urgence { border-left-color: #ef4444; }
+        .type-urgence::before { background: #ef4444; }
+
+        .timeline-time { font-weight: 700; font-size: 1.2rem; color: var(--text); min-width: 80px; }
+        .timeline-details { flex: 1; padding: 0 20px; }
+        .timeline-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 6px; color: var(--text); }
+        .timeline-meta { font-size: 0.85rem; color: var(--text-light); display: flex; gap: 16px; flex-wrap: wrap; }
+        .timeline-actions { display: flex; gap: 8px; align-items: center; }
+
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 32px; border-radius: 20px; width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .modal-content { background: var(--card); padding: 32px; border-radius: 20px; width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
 
         @media (max-width: 1024px) {
             .main-content { display: block; padding: 16px; }
             .calendar-section { display: none; }
             .agenda-header, .calendar-header { flex-direction: column; align-items: stretch; margin-bottom: 24px; }
             .agenda-header > div:last-child, .calendar-actions { display: grid; grid-template-columns: 1fr; gap: 12px; width: 100%; }
-            .btn { width: 100%; justify-content: center; }
+            .timeline-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .timeline-details { padding: 0; margin-top: 8px; }
+            .timeline-actions { width: 100%; justify-content: flex-end; }
         }
     </style>
 </head>
@@ -50,57 +78,10 @@
 <body>
     <div class="dashboard-container">
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
-                    <div class="logo-text"><h1>Clinique Refontiq</h1><p>Espace Médical</p></div>
-                </div>
-
-                <div class="sidebar-search">
-                    <div class="search-wrapper">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Rechercher un patient...">
-                    </div>
-                </div>
-
-                <div class="user-info">
-                    <div class="user-avatar" id="side-avatar">DR</div>
-                    <div class="user-details"><h3 id="side-name">Dr. Duval <span class="online-indicator" style="margin-left: 5px;"></span></h3><p id="side-role">Médecin</p></div>
-                </div>
-            </div>
-            <nav class="nav-menu">
-
-                <a href="dashboard.html" class="nav-item" id="menu-dashboard"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
-                <a href="patients.html" class="nav-item" id="menu-patients"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
-                <a href="consultations.html" class="nav-item" id="menu-consultations"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
-                <a href="rendez-vous.html" class="nav-item active" id="menu-rendezvous"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
-                
-                <hr class="nav-separator" id="sep-finance">
-                
-                <a href="finance.html" class="nav-item" id="menu-finance"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
-                <a href="stocks.html" class="nav-item" id="menu-stocks"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
-                
-                <hr class="nav-separator">
-                
-                <a href="messagerie.html" class="nav-item" id="menu-messagerie"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
-                <a href="alertes.html" class="nav-item" id="menu-alertes"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
-                <a href="parametres.html" class="nav-item" id="menu-parametres"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
-            
-            </nav>
-        </aside>
+        <div id="sidebar-container"></div>
 
         <main class="main-content">
-            <header class="mobile-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <button class="header-btn" onclick="toggleMobileSidebar()" style="background:none; border:none; font-size:1.5rem; color:white; cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
-                    <div style="width: 35px; height: 35px; background: rgba(255,255,255,0.2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
-                        <i class="fa-solid fa-hospital"></i>
-                    </div>
-                    <div style="font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">Clinique Refontiq</div>
-                </div>
-                <div style="font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 8px; text-transform: uppercase;">Agenda</div>
-            </header>
+            
 
             <section class="calendar-section">
                 <div class="mini-calendar-container">
@@ -109,9 +90,9 @@
                 <div style="margin-top: 24px;">
                     <h3 style="font-size: 0.9rem; margin-bottom: 16px; color: var(--text-light);">Légende</h3>
                     <div style="display:flex; flex-direction:column; gap:10px; font-size:0.8rem;">
-                        <div style="display:flex; align-items:center; gap:8px;"><div style="width:12px; height:12px; border-radius:3px; background:var(--primary);"></div> Consultation</div>
-                        <div style="display:flex; align-items:center; gap:8px;"><div style="width:12px; height:12px; border-radius:3px; background:var(--secondary);"></div> Examen</div>
-                        <div style="display:flex; align-items:center; gap:8px;"><div style="width:12px; height:12px; border-radius:3px; background:var(--danger);"></div> Urgence</div>
+                        <div style="display:flex; align-items:center; gap:8px;"><div style="width:12px; height:12px; border-radius:3px; background:#3b82f6;"></div> Consultation</div>
+                        <div style="display:flex; align-items:center; gap:8px;"><div style="width:12px; height:12px; border-radius:3px; background:#10b981;"></div> Examen</div>
+                        <div style="display:flex; align-items:center; gap:8px;"><div style="width:12px; height:12px; border-radius:3px; background:#ef4444;"></div> Urgence</div>
                     </div>
                 </div>
             </section>
@@ -168,7 +149,9 @@
             <form onsubmit="handleSaveRDV(event)">
                 <div class="form-group">
                     <label>Patient *</label>
-                    <select id="select-patient" required><option value="">Sélectionner un patient...</option></select>
+                    <input list="patients-list" id="select-patient-search" class="form-control" placeholder="Taper le nom du patient..." required onchange="onPatientSearchChange()">
+                    <datalist id="patients-list"></datalist>
+                    <input type="hidden" id="select-patient">
                 </div>
                 <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div><label>Date *</label><input type="date" id="rdv-date" required></div>
@@ -247,6 +230,16 @@
                 .subscribe();
         }
 
+        // La fonction chargerPatients est définie plus bas pour éviter les doublons.
+
+        function onPatientSearchChange() {
+            const val = document.getElementById('select-patient-search').value;
+            const p = window.allPatients.find(x => `${x.nom} ${x.prenom}` === val);
+            if (p) {
+                document.getElementById('select-patient').value = p.id;
+            }
+        }
+
         /**
          * Charge TOUS les rendez-vous en attente (toutes dates confondues)
          */
@@ -300,7 +293,7 @@
                 const heureStr = r.heure.substring(0, 5);
 
                 return `
-                <div style="background: white; border-radius: 14px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #fde68a; transition: all 0.2s;" onmouseenter="this.style.boxShadow='0 4px 16px rgba(245,158,11,0.2)'" onmouseleave="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'">
+                <div style="background: var(--card); border-radius: 14px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid var(--border); transition: all 0.2s;" onmouseenter="this.style.boxShadow='0 4px 16px rgba(245,158,11,0.2)'" onmouseleave="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.06)'">
                     <div style="width:42px; height:42px; border-radius:50%; background: linear-gradient(135deg, #f59e0b, #f97316); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0;">${initials}</div>
                     <div style="flex:1; min-width:0;">
                         <div style="font-weight:700; font-size:0.95rem; color:#1e293b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${nom}</div>
@@ -321,13 +314,7 @@
         }
 
         function initUser() {
-            const u = localStorage.getItem('currentUser');
-            if (u) {
-                const user = JSON.parse(u);
-                document.getElementById('side-name').textContent = user.name || 'Utilisateur';
-                document.getElementById('side-role').textContent = user.role;
-                document.getElementById('side-avatar').textContent = (user.name || 'U').substring(0, 2).toUpperCase();
-            }
+            // RoleManager handles the sidebar and basic user info.
         }
 
         function initMiniCalendar() {
@@ -357,8 +344,19 @@
         async function chargerPatients() {
             const supabase = await window.SupabaseAPI.initSupabase();
             const { data } = await supabase.from('patients').select('id, nom, prenom').order('nom');
+            window.allPatients = data || [];
+            
+            const list = document.getElementById('patients-list');
+            if (list && data) {
+                list.innerHTML = data.map(p => `<option value="${p.nom} ${p.prenom}">${p.id}</option>`).join('');
+            }
+
+            // Remplir aussi le select classique si présent
             const select = document.getElementById('select-patient');
-            if (data) data.forEach(p => select.innerHTML += `<option value="${p.id}">${p.nom} ${p.prenom || ''}</option>`);
+            if (select && select.tagName === 'SELECT' && data) {
+                select.innerHTML = '<option value="">Choisir un patient...</option>';
+                data.forEach(p => select.innerHTML += `<option value="${p.id}">${p.nom} ${p.prenom || ''}</option>`);
+            }
         }
 
         function jumpToDate(dateStr) {
@@ -377,7 +375,7 @@
             container.innerHTML = '';
             
             document.getElementById('current-date-display').textContent = "7 Prochains jours";
-            document.getElementById('day-name').textContent = "APERÇU";
+            document.getElementById('day-name').textContent = "APERÇU HEBDOMADAIRE";
 
             const supabase = await window.SupabaseAPI.initSupabase();
             const today = new Date().toISOString().split('T')[0];
@@ -393,25 +391,16 @@
                 .order('date', { ascending: true })
                 .order('heure', { ascending: true });
 
-            // Fallback si la jointure échoue
             if (error || !data) {
-                const result = await supabase
-                    .from('rendez_vous')
-                    .select('*')
-                    .gte('date', today)
-                    .lte('date', nextWeekStr)
-                    .order('date', { ascending: true })
-                    .order('heure', { ascending: true });
+                const result = await supabase.from('rendez_vous').select('*').gte('date', today).lte('date', nextWeekStr).order('date', { ascending: true }).order('heure', { ascending: true });
                 data = result.data;
-
                 if (data && data.length > 0) {
                     const patientIds = [...new Set(data.map(r => r.patient_id).filter(Boolean))];
                     if (patientIds.length > 0) {
-                        const { data: patientsData } = await supabase
-                            .from('patients').select('id, nom, prenom').in('id', patientIds);
+                        const { data: patientsData } = await supabase.from('patients').select('id, nom, prenom').in('id', patientIds);
                         const pMap = {};
                         if (patientsData) patientsData.forEach(p => { pMap[p.id] = p; });
-                        data = data.map(r => ({ ...r, patients: pMap[r.patient_id] || { nom: 'Patient', prenom: '#'+r.patient_id } }));
+                        data = data.map(r => ({ ...r, patients: pMap[r.patient_id] || { nom: 'Patient', prenom: '' } }));
                     }
                 }
             }
@@ -419,30 +408,47 @@
             loader.style.display = 'none';
 
             if (!data || data.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:40px;">Aucun RDV prévu dans les 7 prochains jours.</div>`;
+                container.innerHTML = `<div style="text-align:center; padding:40px; color:var(--text-light);">Aucun RDV prévu dans les 7 prochains jours.</div>`;
                 return;
             }
 
-            container.innerHTML = data.map(r => {
-                const statusStr = r.statut || 'confirme';
-                const isPending = statusStr === 'en_attente';
-                const badgeClass = isPending ? 'status-pending' : 'status-confirmed';
-                const badgeText = isPending ? 'En attente' : 'Confirmé';
+            // Grouper par date
+            const days = {};
+            data.forEach(r => {
+                if (!days[r.date]) days[r.date] = [];
+                days[r.date].push(r);
+            });
 
-                return `
-                <div class="rdv-item">
-                    <div class="rdv-time" style="font-size:0.8rem; line-height:1.2;">
-                        ${new Date(r.date).toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit'})}<br>
-                        <strong>${r.heure.substring(0,5)}</strong>
+            let html = '';
+            Object.keys(days).sort().forEach(date => {
+                const dateObj = new Date(date);
+                const dateStr = dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+                html += `<h3 style="margin: 24px 0 16px 0; font-family:'Space Grotesk'; font-size:1.1rem; color:var(--primary); text-transform:capitalize; border-bottom:1px solid var(--border); padding-bottom:8px;">${dateStr}</h3>`;
+                html += '<div class="timeline-container" style="margin-top:0;">';
+                html += days[date].map(r => {
+                    const typeStr = (r.motif || '').toLowerCase();
+                    let typeClass = 'type-consultation';
+                    if (typeStr.includes('examen') || typeStr.includes('analyse') || typeStr.includes('bilan')) typeClass = 'type-examen';
+                    else if (typeStr.includes('urgence')) typeClass = 'type-urgence';
+
+                    const patientNom = r.patients?.nom || 'Inconnu';
+                    const heure = r.heure ? r.heure.substring(0, 5) : '';
+                    
+                    return `
+                    <div class="timeline-card ${typeClass}" style="padding:12px 16px; margin-bottom:12px;">
+                        <div class="timeline-time" style="font-size:1rem; min-width:60px;">${heure}</div>
+                        <div class="timeline-details" style="padding:0 12px;">
+                            <div class="timeline-name" style="font-size:1rem; margin-bottom:2px;">${patientNom} ${r.patients?.prenom || ''}</div>
+                            <div class="timeline-meta" style="font-size:0.8rem;">
+                                <span><i class="fa-solid fa-tag"></i> ${r.motif || 'Consultation'}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="patient-info">
-                        <div class="patient-name">${r.patients?.nom || 'Inconnu'} ${r.patients?.prenom || ''}</div>
-                        <div class="rdv-reason"><i class="fa-solid fa-tag"></i> ${r.motif || 'Consultation'}</div>
-                    </div>
-                    <div class="status-badge ${badgeClass}">${badgeText}</div>
-                </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+                html += '</div>';
+            });
+            container.innerHTML = html;
         }
 
         async function chargerRDV(date) {
@@ -453,46 +459,23 @@
 
             const supabase = await window.SupabaseAPI.initSupabase();
             
-            // Tentative 1 : avec jointure patients
+            // On charge avec jointure ou sans (comme avant)
             let { data, error } = await supabase
                 .from('rendez_vous')
                 .select('*, patients(id, nom, prenom)')
                 .eq('date', date)
                 .order('heure', { ascending: true });
 
-            console.log('📅 chargerRDV date:', date, '| data:', data, '| error:', error);
-
-            // Tentative 2 : si la jointure échoue, charger sans jointure
             if (error || !data) {
-                console.warn('⚠️ Jointure patients échouée, chargement sans jointure...', error?.message);
-                const result = await supabase
-                    .from('rendez_vous')
-                    .select('*')
-                    .eq('date', date)
-                    .order('heure', { ascending: true });
-                
+                const result = await supabase.from('rendez_vous').select('*').eq('date', date).order('heure', { ascending: true });
                 data = result.data;
-                error = result.error;
-                console.log('📅 Sans jointure - data:', data, '| error:', error);
-
-                // Récupérer les noms des patients séparément
                 if (data && data.length > 0) {
                     const patientIds = [...new Set(data.map(r => r.patient_id).filter(Boolean))];
                     if (patientIds.length > 0) {
-                        const { data: patientsData } = await supabase
-                            .from('patients')
-                            .select('id, nom, prenom')
-                            .in('id', patientIds);
-                        
+                        const { data: patientsData } = await supabase.from('patients').select('id, nom, prenom, telephone').in('id', patientIds);
                         const patientsMap = {};
-                        if (patientsData) {
-                            patientsData.forEach(p => { patientsMap[p.id] = p; });
-                        }
-                        // Attacher les infos patients à chaque RDV
-                        data = data.map(r => ({
-                            ...r,
-                            patients: patientsMap[r.patient_id] || { id: r.patient_id, nom: 'Patient', prenom: '#' + r.patient_id }
-                        }));
+                        if (patientsData) patientsData.forEach(p => { patientsMap[p.id] = p; });
+                        data = data.map(r => ({ ...r, patients: patientsMap[r.patient_id] || { nom: 'Patient', prenom: '' } }));
                     }
                 }
             }
@@ -501,47 +484,76 @@
 
             if (!data || data.length === 0) {
                 container.innerHTML = `
-                    <div style="text-align:center; padding:40px; background:white; border-radius:16px; color:var(--text-light); border:1px dashed var(--border);">
+                    <div style="text-align:center; padding:40px; background:var(--card); border-radius:16px; color:var(--text-light); border:1px dashed var(--border);">
                         <i class="fa-solid fa-calendar-day fa-3x" style="opacity:0.2; margin-bottom:16px;"></i>
                         <p>Aucun rendez-vous pour cette journée.</p>
                     </div>`;
                 return;
             }
 
-            container.innerHTML = data.map(r => {
-                const statusStr = r.statut || 'confirme';
-                const isPending = statusStr === 'en_attente';
-                const badgeClass = isPending ? 'status-pending' : 'status-confirmed';
-                const badgeText = isPending ? 'En attente' : 'Confirmé';
-                
-                const actionBtn = isPending 
-                    ? `<button onclick="event.stopPropagation(); confirmerRDV('${r.id}')" style="background:var(--success); color:white; border:none; padding:6px 12px; border-radius:8px; font-size:0.8rem; cursor:pointer; font-weight:600; box-shadow:0 4px 10px rgba(16,185,129,0.2);"><i class="fa-solid fa-check"></i> Confirmer</button>` 
-                    : '';
+            let html = '<div class="timeline-container">';
+            html += data.map(r => {
+                const typeStr = (r.motif || '').toLowerCase();
+                let typeClass = 'type-consultation';
+                let typeName = 'Consultation';
+                if (typeStr.includes('examen') || typeStr.includes('analyse') || typeStr.includes('bilan')) {
+                    typeClass = 'type-examen';
+                    typeName = 'Examen';
+                } else if (typeStr.includes('urgence')) {
+                    typeClass = 'type-urgence';
+                    typeName = 'Urgence';
+                }
 
                 const patientNom = r.patients?.nom || 'Inconnu';
                 const patientPrenom = r.patients?.prenom || '';
-                const patientId = r.patients?.id || r.patient_id;
+                const medecin = r.medecin_nom || 'Dr Duval';
+                const heure = r.heure ? r.heure.substring(0, 5) : '';
+                const isArrive = r.statut === 'arrive' || r.statut === 'en_attente';
+                const actionBtn = !isArrive 
+                    ? `<button onclick="marquerArrive('${r.id}', '${r.patient_id}')" class="btn" style="background:#10b981; color:white; font-weight:600; padding:6px 12px; font-size:0.85rem;"><i class="fa-solid fa-walking"></i> Arrivé</button>` 
+                    : `<span style="background:rgba(245,158,11,0.1); color:#f59e0b; padding:6px 12px; border-radius:8px; font-size:0.85rem; font-weight:600;"><i class="fa-solid fa-clock"></i> En attente</span>`;
 
                 return `
-                <div class="rdv-item" onclick="window.location.href='dossier-patient.html?id=${patientId}'" style="cursor:pointer;">
-                    <div class="rdv-time">${r.heure.substring(0,5)}</div>
-                    <div class="patient-info">
-                        <div class="patient-name">${patientNom} ${patientPrenom}</div>
-                        <div class="rdv-reason">
-                            <i class="fa-solid fa-tag" style="color:var(--primary);"></i>
-                            ${r.motif || 'Consultation'}
+                <div class="timeline-card ${typeClass}">
+                    <div class="timeline-time">${heure}</div>
+                    <div class="timeline-details">
+                        <div class="timeline-name">${patientNom} ${patientPrenom}</div>
+                        <div class="timeline-meta">
+                            <span><i class="fa-solid fa-user-doctor" style="color:var(--text-light);"></i> ${medecin}</span>
+                            <span><i class="fa-solid fa-stethoscope" style="color:var(--text-light);"></i> ${r.motif || typeName}</span>
+                            ${r.notes ? `<span><i class="fa-solid fa-comment-dots" style="color:var(--text-light);"></i> ${r.notes}</span>` : ''}
                         </div>
                     </div>
-                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
-                        <div class="status-badge ${badgeClass}">${badgeText}</div>
+                    <div class="timeline-actions">
                         ${actionBtn}
+                        <button onclick="deleteRDV('${r.id}')" class="btn" style="background:transparent; color:var(--danger); padding:8px;" title="Supprimer"><i class="fa-solid fa-trash"></i></button>
                     </div>
-                    <button onclick="event.stopPropagation(); deleteRDV('${r.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer; opacity:0.3; transition:0.2s; margin-left: 10px;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.3">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
                 </div>
                 `;
             }).join('');
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function sendWhatsAppReminder(nom, date, heure, telephone) {
+            if (!telephone) {
+                window.notifier("Numéro de téléphone manquant pour ce patient.", 'error');
+                return;
+            }
+            
+            // Nettoyage du numéro (garder uniquement les chiffres)
+            const cleanPhone = telephone.replace(/\D/g, '');
+            // Si le numéro ne commence pas par un indicatif, on peut ajouter l'indicatif de la Côte d'Ivoire par défaut (225)
+            const finalPhone = cleanPhone.length === 10 ? '225' + cleanPhone : cleanPhone;
+            
+            const dateObj = new Date(date);
+            const dateStr = dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+            const heureStr = heure.substring(0, 5);
+            
+            const message = `Bonjour ${nom}, c'est la Clinique Refontiq. Nous vous confirmons votre rendez-vous pour une ${document.getElementById('rdv-type').options[0].text} le ${dateStr} à ${heureStr}. Merci de nous prévenir en cas d'empêchement.`;
+            const encodedMsg = encodeURIComponent(message);
+            
+            window.open(`https://wa.me/${finalPhone}?text=${encodedMsg}`, '_blank');
         }
 
         async function handleSaveRDV(e) {
@@ -594,6 +606,29 @@
             }
         }
 
+        async function marquerArrive(id, patient_id) {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { error: rdvErr } = await supabase.from('rendez_vous').update({ statut: 'en_attente' }).eq('id', id);
+            
+            if (rdvErr) { 
+                if (window.notifier) window.notifier("Erreur : " + rdvErr.message, 'error');
+                return; 
+            }
+            
+            // Créer une consultation en statut 'infirmerie' pour notifier
+            const consultData = {
+                patient_id: patient_id,
+                status: 'infirmerie',
+                date: new Date().toISOString().split('T')[0],
+                heure: new Date().toTimeString().split(' ')[0].substring(0, 5),
+                motif: 'Visite (depuis RDV)'
+            };
+            await supabase.from('consultations').insert([consultData]);
+            
+            if (window.notifier) window.notifier("Patient arrivé ! L'infirmière a été notifiée.");
+            chargerRDV(selectedDate);
+        }
+
         async function deleteRDV(id) {
             if (!confirm("Supprimer ce rendez-vous ?")) return;
             const supabase = await window.SupabaseAPI.initSupabase();
@@ -605,11 +640,36 @@
         function closeModal() { document.getElementById('rdvModal').classList.remove('active'); }
 
         function toggleMobileSidebar() {
-            const s = document.querySelector('.sidebar');
-            const o = document.getElementById('sidebarOverlay');
-            s.classList.toggle('active');
-            o.classList.toggle('active');
+            document.querySelector('.sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
         }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
+            updateThemeIcon(target);
+        }
+
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('theme-toggle');
+            const icon = btn.querySelector('i');
+            if (icon) {
+                if (theme === 'dark') {
+                    icon.className = 'fa-solid fa-sun';
+                    icon.style.color = '#fbbf24';
+                } else {
+                    icon.className = 'fa-solid fa-moon';
+                    icon.style.color = 'var(--text)';
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const theme = document.documentElement.getAttribute('data-theme') || 'light';
+            updateThemeIcon(theme);
+        });
     </script>
 </body>
 </html>

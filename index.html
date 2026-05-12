@@ -6,6 +6,19 @@
   <title>Clinique Médicale Refontiq – Abidjan</title>
   <link rel="icon" href="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAcACADASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAABwgGBAX/xAAvEAABAwMDAgMGBwAAAAAAAAABAgMEBQYRAAchEjETFEEIIiMyM1EkQkNhYnKB/8QAGAEAAgMAAAAAAAAAAAAAAAAAAgYDBAX/xAAiEQABAwQBBQEAAAAAAAAAAAABAgMRAAQxUSEFYZGx8IH/2gAMAwEAAhEDEQA/AKWv+8KZZtKblTULkypK/Chw2lALfXx6nhKRkdSzwM6HKlfW4dXVLl+edp8OnOlVSjUdLX4VjoJ999efidQI6SRnGQDka5t7alLcvS6Z2CTSY8enxSeQyFhC1KAIxlSlZz/EccA6JYMS4U0cJgtzFQKw6qOUMklMlbOFlKgO5TkK5/c+h0y2Fg2GgtUSYz59fRS/eXiy4UiYGvHuku3N0blElAp93zJKxgrZrEVLjJH3UpCepOSQnOQBkHnnTdtzfcS7PNU+RHRT67AA85CDwcTg/nbUPmTngjuk8H0zL+1tyzbQmVS4ItuprcYQFRZIdCvBaQ4pPKyARg9OMHvnVEbL7ZUOi0uDeK21qrU5gygWnlhmOh5PV4KE595ISQMqyTjP20HVLdhtJJEaIjk98fYo+nvPLIAM7mcdqz+/NmvKqTt2Ro02bTZEdLVYiRXCCCgYbkFI5WlIOCPTAPPOvK21uGn27tzPt1MB+qtqTIdj1KIEOBCnklIK0EhSMAgEpyCD6Zxp9SSFZBxrM1fbmyKzMXKm27ETJc+o9GKo61/fqLZTn/dZ7V8ktBp0GBrt4q45ZqDhcaPJ3U40i429v9uKlQ4dOFQmV74UuZKCRHbQG8BCEAkqPSsqBVge92ONJfs20C9WaezUrgqtUj0RlopplMecIC8/qKSeQgD5UnuTnGAMo1E26smhSW5FOt2IH2vpuvlT6m/6lwnp7DtjWkWSTkkk6kuupIcQpDaeVZJz+aoLawUhQUtWMAfc1//Z">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      } else {
+        const hour = new Date().getHours();
+        if (hour >= 20 || hour < 6) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      }
+    })();
+  </script>
   <style>
     :root {
       --blue:       #1a5fb4;
@@ -21,8 +34,16 @@
       --text:       #0f172a;
       --muted:      #64748b;
     }
+    [data-theme="dark"] {
+      --white:      #0f172a;
+      --off-white:  #1e293b;
+      --text:       #f8fafc;
+      --muted:      #94a3b8;
+      --blue-light: #1e293b;
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; font-size: 16px; }
+    html, body { overflow-x: hidden; width: 100%; }
     body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text); overflow-x: hidden; background: var(--white); }
 
     /* ══════════════════ NAVBAR ══════════════════ */

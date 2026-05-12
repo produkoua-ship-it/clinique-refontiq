@@ -4,138 +4,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Messagerie - Clinique Refontiq</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <title>Messagerie Team - Refontiq</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
     <link href="assets/premium-style.css" rel="stylesheet">
+    <link href="assets/ai-assistant.css" rel="stylesheet">
+    
+    <script src="assets/role-manager.js"></script>
     <style>
-        .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 2px solid var(--border); overflow-x: auto; }
-        .tab { padding: 12px 24px; cursor: pointer; font-weight: 600; color: var(--text-light); white-space: nowrap; }
-        .tab.active { color: var(--primary); border-bottom: 2px solid var(--primary); margin-bottom: -2px; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .chat-container { display: grid; grid-template-columns: 350px 1fr; height: calc(100vh - 100px); background: var(--card); border-radius: 24px; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border); margin-top: 20px; }
+        
+        /* Sidebar Contacts */
+        .chat-sidebar { background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .sidebar-search { padding: 20px; border-bottom: 1px solid var(--border); }
+        .contact-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .contact-item { display: flex; align-items: center; gap: 15px; padding: 15px; border-radius: 15px; cursor: pointer; transition: 0.2s; margin-bottom: 5px; }
+        .contact-item:hover { background: var(--primary-light); }
+        .contact-item.active { background: var(--primary); color: white; }
+        .contact-avatar { width: 45px; height: 45px; border-radius: 12px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .contact-item.active .contact-avatar { background: rgba(255,255,255,0.2); color: white; }
+        .contact-info { flex: 1; overflow: hidden; }
+        .contact-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
+        .contact-status { font-size: 0.75rem; opacity: 0.7; }
 
-        .message-item { display: flex; gap: 16px; padding: 20px; background: var(--card); border-radius: 12px; margin-bottom: 12px; box-shadow: var(--shadow); border: 1px solid var(--border); cursor: pointer; transition: 0.2s; position: relative; }
-        .message-item:hover { transform: translateX(5px); background: var(--bg); }
-        .message-item.unread { border-left: 4px solid var(--primary); }
-        .msg-dot { position: absolute; top: 20px; right: 20px; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; }
-        .msg-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
-        .msg-info { flex: 1; overflow: hidden; }
-        .msg-header { display: flex; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 8px; }
-        .msg-sender { font-weight: 700; }
-        .msg-time { font-size: 0.8rem; color: var(--text-light); white-space: nowrap; }
-        .msg-subject { font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .msg-preview { font-size: 0.85rem; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* Main Chat Area */
+        .chat-main { display: flex; flex-direction: column; background: var(--card); }
+        .chat-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; background: var(--card); }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 15px; background: var(--bg); }
+        
+        /* Message Bubbles */
+        .bubble { max-width: 70%; padding: 12px 18px; border-radius: 18px; font-size: 0.95rem; line-height: 1.5; position: relative; }
+        .bubble.sent { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3); }
+        .bubble.received { align-self: flex-start; background: var(--card); color: var(--text); border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+        .bubble-time { font-size: 0.7rem; opacity: 0.6; margin-top: 5px; display: block; text-align: right; }
+
+        /* Chat Input */
+        .chat-input-area { padding: 20px; border-top: 1px solid var(--border); background: var(--card); display: flex; gap: 12px; align-items: center; }
+        .chat-input { flex: 1; background: var(--bg); border: 1px solid var(--border); padding: 12px 20px; border-radius: 12px; color: var(--text); font-family: inherit; }
+        .chat-input:focus { outline: none; border-color: var(--primary); }
+        
+        /* Responsive Mobile */
+        @media (max-width: 900px) {
+            .chat-container { grid-template-columns: 1fr; height: calc(100vh - 140px); border-radius: 0; margin-top: 0; }
+            .chat-sidebar { display: flex; width: 100%; }
+            .chat-sidebar.hidden { display: none; }
+            .chat-main { display: none; width: 100%; }
+            .chat-main.active { display: flex; position: fixed; top: 60px; left: 0; width: 100%; height: calc(100% - 60px); z-index: 1000; }
+            .mobile-back-btn { display: block !important; }
+            .top-bar { display: none; }
+        }
+        .mobile-back-btn { display: none; background: none; border: none; color: var(--text); font-size: 1.2rem; cursor: pointer; padding-right: 10px; }
     </style>
 </head>
 
 <body>
     <div class="dashboard-container">
-        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
-                    <div class="logo-text"><h1>Clinique Refontiq</h1><p>Espace Médical</p></div>
-                </div>
-
-                <div class="sidebar-search">
-                    <div class="search-wrapper">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Rechercher un patient...">
-                    </div>
-                </div>
-
-                <div class="user-info">
-                    <div class="user-avatar" id="side-avatar">DR</div>
-                    <div class="user-details"><h3 id="side-name">Dr. Duval <span class="online-indicator" style="margin-left: 5px;"></span></h3><p id="side-role">Médecin</p></div>
-                </div>
-            </div>
-            <nav class="nav-menu">
-
-                <a href="dashboard.html" class="nav-item" id="menu-dashboard"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
-                <a href="patients.html" class="nav-item" id="menu-patients"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
-                <a href="consultations.html" class="nav-item" id="menu-consultations"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
-                <a href="rendez-vous.html" class="nav-item" id="menu-rendezvous"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
-                
-                <hr class="nav-separator" id="sep-finance">
-                
-                <a href="finance.html" class="nav-item" id="menu-finance"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
-                <a href="stocks.html" class="nav-item" id="menu-stocks"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
-                
-                <hr class="nav-separator">
-                
-                <a href="messagerie.html" class="nav-item active" id="menu-messagerie"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
-                <a href="alertes.html" class="nav-item" id="menu-alertes"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
-                <a href="parametres.html" class="nav-item" id="menu-parametres"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
-            
-            </nav>
-        </aside>
+        <div id="sidebar-container"></div>
 
         <main class="main-content">
-            <header class="mobile-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <button class="header-btn" onclick="toggleMobileSidebar()" style="background:none; border:none; font-size:1.5rem; color:white; cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
-                    <div style="width: 35px; height: 35px; background: rgba(255,255,255,0.2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
-                        <i class="fa-solid fa-hospital"></i>
-                    </div>
-                    <div style="font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">Clinique Refontiq</div>
+            
+
+            <header class="top-bar">
+                <div class="page-title">
+                    <h1>Communication d'Équipe</h1>
+                    <p>Discutez en temps réel avec vos collaborateurs</p>
                 </div>
-                <div style="font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 8px; text-transform: uppercase;">Messages</div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="focusNewChat()"><i class="fa-solid fa-plus"></i> Nouveau Message</button>
+                </div>
             </header>
 
-
-            <div class="top-bar">
-                <div class="page-title">
-                    <h1>Messagerie Interne</h1>
-                    <p>Communiquez avec l'équipe de la clinique</p>
-                </div>
-                <button class="btn btn-primary" onclick="switchTab('new')"><i class="fa-solid fa-plus"></i> Nouveau Message</button>
-            </div>
-
-            <div class="tabs">
-                <div class="tab active" data-tab="inbox" onclick="switchTab('inbox')">Boîte de réception</div>
-                <div class="tab" data-tab="sent" onclick="switchTab('sent')">Messages envoyés</div>
-                <div class="tab" data-tab="new" onclick="switchTab('new')" style="display:none;">Nouveau</div>
-            </div>
-
-            <div class="tab-content active" id="tab-inbox">
-                <div id="inbox-list">
-                    <p style="text-align:center; padding: 40px; color: var(--text-light);">Chargement des messages...</p>
-                </div>
-            </div>
-
-            <div class="tab-content" id="tab-sent">
-                <div id="sent-list">
-                    <p style="text-align:center; padding: 40px; color: var(--text-light);">Aucun message envoyé.</p>
-                </div>
-            </div>
-
-            <div class="tab-content" id="tab-new">
-                <div class="form-card">
-                    <form id="msgForm" onsubmit="handleSendMessage(event)">
-                        <div class="form-group">
-                            <label>Destinataire *</label>
-                            <select id="msg-dest" required>
-                                <option value="">Choisir un membre...</option>
-                                <option value="medecin">Médecin (Général)</option>
-                                <option value="infirmiere">Infirmière</option>
-                                <option value="receptionniste">Réception</option>
-                            </select>
+            <div class="chat-container">
+                <!-- Colonne Gauche : Contacts -->
+                <div class="chat-sidebar">
+                    <div class="sidebar-search">
+                        <div class="search-wrapper">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" placeholder="Rechercher un collègue...">
                         </div>
-                        <div class="form-group">
-                            <label>Message *</label>
-                            <textarea id="msg-content" rows="8" required placeholder="Votre message ici..."></textarea>
+                    </div>
+                    <div class="contact-list" id="contact-list">
+                        <!-- Les membres de l'équipe -->
+                    </div>
+                </div>
+
+                <!-- Colonne Droite : Chat -->
+                <div class="chat-main" id="chat-main" style="display: none;">
+                    <div class="chat-header">
+                        <button class="mobile-back-btn" onclick="backToContacts()"><i class="fa-solid fa-arrow-left"></i></button>
+                        <div class="contact-avatar" id="active-chat-avatar">?</div>
+                        <div class="contact-info">
+                            <div class="contact-name" id="active-chat-name">Sélectionnez un contact</div>
+                            <div class="contact-status">En ligne</div>
                         </div>
-                        <div style="display:flex; gap: 12px;">
-                            <button type="button" class="btn" onclick="switchTab('inbox')" style="background:var(--bg);">Annuler</button>
-                            <button type="submit" class="btn btn-primary" id="btn-send"><i class="fa-solid fa-paper-plane"></i> Envoyer</button>
-                        </div>
+                    </div>
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Les messages s'affichent ici -->
+                    </div>
+                    <form class="chat-input-area" onsubmit="handleSend(event)">
+                        <input type="text" class="chat-input" id="chat-input" placeholder="Écrivez votre message..." autocomplete="off">
+                        <button type="submit" class="btn btn-primary" style="border-radius: 12px; width: 45px; height: 45px; padding: 0; justify-content: center;">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
                     </form>
+                </div>
+
+                <!-- État Vide -->
+                <div id="chat-empty" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg); color: var(--text-light);">
+                    <i class="fa-solid fa-comments" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.2;"></i>
+                    <p>Sélectionnez un collaborateur pour démarrer la discussion</p>
                 </div>
             </div>
         </main>
@@ -144,121 +121,132 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <script>
-        let currentUserRole = "";
+        let currentUser = null;
+        let activeContactId = null;
+        let allMessages = [];
+
+        const teamMembers = [
+            { id: 'medecin', name: 'Dr. Duval', role: 'Médecin Chef' },
+            { id: 'infirmiere', name: 'Infirmière Martin', role: 'Soins Infirmiers' },
+            { id: 'receptionniste', name: 'M. Koffi', role: 'Réception / Accueil' }
+        ];
 
         document.addEventListener('DOMContentLoaded', async () => {
             initUser();
-            await chargerMessages();
+            renderContacts();
+            await chargerTousLesMessages();
+            
+            // Rafraîchissement automatique toutes les 5 secondes
+            setInterval(() => chargerTousLesMessages(), 5000);
         });
 
         function initUser() {
-            const u = localStorage.getItem('currentUser');
-            if (u) {
-                const user = JSON.parse(u);
-                currentUserRole = user.role;
-                document.getElementById('side-name').textContent = getDisplayName(user);
-                document.getElementById('side-role').textContent = getRoleName(user.role);
-                document.getElementById('side-avatar').textContent = getDisplayName(user).substring(0, 2).toUpperCase();
-            }
+            // RoleManager handles user info
         }
 
-        async function chargerMessages() {
-            const supabase = await window.SupabaseAPI.initSupabase();
-            
-            // Inbox
-            const { data: inbox } = await supabase.from('messages')
-                .select('*')
-                .eq('destinataire_id', currentUserRole)
-                .order('created_at', { ascending: false });
-            
-            // Sent
-            const { data: sent } = await supabase.from('messages')
-                .select('*')
-                .eq('expediteur_id', currentUserRole)
-                .order('created_at', { ascending: false });
-
-            renderList('inbox-list', inbox, true);
-            renderList('sent-list', sent, false);
-        }
-
-        function renderList(id, data, isInbox) {
-            const el = document.getElementById(id);
-            if (!data || data.length === 0) {
-                el.innerHTML = `<p style="text-align:center; padding: 40px; color: var(--text-light);">Aucun message ${isInbox ? 'reçu' : 'envoyé'}.</p>`;
-                return;
-            }
-            el.innerHTML = '';
-            data.forEach(m => {
-                const senderDisplay = getRoleName(isInbox ? m.expediteur_id : m.destinataire_id);
-                el.innerHTML += `
-                    <div class="message-item ${isInbox && !m.est_lu ? 'unread' : ''}" onclick="ouvrirMessage('${m.id}', ${isInbox})">
-                        <div class="msg-avatar">${senderDisplay.substring(0,2).toUpperCase()}</div>
-                        <div class="msg-info">
-                            <div class="msg-header">
-                                <span class="msg-sender">${isInbox ? senderDisplay : 'À : ' + senderDisplay}</span>
-                                <span class="msg-time">${new Date(m.created_at).toLocaleDateString()}</span>
-                            </div>
-                            <div class="msg-preview">${m.contenu}</div>
+        function renderContacts() {
+            const list = document.getElementById('contact-list');
+            list.innerHTML = teamMembers
+                .filter(m => m.id !== currentUser?.role) // Ne pas se voir soi-même
+                .map(m => `
+                    <div class="contact-item" id="contact-${m.id}" onclick="selectContact('${m.id}')">
+                        <div class="contact-avatar">${m.name.substring(0,2).toUpperCase()}</div>
+                        <div class="contact-info">
+                            <div class="contact-name">${m.name}</div>
+                            <div class="contact-status">${m.role}</div>
                         </div>
-                        ${isInbox && !m.est_lu ? '<div class="msg-dot"></div>' : ''}
+                    </div>
+                `).join('');
+        }
+
+        function focusNewChat() {
+            const sidebar = document.querySelector('.chat-sidebar');
+            sidebar.style.boxShadow = '0 0 20px var(--primary)';
+            setTimeout(() => sidebar.style.boxShadow = 'none', 1000);
+            document.querySelector('.chat-input').focus();
+            window.notifier && window.notifier("Sélectionnez un collègue dans la liste de gauche", "info");
+        }
+
+        async function selectContact(id) {
+            activeContactId = id;
+            const contact = teamMembers.find(m => m.id === id);
+            
+            // UI Updates
+            document.querySelectorAll('.contact-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`contact-${id}`).classList.add('active');
+            
+            document.getElementById('chat-empty').style.display = 'none';
+            const chatMain = document.getElementById('chat-main');
+            chatMain.style.display = 'flex';
+            chatMain.classList.add('active');
+            
+            document.querySelector('.chat-sidebar').classList.add('hidden');
+            
+            document.getElementById('active-chat-name').textContent = contact.name;
+            document.getElementById('active-chat-avatar').textContent = contact.name.substring(0,2).toUpperCase();
+            
+            renderMessages();
+        }
+
+        function backToContacts() {
+            document.getElementById('chat-main').classList.remove('active');
+            document.querySelector('.chat-sidebar').classList.remove('hidden');
+            activeContactId = null;
+        }
+
+        function toggleMobileSidebar() {
+            document.querySelector('.sidebar').classList.toggle('active');
+        }
+
+        async function chargerTousLesMessages() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data, error } = await supabase.from('messages').select('*').order('created_at', { ascending: true });
+            if (!error && data) {
+                allMessages = data;
+                if (activeContactId) renderMessages();
+            }
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('chat-messages');
+            const filtered = allMessages.filter(m => 
+                (m.expediteur_id === currentUser.role && m.destinataire_id === activeContactId) ||
+                (m.expediteur_id === activeContactId && m.destinataire_id === currentUser.role)
+            );
+
+            container.innerHTML = filtered.map(m => {
+                const isSent = m.expediteur_id === currentUser.role;
+                return `
+                    <div class="bubble ${isSent ? 'sent' : 'received'}">
+                        ${m.contenu}
+                        <span class="bubble-time">${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                     </div>
                 `;
-            });
+            }).join('');
+            
+            container.scrollTop = container.scrollHeight;
         }
 
-        async function handleSendMessage(e) {
+        async function handleSend(e) {
             e.preventDefault();
-            const btn = document.getElementById('btn-send');
-            btn.disabled = true;
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text || !activeContactId) return;
+
+            input.value = '';
             
             const supabase = await window.SupabaseAPI.initSupabase();
-            const data = {
-                expediteur_id: currentUserRole,
-                destinataire_id: document.getElementById('msg-dest').value,
-                contenu: document.getElementById('msg-content').value,
+            const msg = {
+                expediteur_id: currentUser.role,
+                destinataire_id: activeContactId,
+                contenu: text,
                 est_lu: false
             };
 
-            const { error } = await supabase.from('messages').insert([data]);
-            if (error) window.notifier("Erreur: " + error.message, 'error');
-            else {
-                document.getElementById('msgForm').reset();
-                await chargerMessages();
-                switchTab('sent');
-                if(window.notifier) window.notifier("Message envoyé !", "success");
+            const { error } = await supabase.from('messages').insert([msg]);
+            if (!error) {
+                await chargerTousLesMessages();
             }
-            btn.disabled = false;
-        }
-
-        async function ouvrirMessage(id, isInbox) {
-            if (isInbox) {
-                const supabase = await window.SupabaseAPI.initSupabase();
-                await supabase.from('messages').update({ est_lu: true }).eq('id', id);
-                await chargerMessages();
-            }
-        }
-
-        function getDisplayName(u) {
-            if (u.role === 'medecin') return 'Dr. Duval';
-            if (u.role === 'infirmiere') return 'Infirm. Martin';
-            if (u.role === 'receptionniste') return 'M. Koffi';
-            return u.name || 'Utilisateur';
-        }
-        function getRoleName(r) {
-            const roles = { 'medecin': 'Médecin', 'infirmiere': 'Infirmière', 'receptionniste': 'Réceptionniste', 'admin': 'Admin' };
-            return roles[r] || r;
-        }
-        function switchTab(t) {
-            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            const tabBtn = document.querySelector(`[data-tab="${t}"]`);
-            if (tabBtn) tabBtn.classList.add('active');
-            const content = document.getElementById(`tab-${t}`);
-            if (content) content.classList.add('active');
-        }
-        function toggleMobileSidebar() {
-            document.querySelector('.sidebar').classList.toggle('active');
-            document.getElementById('sidebarOverlay').classList.toggle('active');
         }
     </script>
 </body>

@@ -7,10 +7,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="assets/premium-style.css" rel="stylesheet">
+    <link href="assets/ai-assistant.css" rel="stylesheet">
+    
+    <script src="assets/role-manager.js"></script>
+    <script src="assets/barcode-scanner.js"></script>
+
     <style>
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 32px; border-radius: 20px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: var(--card); padding: 32px; border-radius: 20px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
         .cat-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
         .cat-pill { padding: 8px 18px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
         .cat-pill.active, .cat-pill:hover { background: var(--primary); color: white; border-color: var(--primary); }
@@ -27,42 +32,10 @@
 <body>
     <div class="dashboard-container">
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
-                    <div class="logo-text"><h1>Clinique Refontiq</h1><p>Espace Médical</p></div>
-                </div>
-                <div class="sidebar-search"><div class="search-wrapper"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Rechercher un patient..."></div></div>
-                <div class="user-info">
-                    <div class="user-avatar" id="side-avatar">DR</div>
-                    <div class="user-details"><h3 id="side-name">Dr. Duval <span class="online-indicator" style="margin-left: 5px;"></span></h3><p id="side-role">Médecin</p></div>
-                </div>
-            </div>
-            <nav class="nav-menu">
-                <a href="dashboard.html" class="nav-item" id="menu-dashboard"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard</a>
-                <a href="patients.html" class="nav-item" id="menu-patients"><i class="fa-solid fa-users glass-icon"></i> Patients</a>
-                <a href="consultations.html" class="nav-item" id="menu-consultations"><i class="fa-solid fa-stethoscope glass-icon"></i> Consultations</a>
-                <a href="rendez-vous.html" class="nav-item" id="menu-rendezvous"><i class="fa-solid fa-calendar-check glass-icon"></i> Rendez-vous</a>
-                <hr class="nav-separator" id="sep-finance">
-                <a href="finance.html" class="nav-item" id="menu-finance"><i class="fa-solid fa-coins glass-icon"></i> Finance</a>
-                <a href="stocks.html" class="nav-item active" id="menu-stocks"><i class="fa-solid fa-boxes-stacked glass-icon"></i> Stocks</a>
-                <hr class="nav-separator">
-                <a href="messagerie.html" class="nav-item" id="menu-messagerie"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
-                <a href="alertes.html" class="nav-item" id="menu-alertes"><i class="fa-solid fa-bell glass-icon"></i> Alertes</a>
-                <a href="parametres.html" class="nav-item" id="menu-parametres"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
-            </nav>
-        </aside>
+        <div id="sidebar-container"></div>
 
         <main class="main-content">
-            <header class="mobile-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <button class="header-btn" onclick="toggleMobileSidebar()" style="background:none; border:none; font-size:1.5rem; color:white; cursor:pointer;"><i class="fa-solid fa-bars"></i></button>
-                    <div style="width: 35px; height: 35px; background: rgba(255,255,255,0.2); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px;"><i class="fa-solid fa-hospital"></i></div>
-                    <div style="font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px;">Clinique Refontiq</div>
-                </div>
-                <div style="font-size: 0.7rem; font-weight: 800; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 8px; text-transform: uppercase;">Stocks</div>
-            </header>
+            
 
             <div class="top-bar">
                 <div class="page-title">
@@ -124,7 +97,10 @@
             <h2 id="modal-title" style="margin-bottom:24px; font-family:'Space Grotesk';">Ajouter un produit</h2>
             <form onsubmit="handleSaveStock(event)">
                 <input type="hidden" id="s-id">
-                <div class="form-group"><label>Nom du produit *</label><input type="text" id="s-nom" required></div>
+                <div class="form-group" style="display:grid; grid-template-columns:2fr 1fr; gap:12px;">
+                    <div><label>Nom du produit *</label><input type="text" id="s-nom" required></div>
+                    <div><label>Code-barres</label><input type="text" id="s-code" placeholder="Scanner ou taper..."></div>
+                </div>
                 <div class="form-group" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                     <div><label>Catégorie</label>
                         <select id="s-cat"><option value="Médicament">Médicament</option><option value="Matériel">Matériel</option><option value="Consommable">Consommable</option></select>
@@ -173,7 +149,7 @@
 
     <!-- Modal Historique & Stats -->
     <div class="modal" id="historiqueModal">
-        <div class="modal-content" style="max-width: 800px; background: #f8fafc;">
+        <div class="modal-content" style="max-width: 800px; background: var(--bg);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                 <h2 style="font-family:'Space Grotesk'; font-size: 1.5rem; color: var(--text);">📈 Historique & Statistiques</h2>
                 <button class="action-btn-sm" onclick="fermerHistorique()"><i class="fa-solid fa-xmark fa-xl"></i></button>
@@ -181,7 +157,7 @@
             
             <div style="display: grid; grid-template-columns: 1fr 2.5fr; gap: 24px;">
                 <!-- Top Consommation -->
-                <div class="card" style="padding: 16px; margin: 0; background: white;">
+                <div class="card" style="padding: 16px; margin: 0; background: var(--card);">
                     <h3 style="font-size: 1rem; margin-bottom: 16px; color: var(--primary);"><i class="fa-solid fa-fire"></i> Top Sorties (30j)</h3>
                     <div id="top-conso-list">
                         <p style="font-size: 0.8rem; color: var(--text-light); text-align: center;">Chargement...</p>
@@ -189,7 +165,7 @@
                 </div>
 
                 <!-- Derniers Mouvements -->
-                <div class="card" style="padding: 16px; margin: 0; background: white; max-height: 500px; overflow-y: auto;">
+                <div class="card" style="padding: 16px; margin: 0; background: var(--card); max-height: 500px; overflow-y: auto;">
                     <h3 style="font-size: 1rem; margin-bottom: 16px;"><i class="fa-solid fa-list-ul"></i> Derniers Mouvements</h3>
                     <table style="font-size: 0.85rem; width: 100%;">
                         <thead>
@@ -212,7 +188,7 @@
 
     <!-- Modal Kits de Soins (Liste) -->
     <div class="modal" id="kitsModal">
-        <div class="modal-content" style="max-width: 700px; background: #f8fafc;">
+        <div class="modal-content" style="max-width: 700px; background: var(--bg);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                 <h2 style="font-family:'Space Grotesk'; font-size: 1.5rem; color: var(--text);">💉 Kits de Soins</h2>
                 <div>
@@ -220,7 +196,7 @@
                     <button class="action-btn-sm" onclick="fermerKits()" style="margin-left: 12px;"><i class="fa-solid fa-xmark fa-xl"></i></button>
                 </div>
             </div>
-            <div class="card" style="padding: 0; margin: 0; background: white; overflow: hidden;">
+            <div class="card" style="padding: 0; margin: 0; background: var(--card); overflow: hidden;">
                 <table style="font-size: 0.9rem; width: 100%;">
                     <thead>
                         <tr style="text-align: left; border-bottom: 2px solid var(--border);">
@@ -268,19 +244,31 @@
         let currentFilter = 'all';
 
         document.addEventListener('DOMContentLoaded', async () => {
-            initUser();
             await chargerStocks();
+            
+            // Initialisation du Scan Code-Barres
+            BarcodeScanner.init((code) => handleBarcodeScan(code));
         });
 
-        function initUser() {
-            const u = localStorage.getItem('currentUser');
-            if (u) {
-                const user = JSON.parse(u);
-                document.getElementById('side-name').textContent = user.name || 'Utilisateur';
-                document.getElementById('side-role').textContent = user.role;
-                document.getElementById('side-avatar').textContent = (user.name || 'U').substring(0, 2).toUpperCase();
+        async function handleBarcodeScan(code) {
+            window.notifier("Code détecté : " + code, "success");
+            
+            // On cherche si le produit existe déjà (par nom ou code si vous ajoutez un champ code_barres)
+            // Pour l'instant on cherche par nom ou on propose l'ajout
+            const produit = allStocks.find(s => s.code_barres === code || s.nom.toLowerCase().includes(code.toLowerCase()));
+            
+            if (produit) {
+                ouvrirAjustement(produit.id, produit.nom, produit.quantite);
+            } else {
+                if (confirm("Produit inconnu (" + code + "). Voulez-vous le créer ?")) {
+                    ouvrirModal();
+                    document.getElementById('s-nom').value = "Produit " + code;
+                    // On pourrait stocker le code dans un champ caché si vous l'ajoutez en base
+                }
             }
         }
+
+
 
         async function chargerStocks() {
             const supabase = await window.SupabaseAPI.initSupabase();
@@ -425,6 +413,7 @@
             document.getElementById('modal-title').textContent = 'Modifier : ' + s.nom;
             document.getElementById('s-id').value = s.id;
             document.getElementById('s-nom').value = s.nom;
+            document.getElementById('s-code').value = s.code_barres || '';
             document.getElementById('s-cat').value = s.categorie || 'Médicament';
             document.getElementById('s-qty').value = s.quantite;
             document.getElementById('s-seuil').value = s.seuil_alerte || 10;
@@ -445,6 +434,7 @@
             const id = document.getElementById('s-id').value;
             const prod = {
                 nom: document.getElementById('s-nom').value,
+                code_barres: document.getElementById('s-code').value || null,
                 categorie: document.getElementById('s-cat').value,
                 quantite: parseInt(document.getElementById('s-qty').value),
                 seuil_alerte: parseInt(document.getElementById('s-seuil').value) || 10,
@@ -745,11 +735,36 @@
         }
 
         function toggleMobileSidebar() {
-            const s = document.querySelector('.sidebar');
-            const o = document.getElementById('sidebarOverlay');
-            s.classList.toggle('active');
-            o.classList.toggle('active');
+            document.querySelector('.sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
         }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
+            updateThemeIcon(target);
+        }
+
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('theme-toggle');
+            const icon = btn.querySelector('i');
+            if (icon) {
+                if (theme === 'dark') {
+                    icon.className = 'fa-solid fa-sun';
+                    icon.style.color = '#fbbf24';
+                } else {
+                    icon.className = 'fa-solid fa-moon';
+                    icon.style.color = 'var(--text)';
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const theme = document.documentElement.getAttribute('data-theme') || 'light';
+            updateThemeIcon(theme);
+        });
     </script>
 </body>
 </html>

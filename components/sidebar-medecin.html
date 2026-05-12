@@ -1,0 +1,65 @@
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo" style="cursor: pointer;" onclick="window.location.href='index.html'">
+            <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
+            <div class="logo-text"><h1>Clinique Refontiq</h1><p>Espace Médical</p></div>
+        </div>
+        
+        <div class="sidebar-search">
+            <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Rechercher un patient...">
+            </div>
+        </div>
+
+        <div class="user-info">
+            <div class="user-avatar" id="side-avatar">U</div>
+            <div class="user-details"><h3 id="side-name">Utilisateur <span class="online-indicator" style="margin-left: 5px;"></span></h3><p id="side-role">Médecin</p></div>
+        </div>
+    </div>
+    <nav class="nav-menu">
+        <a href="dashboard.html" class="nav-item" id="menu-dashboard" data-page="dashboard"><i class="fa-solid fa-chart-line glass-icon"></i> Dashboard Général</a>
+        
+        <div class="nav-group active">
+            <div class="nav-group-header" onclick="this.parentElement.classList.toggle('active')">
+                <span>📁 Patientèle</span>
+                <i class="fa-solid fa-chevron-down toggle-icon"></i>
+            </div>
+            <div class="nav-group-content">
+                <a href="dashboard.html" class="nav-item" data-page="dashboard"><i class="fa-solid fa-clock"></i> File d'attente (Temps réel)</a>
+                <a href="patients.html" class="nav-item" id="menu-patients" data-page="patients"><i class="fa-solid fa-users"></i> Liste des patients</a>
+                <a href="patients.html" class="nav-item" data-page="historique"><i class="fa-solid fa-folder-open"></i> Historique dossiers</a>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-group-header" onclick="this.parentElement.classList.toggle('active')">
+                <span>🩺 Activité Médicale</span>
+                <i class="fa-solid fa-chevron-down toggle-icon"></i>
+            </div>
+            <div class="nav-group-content">
+                <a href="consultations.html" class="nav-item" id="menu-consultations" data-page="consultations"><i class="fa-solid fa-stethoscope"></i> Consultations</a>
+                <a href="hospitalisation.html" class="nav-item" id="menu-hospitalisation" data-page="hospitalisation"><i class="fa-solid fa-bed"></i> Hospitalisations (Lits)</a>
+                <a href="rendez-vous.html" class="nav-item" id="menu-rendezvous" data-page="rendez-vous"><i class="fa-solid fa-calendar-check"></i> Rendez-vous</a>
+            </div>
+        </div>
+        
+        <div class="nav-group">
+            <div class="nav-group-header" onclick="this.parentElement.classList.toggle('active')">
+                <span>📊 Gestion & Analyse</span>
+                <i class="fa-solid fa-chevron-down toggle-icon"></i>
+            </div>
+            <div class="nav-group-content">
+                <a href="reporting.html" class="nav-item" id="menu-reporting" data-page="reporting"><i class="fa-solid fa-chart-pie"></i> Reporting (Stats)</a>
+                <a href="stocks.html" class="nav-item" id="menu-stocks" data-page="stocks"><i class="fa-solid fa-pills"></i> Stocks (Pharmacie)</a>
+                <a href="finance.html" class="nav-item" id="menu-finance" data-page="finance"><i class="fa-solid fa-coins"></i> Finance (Revenus)</a>
+            </div>
+        </div>
+
+        <hr class="nav-separator">
+        
+        <a href="messagerie.html" class="nav-item" id="menu-messagerie" data-page="messagerie"><i class="fa-solid fa-comments glass-icon"></i> Messagerie</a>
+        <a href="alertes.html" class="nav-item" id="menu-alertes" data-page="alertes"><i class="fa-solid fa-bell glass-icon"></i> Alertes <span class="nav-badge">0</span></a>
+        <a href="parametres.html" class="nav-item" id="menu-parametres" data-page="parametres"><i class="fa-solid fa-cog glass-icon"></i> Paramètres</a>
+    </nav>
+</aside>
