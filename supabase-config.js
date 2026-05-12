@@ -777,7 +777,8 @@ function injecterBoutonDeconnexion() {
             }
         }
         localStorage.removeItem('currentUser');
-        window.location.href = 'login.html';
+        const isAppPath = window.location.pathname.includes('/app/');
+        window.location.href = isAppPath ? '../login.html' : 'login.html';
     };
 
     navMenu.appendChild(logoutBtn);

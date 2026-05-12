@@ -44,7 +44,7 @@ const RoleManager = {
                         <button class="hamburger-btn" onclick="toggleMobileSidebar()">
                             <i class="fa-solid fa-bars"></i>
                         </button>
-                        <div class="logo-group" onclick="window.location.href='index.html'">
+                        <div class="logo-group" onclick="window.location.href='../index.html'">
                             <div class="logo-icon">
                                 <i class="fa-solid fa-hospital"></i>
                             </div>

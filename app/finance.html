@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance - Clinique Refontiq</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <link href="../assets/premium-style.css" rel="stylesheet">
+    <link href="../assets/ai-assistant.css" rel="stylesheet">
+    
+    <script src="../assets/role-manager.js"></script>
+
+    <style>
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 32px; }
+        .stat-card { background: var(--card); padding: 24px; border-radius: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .stat-label { font-size: 0.85rem; color: var(--text-light); margin-bottom: 8px; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; font-family: 'Space Grotesk'; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .calendar-nav { display: flex; align-items: center; gap: 20px; }
+        .nav-btn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); transition: 0.2s; }
+        .nav-btn:hover { background: var(--bg); color: var(--primary); }
+        .calendar-actions { display: flex; gap: 10px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--card); padding: 32px; border-radius: 20px; width: 100%; max-width: 500px; }
+
+        .finance-tabs { display: flex; gap: 20px; border-bottom: 1px solid var(--border); margin-bottom: 24px; padding: 0 10px; }
+        .finance-tab { padding: 12px 20px; cursor: pointer; color: var(--text-light); font-weight: 600; transition: 0.3s; position: relative; }
+        .finance-tab.active { color: var(--primary); }
+        .finance-tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 3px; background: var(--primary); border-radius: 3px 3px 0 0; }
+        .finance-tab:hover { color: var(--primary); }
+
+        @media (max-width: 768px) {
+            .calendar-header { flex-direction: column; align-items: stretch; }
+            .calendar-nav { justify-content: center; }
+            .calendar-actions { display: grid; grid-template-columns: 1fr 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+        <div id="sidebar-container"></div>
+
+        <main class="main-content">
+            
+
+
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1>Gestion Financière</h1>
+                    <p>Suivi des revenus et dépenses</p>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="toggleModal(true)"><i class="fa-solid fa-plus"></i> Nouvelle Transaction</button>
+                </div>
+            </div>
+
+            <div class="calendar-header" style="background: var(--card); padding: 24px; border-radius: 20px; margin-bottom: 32px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div class="agenda-date" style="display: flex; align-items: center; gap: 20px;">
+                    <button class="nav-btn" onclick="precedent()"><i class="fa-solid fa-chevron-left"></i></button>
+                    <div>
+                        <p style="text-transform: uppercase; letter-spacing: 1px; font-weight: 600; color: var(--text-light); font-size: 0.8rem; margin:0;">PÉRIODE</p>
+                        <h2 id="currentMonth" style="margin:0; font-size: 1.8rem; font-family:'Space Grotesk'; color: var(--primary);">Mai 2026</h2>
+                    </div>
+                    <button class="nav-btn" onclick="suivant()"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: auto; min-width: max-content;">
+                    <button class="btn" style="background: var(--primary-light); color: var(--primary); justify-content: center;" onclick="filtrerDate('today')">Aujourd'hui</button>
+                    <button class="btn btn-primary" style="justify-content: center;" onclick="filtrerDate('month')">Ce mois</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Revenus du Jour</div>
+                    <div class="stat-value" id="stat-day" style="color: var(--secondary);">0 FCFA</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Revenus du Mois</div>
+                    <div class="stat-value" id="stat-month" style="color: var(--primary);">0 FCFA</div>
+                </div>
+                <div class="stat-card" style="border: 2px solid rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.02);">
+                    <div class="stat-label" style="color: var(--danger); font-weight: 700;">Dette Totale (Impayés)</div>
+                    <div class="stat-value" id="stat-pending" style="color: var(--danger);">0 FCFA</div>
+                </div>
+            </div>
+
+            <div class="finance-tabs">
+                <div class="finance-tab active" id="tab-all" onclick="setFinanceFilter('all')">Toutes les transactions</div>
+                <div class="finance-tab" id="tab-unpaid" onclick="setFinanceFilter('unpaid')">Impayés <span id="unpaid-count" style="font-size:0.7rem; background:var(--danger); color:white; padding:2px 6px; border-radius:10px; margin-left:5px; display:none;">0</span></div>
+            </div>
+
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Patient</th>
+                                <th>Motif</th>
+                                <th>Montant</th>
+                                <th>Statut</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-body">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 60px;">
+                                    <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: var(--primary);"></i>
+                                    <p style="margin-top: 15px; color: var(--text-light);">Chargement des finances...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Paiement -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom:24px; font-family:'Space Grotesk';">Encaisser un paiement</h2>
+            <form onsubmit="savePayment(event)">
+                <div class="form-group">
+                    <label>Patient *</label>
+                    <select id="pay-patient" required><option value="">Chargement...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Motif *</label>
+                    <input type="text" id="pay-reason" placeholder="Ex: Consultation" required>
+                </div>
+                <div class="form-group">
+                    <label>Montant (FCFA) *</label>
+                    <input type="number" id="pay-amount" required>
+                </div>
+                <div class="form-group">
+                    <label>Statut</label>
+                    <select id="pay-status">
+                        <option value="Payé">Payé</option>
+                        <option value="En attente">En attente</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:12px; margin-top:24px;">
+                    <button type="button" class="btn" onclick="toggleModal(false)" style="flex:1;">Annuler</button>
+                    <button type="submit" class="btn btn-primary" style="flex:1;" id="btn-save">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../supabase-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await chargerPatients();
+            await chargerFinances();
+        });
+
+
+
+        async function chargerPatients() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data } = await supabase.from('patients').select('id, nom, prenom').order('nom');
+            const select = document.getElementById('pay-patient');
+            if (data) {
+                select.innerHTML = '<option value="">Choisir un patient...</option>';
+                data.forEach(p => select.innerHTML += `<option value="${p.id}">${p.nom} ${p.prenom || ''}</option>`);
+            }
+        }
+
+        let currentDate = new Date();
+        let currentFinanceFilter = 'all';
+
+        async function setFinanceFilter(filter) {
+            currentFinanceFilter = filter;
+            document.querySelectorAll('.finance-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${filter}`).classList.add('active');
+            await chargerFinances();
+        }
+
+        function updateCalendarHeader() {
+            const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+            document.getElementById('currentMonth').textContent = `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+        }
+
+        async function precedent() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            updateCalendarHeader();
+            await chargerFinances();
+        }
+
+        async function suivant() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            updateCalendarHeader();
+            await chargerFinances();
+        }
+
+        async function filtrerDate(type) {
+            const now = new Date();
+            if (type === 'today') {
+                currentDate = new Date();
+            } else if (type === 'month') {
+                currentDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            }
+            updateCalendarHeader();
+            await chargerFinances();
+        }
+
+        async function chargerFinances() {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data: payments } = await supabase.from('paiements').select('*, patients(nom, prenom, telephone)').order('created_at', { ascending: false });
+            
+            updateCalendarHeader();
+            const tbody = document.getElementById('transaction-body');
+            if (!payments || payments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Aucune transaction.</td></tr>';
+                return;
+            }
+
+            let dayTotal = 0, monthTotal = 0, pendingTotal = 0, unpaidCount = 0;
+            const todayStr = new Date().toISOString().split('T')[0];
+            
+            const filterMonth = currentDate.getMonth();
+            const filterYear = currentDate.getFullYear();
+
+            const filteredPayments = payments ? payments.filter(p => {
+                const pDate = new Date(p.created_at);
+                const isSameMonth = pDate.getMonth() === filterMonth && pDate.getFullYear() === filterYear;
+                
+                if (p.statut !== 'Payé') unpaidCount++;
+                
+                // Filtre par onglet (Impayés)
+                if (currentFinanceFilter === 'unpaid' && p.statut === 'Payé') return false;
+                
+                // Filtre par période du calendrier
+                return isSameMonth;
+            }) : [];
+
+            const unpaidBadge = document.getElementById('unpaid-count');
+            if (unpaidBadge) {
+                unpaidBadge.textContent = unpaidCount;
+                unpaidBadge.style.display = unpaidCount > 0 ? 'inline' : 'none';
+            }
+
+            tbody.innerHTML = filteredPayments.map(p => {
+                const date = new Date(p.created_at);
+                const isToday = date.toISOString().split('T')[0] === todayStr;
+                const isThisMonth = date.getMonth() === new Date().getMonth() && date.getFullYear() === new Date().getFullYear();
+
+                if (p.statut === 'Payé') {
+                    if (isToday) dayTotal += p.montant;
+                    if (isThisMonth) monthTotal += p.montant;
+                } else {
+                    pendingTotal += p.montant;
+                }
+
+                return `
+                    <tr>
+                        <td>${date.toLocaleDateString('fr-FR')}</td>
+                        <td style="font-weight:600;">${p.patients?.nom || 'N/A'} ${p.patients?.prenom || ''}</td>
+                        <td>${p.motif}</td>
+                        <td style="font-weight:700;">${p.montant.toLocaleString()} FCFA</td>
+                        <td><span class="status-badge ${p.statut === 'Payé' ? 'status-paid' : 'status-pending'}">${p.statut}</span></td>
+                        <td>
+                            ${p.statut !== 'Payé' ? `
+                                <div style="display:flex; gap:6px;">
+                                    <button onclick="validerPaiement('${p.id}')" class="btn" style="padding:4px 8px; font-size:0.75rem; background:var(--secondary); color:white;" title="Encaisser">Encaisser</button>
+                                    <button onclick="relancerPaiement('${p.patients?.nom}', '${p.montant}', '${p.patients?.telephone}')" class="btn" style="padding:4px 8px; font-size:0.75rem; background:#25D366; color:white;" title="Relancer par WhatsApp"><i class="fa-brands fa-whatsapp"></i></button>
+                                </div>
+                            ` : '<i class="fa-solid fa-check-circle" style="color:var(--secondary)"></i>'}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('stat-day').textContent = dayTotal.toLocaleString() + ' FCFA';
+            document.getElementById('stat-month').textContent = monthTotal.toLocaleString() + ' FCFA';
+            document.getElementById('stat-pending').textContent = pendingTotal.toLocaleString() + ' FCFA';
+        }
+
+        async function savePayment(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save');
+            btn.disabled = true;
+            btn.textContent = "Traitement...";
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const pay = {
+                patient_id: document.getElementById('pay-patient').value,
+                motif: document.getElementById('pay-reason').value,
+                montant: parseInt(document.getElementById('pay-amount').value),
+                statut: document.getElementById('pay-status').value
+            };
+
+            const { error } = await supabase.from('paiements').insert([pay]);
+            if (!error) {
+                window.notifier("Transaction enregistrée avec succès !");
+                toggleModal(false);
+                await chargerFinances();
+            } else window.notifier("Erreur : " + error.message, 'error');
+            
+            btn.disabled = false;
+            btn.textContent = "Enregistrer";
+        }
+
+        async function validerPaiement(id) {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            await supabase.from('paiements').update({ statut: 'Payé' }).eq('id', id);
+            if (window.notifier) window.notifier("Paiement validé !");
+            await chargerFinances();
+        }
+
+        function relancerPaiement(nom, montant, telephone) {
+            if (!telephone) {
+                if (window.notifier) window.notifier("Numéro de téléphone manquant.", 'error');
+                return;
+            }
+            const cleanPhone = telephone.replace(/\D/g, '');
+            const finalPhone = cleanPhone.length === 10 ? '225' + cleanPhone : cleanPhone;
+            const message = `Bonjour ${nom}, c'est la Clinique Refontiq. Nous vous informons qu'un montant de ${montant.toLocaleString()} FCFA reste en attente de paiement pour vos derniers soins. Merci de passer à la caisse ou de nous contacter.`;
+            window.open(`https://wa.me/${finalPhone}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        function toggleModal(show) {
+            document.getElementById('paymentModal').classList.toggle('active', show);
+        }
+
+
+    </script>
+</body>
+</html>

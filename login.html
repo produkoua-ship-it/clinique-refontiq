@@ -440,6 +440,26 @@
                 <p>Connectez-vous à votre espace Clinique Refontiq</p>
             </div>
 
+            <div class="demo-accounts" style="margin-top: 0; margin-bottom: 32px; border-color: var(--primary); background: var(--primary-light);">
+                <h4>Accès Rapide (Démo)</h4>
+                <div class="demo-buttons">
+                    <button class="demo-btn" onclick="accesRapide('medecin')">
+                        <i class="fa-solid fa-user-doctor"></i>
+                        <span>Médecin</span>
+                    </button>
+                    <button class="demo-btn" onclick="accesRapide('infirmiere')">
+                        <i class="fa-solid fa-user-nurse"></i>
+                        <span>Infirmière</span>
+                    </button>
+                    <button class="demo-btn" onclick="accesRapide('reception')">
+                        <i class="fa-solid fa-headset"></i>
+                        <span>Réception</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-divider" style="margin-bottom: 32px;"><span>Ou connectez-vous manuellement</span></div>
+
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label for="email">Email professionnel</label>
@@ -527,24 +547,6 @@
                 </div>
             </div>
 
-            <div class="form-divider"><span>Comptes de démonstration</span></div>
-            <div class="demo-accounts">
-                <h4>Accès Rapide (Démo)</h4>
-                <div class="demo-buttons">
-                    <button class="demo-btn" onclick="accesRapide('medecin')">
-                        <i class="fa-solid fa-user-doctor"></i>
-                        <span>Médecin</span>
-                    </button>
-                    <button class="demo-btn" onclick="accesRapide('infirmiere')">
-                        <i class="fa-solid fa-user-nurse"></i>
-                        <span>Infirmière</span>
-                    </button>
-                    <button class="demo-btn" onclick="accesRapide('reception')">
-                        <i class="fa-solid fa-headset"></i>
-                        <span>Réception</span>
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -636,7 +638,7 @@
                 };
                 localStorage.setItem('currentUser', JSON.stringify(userData));
                 window.notifier("Compte créé avec succès ! Bienvenue " + invitationData.nom + " !");
-                setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                setTimeout(() => window.location.href = 'app/dashboard.html', 1500);
             } else if (res && res.reason === 'ALREADY_LOGGED_IN') {
                 window.notifier(`Le compte est créé, mais l'accès est refusé : ${res.activeUser} est déjà connecté(e) en tant que ${invitationData.role}. Réessayez plus tard.`, 'error');
                 setTimeout(() => window.location.reload(), 3000);
@@ -705,7 +707,7 @@
                     timestamp: new Date().toISOString()
                 };
                 localStorage.setItem('currentUser', JSON.stringify(userData));
-                window.location.href = 'dashboard.html';
+                window.location.href = 'app/dashboard.html';
             } else {
                 if (res && res.reason === 'ALREADY_LOGGED_IN') {
                     // Message spécifique pour le blocage de session multiple
@@ -719,7 +721,7 @@
 
         // Vérifier si déjà connecté
         window.onload = function () {
-            if (localStorage.getItem('currentUser')) window.location.href = 'dashboard.html';
+            if (localStorage.getItem('currentUser')) window.location.href = 'app/dashboard.html';
         };
     </script>
 </body>

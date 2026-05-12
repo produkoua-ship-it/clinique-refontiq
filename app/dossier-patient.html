@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dossier Patient - Refontiq</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <link href="../assets/premium-style.css" rel="stylesheet">
+    <link href="../assets/ai-assistant.css" rel="stylesheet">
+    
+    <script src="../assets/role-manager.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Dossier Layout Spécifique */
+        .dossier-grid { display: grid; grid-template-columns: 350px 1fr; gap: 24px; }
+        .patient-card { background: var(--card); border-radius: 20px; padding: 32px; box-shadow: var(--shadow); border: 1px solid var(--border); text-align: center; }
+        .patient-avatar { width: 100px; height: 100px; border-radius: 50%; background: var(--primary-light); color: var(--primary); font-size: 2.5rem; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .info-card { background: var(--card); border-radius: 20px; padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 24px; }
+        .info-title { font-family: 'Space Grotesk'; font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        
+        .data-row { display: grid; grid-template-columns: 150px 1fr; padding: 12px 0; border-bottom: 1px solid var(--bg); }
+        .data-label { color: var(--text-light); font-size: 0.9rem; font-weight: 500; }
+        .data-value { font-weight: 600; }
+
+        .history-item { padding: 16px; border-radius: 12px; background: var(--bg); margin-bottom: 12px; border-left: 4px solid var(--primary); }
+        .history-date { font-size: 0.8rem; color: var(--text-light); margin-bottom: 4px; }
+        .history-diag { font-weight: 700; margin-bottom: 4px; }
+        .history-trait { font-size: 0.9rem; color: var(--secondary); font-weight: 500; }
+
+        .chart-container { height: 180px; position: relative; margin-top: 10px; }
+        .vitals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+        .vital-mini-card { background: var(--bg); padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 12px; }
+        .vital-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+
+        @media (max-width: 768px) {
+            .dossier-grid { grid-template-columns: 1fr; }
+            .vitals-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+        <div id="sidebar-container"></div>
+
+        <main class="main-content">
+            
+
+
+            <div id="loader" style="text-align: center; padding: 100px;">
+                <i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color: var(--primary);"></i>
+                <p style="margin-top: 20px; color: var(--text-light);">Récupération du dossier médical...</p>
+            </div>
+
+            <div id="dossier-content" style="display: none;">
+                <div class="top-bar">
+                    <div class="page-title">
+                        <h1>Dossier Médical</h1>
+                        <p id="p-ref">Référence: --</p>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <a href="patients.html" class="btn" style="background: var(--border); color: var(--text);"><i class="fa-solid fa-arrow-left"></i> Retour</a>
+                        <button class="btn" style="background: var(--border); color: var(--text);" onclick="ouvrirConstantesModal()"><i class="fa-solid fa-heart-pulse"></i> Prendre Constantes</button>
+                        <button class="btn" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; border: none;" onclick="ouvrirSoinModal()"><i class="fa-solid fa-syringe"></i> Enregistrer un Soin</button>
+                        <a id="btn-nouvelle-consult" href="#" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouvelle Consultation</a>
+                    </div>
+                </div>
+
+                <div class="dossier-grid">
+                    <!-- Colonne Gauche: Résumé -->
+                    <div>
+                        <div class="patient-card">
+                            <div class="patient-avatar" id="p-avatar">?</div>
+                            <h2 id="p-nom-complet" style="font-family:'Space Grotesk'; margin-bottom: 8px;">--</h2>
+                            <p id="p-status" style="color: var(--secondary); font-weight: 600; font-size: 0.9rem;"><i class="fa-solid fa-circle-check"></i> Patient Actif</p>
+                            
+                            <div style="margin-top: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div style="padding: 12px; background: var(--bg); border-radius: 12px;">
+                                    <div style="font-size: 0.75rem; color: var(--text-light);">Âge</div>
+                                    <div id="p-age" style="font-weight: 700;">--</div>
+                                </div>
+                                <div style="padding: 12px; background: var(--bg); border-radius: 12px;">
+                                    <div style="font-size: 0.75rem; color: var(--text-light);">Groupe</div>
+                                    <div id="p-sang" style="font-weight: 700; color: var(--danger);">--</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-card" style="margin-top: 24px;">
+                            <div class="info-title"><i class="fa-solid fa-phone"></i> Contact</div>
+                            <div class="data-row"><span class="data-label">Téléphone</span><span class="data-value" id="p-tel">--</span></div>
+                            <div class="data-row" style="border:none;"><span class="data-label">Adresse</span><span class="data-value" id="p-adresse">--</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Colonne Droite: Détails et Historique -->
+                    <div>
+                        <div class="info-card">
+                            <div class="info-title" style="justify-content: space-between;">
+                                <span><i class="fa-solid fa-chart-line"></i> Tableau de Bord des Constantes</span>
+                                <span style="font-size: 0.75rem; color: var(--text-light); font-weight: 400;">Derniers 7 jours</span>
+                            </div>
+                            
+                            <div class="vitals-grid">
+                                <div>
+                                    <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;"><i class="fa-solid fa-temperature-half" style="color: #ef4444;"></i> Température (°C)</div>
+                                    <div class="chart-container"><canvas id="tempChart"></canvas></div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;"><i class="fa-solid fa-droplet" style="color: #3b82f6;"></i> Tension Artérielle (mmHg)</div>
+                                    <div class="chart-container"><canvas id="tensionChart"></canvas></div>
+                                </div>
+                            </div>
+
+                            <div class="vitals-grid" style="margin-top: 24px; border-top: 1px solid var(--bg); padding-top: 16px;">
+                                <div class="vital-mini-card">
+                                    <div class="vital-icon" style="background: #ecfdf5; color: #10b981;"><i class="fa-solid fa-heartbeat"></i></div>
+                                    <div><div style="font-size:0.7rem; color:var(--text-light);">Pouls</div><div id="v-pouls" style="font-weight:700;">-- bpm</div></div>
+                                </div>
+                                <div class="vital-mini-card">
+                                    <div class="vital-icon" style="background: #eff6ff; color: #3b82f6;"><i class="fa-solid fa-lungs"></i></div>
+                                    <div><div style="font-size:0.7rem; color:var(--text-light);">SpO2</div><div id="v-spo2" style="font-weight:700;">-- %</div></div>
+                                </div>
+                            </div>
+                            <div id="v-author" style="margin-top: 12px; font-size: 0.7rem; color: var(--text-light); text-align: right; font-style: italic;">
+                                --
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-title"><i class="fa-solid fa-file-medical"></i> Antécédents Médicaux</div>
+                            <p id="p-antecedents" style="line-height: 1.6; color: var(--text-light);">Aucun antécédent particulier déclaré.</p>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-title"><i class="fa-solid fa-history"></i> Historique des Consultations</div>
+                            <div id="consultations-list">
+                                <p style="text-align: center; color: var(--text-light); padding: 40px;">Aucune consultation enregistrée pour ce patient.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Prise de Constantes -->
+    <div class="modal" id="constantesModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 2000; padding: 20px;">
+        <div class="modal-content" style="background: white; padding: 32px; border-radius: 20px; width: 100%; max-width: 450px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="font-family:'Space Grotesk'; font-size: 1.3rem;">🌡️ Prise de Constantes</h2>
+                <button class="action-btn-sm" onclick="document.getElementById('constantesModal').style.display = 'none'" style="background:none; border:none; cursor:pointer;"><i class="fa-solid fa-xmark fa-xl"></i></button>
+            </div>
+            
+            <form onsubmit="handleSaveConstantes(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label>Température (°C)</label>
+                        <input type="number" id="c-temp" step="0.1" placeholder="37.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Poids (kg)</label>
+                        <input type="number" id="c-poids" step="0.1" placeholder="70.0">
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label>Tension Sys (max)</label>
+                        <input type="number" id="c-sys" placeholder="120" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tension Dia (min)</label>
+                        <input type="number" id="c-dia" placeholder="80" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                    <div class="form-group">
+                        <label>Pouls (bpm)</label>
+                        <input type="number" id="c-pouls" placeholder="72">
+                    </div>
+                    <div class="form-group">
+                        <label>SpO2 (%)</label>
+                        <input type="number" id="c-spo2" placeholder="98">
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:12px;">
+                    <button type="button" class="btn" onclick="document.getElementById('constantesModal').style.display = 'none'" style="flex:1;">Annuler</button>
+                    <button type="submit" class="btn btn-primary" style="flex:1;" id="btn-save-const">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Enregistrement de Soin -->
+    <div class="modal" id="soinModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 2000; padding: 20px;">
+        <div class="modal-content" style="background: white; padding: 32px; border-radius: 20px; width: 100%; max-width: 500px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="font-family:'Space Grotesk'; font-size: 1.3rem;">💉 Enregistrer un Soin</h2>
+                <button class="action-btn-sm" onclick="document.getElementById('soinModal').style.display = 'none'" style="background:none; border:none; cursor:pointer;"><i class="fa-solid fa-xmark fa-xl"></i></button>
+            </div>
+            
+            <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 20px;">Sélectionnez l'acte de soin réalisé. Le matériel correspondant sera automatiquement déduit des stocks.</p>
+            
+            <div style="margin-bottom: 20px; position: relative;">
+                <i class="fa-solid fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light);"></i>
+                <input type="text" id="search-soin" placeholder="Rechercher un soin (ex: pansement)..." onkeyup="filtrerKitsSoins()" style="width: 100%; padding: 12px 12px 12px 36px; border-radius: 12px; border: 2px solid var(--border); font-size: 0.9rem;">
+            </div>
+            
+            <input type="hidden" id="select-soin" value="">
+            <div id="grid-soins" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-bottom: 24px; max-height: 350px; overflow-y: auto; padding: 4px;">
+                <p style="color: var(--text-light); grid-column: 1 / -1; text-align: center;">Chargement des soins...</p>
+            </div>
+
+            <div style="display:flex; gap:12px;">
+                <button type="button" class="btn" onclick="document.getElementById('soinModal').style.display = 'none'" style="flex:1;">Annuler</button>
+                <button type="button" class="btn btn-primary" style="flex:1; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border:none;" onclick="appliquerSoin()" id="btn-valider-soin">Valider le Soin</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../supabase-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const hour = new Date().getHours();
+            const savedTheme = localStorage.getItem('theme');
+            let theme = (hour >= 20 || hour < 6) ? 'dark' : 'light';
+            if (savedTheme) theme = savedTheme;
+            
+            document.documentElement.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+            
+            initUser();
+            await chargerDossier();
+        });
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const target = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
+            updateThemeIcon(target);
+        }
+
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('theme-toggle');
+            const icon = btn.querySelector('i');
+            if (icon) {
+                if (theme === 'dark') {
+                    icon.className = 'fa-solid fa-sun';
+                    icon.style.color = '#fbbf24';
+                } else {
+                    icon.className = 'fa-solid fa-moon';
+                    icon.style.color = 'var(--text)';
+                }
+            }
+        }
+
+        function initUser() {
+            // Géré automatiquement par assets/role-manager.js
+        }
+
+        async function chargerDossier() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (!id) {
+                document.getElementById('loader').innerHTML = '<p style="color:var(--danger)">Aucun patient sélectionné.</p>';
+                return;
+            }
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+            
+            // 1. Infos Patient
+            const { data: p, error: e1 } = await supabase.from('patients').select('*').eq('id', id).single();
+            if (e1 || !p) {
+                document.getElementById('loader').innerHTML = '<p style="color:var(--danger)">Erreur lors de la récupération du dossier.</p>';
+                return;
+            }
+
+            // Remplissage UI
+            document.getElementById('p-nom-complet').textContent = `${p.nom} ${p.prenom || ''}`;
+            document.getElementById('p-avatar').textContent = (p.nom[0] + (p.prenom ? p.prenom[0] : '')).toUpperCase();
+            document.getElementById('p-ref').textContent = `Référence: ${p.id.substring(0,8).toUpperCase()}`;
+            
+            // Calcul de l'âge
+            let ageDisplay = '?';
+            if (p.date_naissance) {
+                const dob = new Date(p.date_naissance);
+                const ageDifMs = Date.now() - dob.getTime();
+                const ageDate = new Date(ageDifMs);
+                ageDisplay = Math.abs(ageDate.getUTCFullYear() - 1970);
+            }
+            document.getElementById('p-age').textContent = `${ageDisplay} ans`;
+            
+            document.getElementById('p-sang').textContent = p.groupe_sanguin || '--';
+            document.getElementById('p-tel').textContent = p.telephone || '--';
+            document.getElementById('p-adresse').textContent = p.adresse || '--';
+            
+            // Traitement des allergies et maladies pour les tags
+            const allergies = p.allergies ? p.allergies.split(',').map(a => a.trim()).filter(a => a) : [];
+            const maladies = p.maladies ? p.maladies.split(',').map(m => m.trim()).filter(m => m) : [];
+            const antContainer = document.getElementById('p-antecedents');
+            
+            if (allergies.length === 0 && maladies.length === 0) {
+                antContainer.innerHTML = '<span style="color: var(--text-light);">Aucun antécédent particulier déclaré.</span>';
+            } else {
+                let tagsHTML = '';
+                allergies.forEach(txt => {
+                    tagsHTML += `<span class="tag tag-danger" style="margin-right: 8px; margin-bottom: 8px;"><i class="fa-solid fa-triangle-exclamation" style="margin-right: 4px;"></i> ${txt}</span>`;
+                });
+                maladies.forEach(txt => {
+                    tagsHTML += `<span class="tag tag-warning" style="margin-right: 8px; margin-bottom: 8px;"><i class="fa-solid fa-notes-medical" style="margin-right: 4px;"></i> ${txt}</span>`;
+                });
+                antContainer.innerHTML = tagsHTML;
+            }
+            
+            document.getElementById('btn-nouvelle-consult').href = `consultations.html?patient_id=${p.id}`;
+
+            // 2. Historique Consultations
+            const { data: consults } = await supabase.from('consultations').select('*').eq('patient_id', id).order('date', { ascending: false });
+            
+            const listDiv = document.getElementById('consultations-list');
+            if (consults && consults.length > 0) {
+                listDiv.innerHTML = consults.map(c => `
+                    <div class="history-item">
+                        <div class="history-date">${new Date(c.date).toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' })}${c.heure ? ' à ' + c.heure.substring(0,5) : ''}</div>
+                        <div class="history-diag"><strong>Motif :</strong> ${c.motif || 'Consultation de routine'}</div>
+                        <div class="history-diag">${c.notes || '--'}</div>
+                        <div class="history-trait"><strong>Traitement :</strong> ${c.historique || '--'}</div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('dossier-content').style.display = 'block';
+
+            // 3. Charger les graphiques
+            await chargerGraphiques(id);
+
+            // 4. Action automatique (ex: ouverture modal constantes)
+            if (urlParams.get('action') === 'vitals') {
+                ouvrirConstantesModal();
+            }
+        }
+
+        // === GESTION DES CONSTANTES & GRAPHIQUES ===
+        let tempChart, tensionChart;
+
+        async function chargerGraphiques(patientId) {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data: c } = await supabase.from('constantes')
+                .select('*, users(nom, prenom)')
+                .eq('patient_id', patientId)
+                .order('created_at', { ascending: true })
+                .limit(10);
+
+            if (!c || c.length === 0) return;
+
+            const labels = c.map(x => new Date(x.created_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'short' }));
+            
+            // Mise à jour des valeurs "Dernière"
+            const last = c[c.length - 1];
+            document.getElementById('v-pouls').textContent = (last.pouls || '--') + ' bpm';
+            document.getElementById('v-spo2').textContent = (last.spo2 || '--') + ' %';
+            
+            if (last.users) {
+                document.getElementById('v-author').textContent = `Dernière prise par : ${last.users.nom} ${last.users.prenom || ''}`;
+            }
+
+            // Graphique Température
+            const ctxTemp = document.getElementById('tempChart').getContext('2d');
+            if (tempChart) tempChart.destroy();
+            tempChart = new Chart(ctxTemp, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Temp',
+                        data: c.map(x => x.temperature),
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#ef4444'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { min: 35, max: 42 }, x: { display: true } }
+                }
+            });
+
+            // Graphique Tension
+            const ctxTension = document.getElementById('tensionChart').getContext('2d');
+            if (tensionChart) tensionChart.destroy();
+            tensionChart = new Chart(ctxTension, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Sys',
+                            data: c.map(x => x.tension_sys),
+                            borderColor: '#3b82f6',
+                            tension: 0.4,
+                            pointRadius: 3
+                        },
+                        {
+                            label: 'Dia',
+                            data: c.map(x => x.tension_dia),
+                            borderColor: '#60a5fa',
+                            tension: 0.4,
+                            pointRadius: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { min: 40, max: 200 } }
+                }
+            });
+        }
+
+        function ouvrirConstantesModal() {
+            document.getElementById('constantesModal').style.display = 'flex';
+            setupVitalsAlerts();
+        }
+
+        function setupVitalsAlerts() {
+            const thresholds = {
+                'c-temp': { high: 38, warning: 37.5, color: '#fee2e2', wColor: '#fef3c7' },
+                'c-sys': { high: 140, low: 90, color: '#fee2e2' },
+                'c-spo2': { low: 94, color: '#fee2e2' }
+            };
+
+            Object.keys(thresholds).forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                
+                el.addEventListener('input', () => {
+                    const val = parseFloat(el.value);
+                    const group = el.closest('.input-group');
+                    const t = thresholds[id];
+                    
+                    if (group) group.style.background = 'transparent';
+                    
+                    if (val) {
+                        if (id === 'c-temp') {
+                            if (val >= t.high) group.style.background = t.color;
+                            else if (val >= t.warning) group.style.background = t.wColor;
+                        } else if (id === 'c-sys') {
+                            if (val >= t.high || val <= t.low) group.style.background = t.color;
+                        } else if (id === 'c-spo2') {
+                            if (val < t.low) group.style.background = t.color;
+                        }
+                    }
+                });
+            });
+        }
+
+        async function handleSaveConstantes(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-const');
+            btn.disabled = true; btn.textContent = 'Enregistrement...';
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const patientId = urlParams.get('id');
+            const supabase = await window.SupabaseAPI.initSupabase();
+
+            // Récupérer l'ID de l'utilisateur connecté (infirmière ou médecin)
+            const userJson = localStorage.getItem('currentUser');
+            const currentUser = userJson ? JSON.parse(userJson) : null;
+
+            const data = {
+                patient_id: patientId,
+                infirmiere_id: currentUser ? currentUser.id : null,
+                temperature: parseFloat(document.getElementById('c-temp').value),
+                poids: parseFloat(document.getElementById('c-poids').value) || null,
+                tension_sys: parseInt(document.getElementById('c-sys').value),
+                tension_dia: parseInt(document.getElementById('c-dia').value),
+                pouls: parseInt(document.getElementById('c-pouls').value) || null,
+                spo2: parseInt(document.getElementById('c-spo2').value) || null
+            };
+
+            const { error } = await supabase.from('constantes').insert([data]);
+
+            if (!error) {
+                // Mise à jour du statut de la consultation
+                const { data: consult } = await supabase
+                    .from('consultations')
+                    .select('id')
+                    .eq('patient_id', patientId)
+                    .neq('status', 'termine')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+
+                if (consult) {
+                    await supabase.from('consultations').update({ status: 'pret' }).eq('id', consult.id);
+                }
+
+                window.notifier('Constantes enregistrées avec succès !');
+                document.getElementById('constantesModal').style.display = 'none';
+                e.target.reset();
+                
+                // Redirection intelligente pour l'infirmière : retour au dashboard pour le patient suivant
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+            } else {
+                window.notifier('Erreur : ' + error.message, 'error');
+            }
+            btn.disabled = false; btn.textContent = 'Enregistrer';
+        }
+
+        // === GESTION DES SOINS (AUTOMATISATION STOCKS) ===
+        let allSoinsDisponibles = [];
+
+        function getSoinColor(nom) {
+            const n = nom.toLowerCase();
+            if (n.includes('pans') || n.includes('plaie')) return '#3b82f6'; // Bleu
+            if (n.includes('inj') || n.includes('vacc') || n.includes('seringue')) return '#22c55e'; // Vert
+            if (n.includes('urg') || n.includes('sang') || n.includes('réa')) return '#ef4444'; // Rouge
+            if (n.includes('perf')) return '#a855f7'; // Violet
+            if (n.includes('consult')) return '#f59e0b'; // Orange
+            return 'var(--primary)'; // Couleur par défaut (Turquoise/Bleu-vert)
+        }
+
+        async function ouvrirSoinModal() {
+            document.getElementById('soinModal').style.display = 'flex';
+            
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data: soins } = await supabase.from('soins').select('*').order('nom');
+            
+            const grid = document.getElementById('grid-soins');
+            if (!soins || soins.length === 0) {
+                grid.innerHTML = '<p style="color:var(--text-light); text-align:center; width:100%; grid-column: 1 / -1;">Aucun soin configuré dans les stocks.</p>';
+                return;
+            }
+            
+            allSoinsDisponibles = soins;
+            grid.innerHTML = soins.map(s => {
+                const color = getSoinColor(s.nom);
+                return `
+                <button type="button" class="btn-soin" onclick="selectionnerSoin('${s.id}', this)" 
+                    style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px 8px; border:2px solid var(--border); border-radius:12px; background:white; cursor:pointer; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); height: 100%; position:relative; overflow:hidden;">
+                    
+                    <div class="soin-icon-circle" style="width:42px; height:42px; border-radius:50%; background: ${color}15; color: ${color}; font-size:1.2rem; display:flex; align-items:center; justify-content:center; transition:0.3s; border: 1px solid ${color}30;">
+                        <i class="fa-solid fa-kit-medical"></i>
+                    </div>
+                    
+                    <span style="font-weight:600; font-family:'Inter', sans-serif; font-size:0.75rem; text-align:center; color:var(--text); line-height:1.2; z-index:2;">${s.nom}</span>
+                    
+                    <style>
+                        .btn-soin:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border-color: ${color}80 !important; }
+                        .btn-soin:hover .soin-icon-circle { transform: scale(1.1); background: ${color}; color: white; }
+                        .btn-soin.active-selection { border-color: ${color} !important; background: ${color}08 !important; transform: scale(1.05); box-shadow: 0 0 0 4px ${color}20; }
+                    </style>
+                </button>
+                `;
+            }).join('');
+            
+            document.getElementById('select-soin').value = '';
+            document.getElementById('btn-valider-soin').disabled = true;
+            document.getElementById('search-soin').value = ''; // Reset recherche
+        }
+
+        function filtrerKitsSoins() {
+            const query = document.getElementById('search-soin').value.toLowerCase();
+            const buttons = document.querySelectorAll('.btn-soin');
+            
+            buttons.forEach(btn => {
+                const nom = btn.querySelector('span').textContent.toLowerCase();
+                if (nom.includes(query)) {
+                    btn.style.display = 'flex';
+                } else {
+                    btn.style.display = 'none';
+                }
+            });
+        }
+
+        function selectionnerSoin(id, btnElement) {
+            document.querySelectorAll('.btn-soin').forEach(b => {
+                b.classList.remove('active-selection');
+            });
+            
+            btnElement.classList.add('active-selection');
+            
+            document.getElementById('select-soin').value = id;
+            document.getElementById('btn-valider-soin').disabled = false;
+        }
+
+        async function appliquerSoin() {
+            const soinId = document.getElementById('select-soin').value;
+            if (!soinId) {
+                window.notifier('Veuillez sélectionner un soin', 'error');
+                return;
+            }
+
+            const soin = allSoinsDisponibles.find(s => s.id === soinId);
+            const produitsRequis = Array.isArray(soin.produits_requis) ? soin.produits_requis : [];
+            
+            const btn = document.getElementById('btn-valider-soin');
+            btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Traitement...';
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+            
+            // 1. Vérifier si on a assez de stock pour tout
+            if (produitsRequis.length > 0) {
+                const { data: stocksActuels } = await supabase.from('stocks').select('id, quantite, nom').in('id', produitsRequis.map(p => p.produit_id));
+                
+                let missing = [];
+                produitsRequis.forEach(req => {
+                    const st = stocksActuels.find(s => s.id === req.produit_id);
+                    if (!st || st.quantite < req.quantite) {
+                        missing.push(st ? st.nom : 'Produit inconnu');
+                    }
+                });
+
+                if (missing.length > 0) {
+                    window.notifier(`Stock insuffisant pour : ${missing.join(', ')}. Veuillez réapprovisionner d'abord.`, 'error');
+                    btn.disabled = false; btn.textContent = 'Valider le Soin';
+                    return;
+                }
+
+                // 2. Déduire les stocks et créer l'historique
+                const urlParams = new URLSearchParams(window.location.search);
+                const patientId = urlParams.get('id');
+                const patientName = document.getElementById('p-nom-complet').textContent;
+                
+                const userStr = localStorage.getItem('currentUser');
+                const u = userStr ? JSON.parse(userStr) : {};
+                const userName = u.name || u.role || 'Infirmière';
+                
+                const motif = `Soin : ${soin.nom} (Patient : ${patientName})`;
+
+                for (const req of produitsRequis) {
+                    const st = stocksActuels.find(s => s.id === req.produit_id);
+                    const newQty = st.quantite - req.quantite;
+                    
+                    // Update stock
+                    await supabase.from('stocks').update({ quantite: newQty }).eq('id', req.produit_id);
+                    
+                    // Insert mouvement
+                    await supabase.from('stock_mouvements').insert([{
+                        produit_id: req.produit_id,
+                        type_mouvement: 'sortie',
+                        quantite: req.quantite,
+                        motif: motif,
+                        utilisateur: userName
+                    }]);
+                }
+                
+                // 3. Optionnel : Enregistrer le soin dans l'historique médical
+                const now = new Date();
+                await supabase.from('consultations').insert([{
+                    patient_id: patientId,
+                    motif: `Soin : ${soin.nom}`,
+                    notes: `Acte réalisé automatiquement. Matériel déduit du stock.`,
+                    historique: `Validé par ${userName}`,
+                    date: now.toISOString().split('T')[0],
+                    heure: now.toTimeString().split(' ')[0].substring(0, 5),
+                    status: 'termine'
+                }]);
+            }
+
+            document.getElementById('soinModal').style.display = 'none';
+            btn.disabled = false; btn.textContent = 'Valider le Soin';
+            window.notifier('Soin enregistré et stocks déduits avec succès !');
+            await chargerDossier(); // Rafraîchir l'historique
+        }
+
+        function toggleMobileSidebar() {
+            document.querySelector('.sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
