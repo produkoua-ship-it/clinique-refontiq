@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patients - Clinique Refontiq</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <link href="../assets/premium-style.css" rel="stylesheet">
+    <link href="../assets/ai-assistant.css" rel="stylesheet">
+    <script src="../assets/role-manager.js"></script>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+        <div id="sidebar-container"></div>
+
+        <main class="main-content">
+            <div id="view-list">
+                <div class="top-bar">
+                    <div class="page-title">
+                        <h1>Base Patients</h1>
+                        <p id="count-text">Chargement...</p>
+                    </div>
+                    <div class="top-actions" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <div class="search-box">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" id="search-patient" placeholder="Rechercher..." onkeyup="filtrerPatients()">
+                        </div>
+                        <select id="sort-order" class="btn" style="background: var(--card); border: 1px solid var(--border);" onchange="chargerPatients(1)">
+                            <option value="nom_asc">Nom (A-Z)</option>
+                            <option value="nom_desc">Nom (Z-A)</option>
+                            <option value="recent">Plus récents</option>
+                            <option value="ancien">Plus anciens</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showSection('new')"><i class="fa-solid fa-plus"></i> Nouveau</button>
+                        <button class="btn" style="background:var(--primary-light); color:var(--primary);" onclick="document.getElementById('import-csv').click()" title="Importer des patients depuis un fichier CSV"><i class="fa-solid fa-file-import"></i> Importer CSV</button>
+                        <input type="file" id="import-csv" accept=".csv" style="display:none;" onchange="handleImport(this)">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Téléphone</th>
+                                    <th>Genre</th>
+                                    <th>Groupe</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patient-table-body">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 60px;">
+                                        <i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color: var(--primary);"></i>
+                                        <p style="margin-top: 15px; color: var(--text-light);">Accès à la base de données...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="pagination-controls" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-top: 1px solid var(--border); background: var(--bg);">
+                        <div id="pagination-info" style="font-size: 0.85rem; color: var(--text-light);">Chargement...</div>
+                        <div id="pagination-buttons" style="display: flex; gap: 8px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-new" style="display: none;">
+                <div class="top-bar">
+                    <div class="page-title">
+                        <h1>Nouveau Patient</h1>
+                        <p>Création d'un dossier médical sécurisé</p>
+                    </div>
+                    <button class="btn" onclick="showSection('list')">Annuler</button>
+                </div>
+
+                <div class="card">
+                    <form onsubmit="handleNewPatient(event)">
+                        <div class="form-grid">
+                            <div class="form-group"><label>Nom *</label><input type="text" id="nom" required></div>
+                            <div class="form-group"><label>Prénom *</label><input type="text" id="prenom" required></div>
+                            <div class="form-group"><label>Téléphone *</label><input type="tel" id="tel" required></div>
+                            <div class="form-group">
+                                <label>Sexe</label>
+                                <select id="sexe">
+                                    <option value="M">Masculin</option>
+                                    <option value="F">Féminin</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Date de naissance</label><input type="date" id="date_naissance"></div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Adresse *</label>
+                                <input type="text" id="adresse" placeholder="Ex: Koumassi, Rue des jardins..." required>
+                            </div>
+                            <div class="form-group">
+                                <label>Groupe Sanguin</label>
+                                <select id="sang">
+                                    <option value="">Inconnu</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Allergies</label>
+                                <textarea id="allergies" rows="2" placeholder="Ex: Pénicilline..."></textarea>
+                            </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label>Maladies chroniques</label>
+                                <textarea id="maladies" rows="2" placeholder="Ex: Diabète, Hypertension..."></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="btn-save">Enregistrer le patient</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../supabase-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await chargerPatients();
+        });
+
+        let currentPage = 1;
+        const itemsPerPage = 20;
+        let searchQuery = '';
+
+        async function chargerPatients(page = 1) {
+            currentPage = page;
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const tbody = document.getElementById('patient-table-body');
+            const countText = document.getElementById('count-text');
+            const pagInfo = document.getElementById('pagination-info');
+            const pagBtns = document.getElementById('pagination-buttons');
+            
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="color:var(--primary);"></i> Chargement...</td></tr>`;
+
+            let query = supabase.from('patients').select('*', { count: 'exact' });
+            if (searchQuery) {
+                query = query.or(`nom.ilike.%${searchQuery}%,prenom.ilike.%${searchQuery}%,telephone.ilike.%${searchQuery}%`);
+            }
+
+            const from = (page - 1) * itemsPerPage;
+            const to = from + itemsPerPage - 1;
+
+            const sortOrder = document.getElementById('sort-order').value;
+            if (sortOrder === 'nom_asc') query = query.order('nom', { ascending: true });
+            else if (sortOrder === 'nom_desc') query = query.order('nom', { ascending: false });
+            else if (sortOrder === 'recent') query = query.order('created_at', { ascending: false });
+            else if (sortOrder === 'ancien') query = query.order('created_at', { ascending: true });
+
+            const { data, count, error } = await query.range(from, to);
+            
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--danger);">Erreur : ${error.message}</td></tr>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Aucun patient trouvé.</td></tr>`;
+                countText.textContent = "0 patient enregistré";
+                pagInfo.textContent = "0 résultat";
+                pagBtns.innerHTML = '';
+                return;
+            }
+
+            countText.textContent = `${count} patient${count > 1 ? 's' : ''} enregistré${count > 1 ? 's' : ''}`;
+            
+            tbody.innerHTML = data.map(p => `
+                <tr onclick="window.location.href='dossier-patient.html?id=${p.id}'" style="cursor: pointer;">
+                    <td>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div class="patient-avatar-table">${p.nom[0]}${p.prenom ? p.prenom[0] : ''}</div>
+                            <div>
+                                <div style="font-weight:700;">${p.nom} ${p.prenom || ''}</div>
+                                <div style="font-size:0.75rem; color:var(--text-light);">Réf: ${p.id.substring(0,8).toUpperCase()}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${p.telephone || '--'}</td>
+                    <td>${p.sexe || '--'}</td>
+                    <td><span style="font-weight:600; color:var(--primary);">${p.groupe_sanguin || '--'}</span></td>
+                    <td><span class="status-badge status-active">Dossier Actif</span></td>
+                </tr>
+            `).join('');
+
+            const totalPages = Math.ceil(count / itemsPerPage);
+            const actualEnd = Math.min(to + 1, count);
+            pagInfo.textContent = `Affichage ${from + 1} à ${actualEnd} sur ${count}`;
+
+            let btnHTML = '';
+            if (currentPage > 1) {
+                btnHTML += `<button class="btn" style="padding: 6px 12px;" onclick="chargerPatients(${currentPage - 1})"><i class="fa-solid fa-angle-left"></i> Précédent</button>`;
+            }
+            if (currentPage < totalPages) {
+                btnHTML += `<button class="btn btn-primary" style="padding: 6px 12px;" onclick="chargerPatients(${currentPage + 1})">Suivant <i class="fa-solid fa-angle-right"></i></button>`;
+            }
+            pagBtns.innerHTML = btnHTML;
+        }
+
+        async function handleImport(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const text = e.target.result;
+                const rows = text.split('\n').filter(row => row.trim() !== '');
+                if (rows.length < 2) {
+                    window.notifier("Le fichier est vide ou mal formaté.", 'error');
+                    return;
+                }
+
+                const dataRows = rows.slice(1);
+                const patientsToImport = [];
+                dataRows.forEach(row => {
+                    const values = row.split(/[;,]/);
+                    if (values.length >= 3) {
+                        patientsToImport.push({
+                            nom: values[0]?.trim() || 'Importé',
+                            prenom: values[1]?.trim() || '',
+                            telephone: values[2]?.trim() || '',
+                            sexe: (values[3]?.trim() || 'M').toUpperCase().substring(0, 1),
+                            adresse: values[4]?.trim() || ''
+                        });
+                    }
+                });
+
+                if (patientsToImport.length === 0) {
+                    window.notifier("Aucune donnée valide trouvée.", 'error');
+                    return;
+                }
+
+                if (!confirm(`Importer ${patientsToImport.length} patients ?`)) return;
+
+                const supabase = await window.SupabaseAPI.initSupabase();
+                const { error } = await supabase.from('patients').insert(patientsToImport);
+
+                if (error) {
+                    window.notifier("Erreur d'importation : " + error.message, 'error');
+                } else {
+                    window.notifier(`${patientsToImport.length} patients importés avec succès !`);
+                    await chargerPatients();
+                }
+                input.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        async function handleNewPatient(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save');
+            btn.disabled = true;
+            btn.textContent = "Enregistrement...";
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const patient = {
+                nom: document.getElementById('nom').value,
+                prenom: document.getElementById('prenom').value,
+                telephone: document.getElementById('tel').value,
+                adresse: document.getElementById('adresse').value,
+                sexe: document.getElementById('sexe').value,
+                date_naissance: document.getElementById('date_naissance').value || null,
+                groupe_sanguin: document.getElementById('sang').value,
+                allergies: document.getElementById('allergies').value,
+                maladies: document.getElementById('maladies').value
+            };
+
+            const { data, error } = await supabase.from('patients').insert([patient]).select();
+            
+            if (error) {
+                window.notifier("Erreur : " + error.message, 'error');
+                btn.disabled = false;
+                btn.textContent = "Enregistrer le patient";
+            } else {
+                window.notifier("Patient enregistré avec succès !");
+                const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                
+                setTimeout(() => {
+                    if (user.role === 'infirmiere') {
+                        window.location.href = `dossier-patient.html?id=${data[0].id}&action=vitals`;
+                    } else {
+                        showSection('list');
+                        chargerPatients();
+                        btn.disabled = false;
+                        btn.textContent = "Enregistrer le patient";
+                        document.querySelector('form').reset();
+                    }
+                }, 1000);
+            }
+        }
+
+        function showSection(s) {
+            document.getElementById('view-list').style.display = s === 'list' ? 'block' : 'none';
+            document.getElementById('view-new').style.display = s === 'new' ? 'block' : 'none';
+        }
+
+        let searchTimeout;
+        function filtrerPatients() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchQuery = document.getElementById('search-patient').value.trim();
+                chargerPatients(1);
+            }, 300);
+        }
+    </script>
+</body>
+
+</html>
