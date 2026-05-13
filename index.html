@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clinique Médicale Refontiq – Excellence Médicale à Abidjan</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="La Clinique Médicale Refontiq à Abidjan offre des soins de qualité 24h/24 et 7j/7. Consultations générales, spécialités (Gynécologie, Pédiatrie, Cardiologie), laboratoire d'analyses et maternité.">
+  <meta name="keywords" content="clinique médicale, Abidjan, Refontiq, urgences 24h/24, gynécologie, pédiatrie, cardiologie, laboratoire analyses, maternité Côte d'Ivoire">
+  <meta name="author" content="Clinique Médicale Refontiq">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://refontiq.com/">
+  <meta property="og:title" content="Clinique Médicale Refontiq – Votre santé, notre priorité">
+  <meta property="og:description" content="Découvrez une prise en charge médicale d'excellence au cœur d'Abidjan. Services polyvalents et urgences disponibles 24h/24.">
+  <meta property="og:image" content="assets/img/landing_img_3.png">
+
+  <link rel="icon" href="assets/img/landing_img_1.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      } else {
+        const hour = new Date().getHours();
+        if (hour >= 20 || hour < 6) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      }
+    })();
+  </script>
+  
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/landing-style.css">
+</head>
+<body>
+
+<!-- ── DECORATIVE SHAPES ── -->
+<div class="bg-shape shape-1"></div>
+<div class="bg-shape shape-2"></div>
+
+<!-- ── NAVBAR ── -->
+<header>
+  <nav id="navbar">
+    <a href="#hero" class="nav-logo" aria-label="Retour à l'accueil">
+      <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
+      <div class="logo-text">
+        <div class="logo-title">Clinique Refontiq</div>
+        <p>Excellence Médicale</p>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a class="nav-link" href="#about">À propos</a></li>
+      <li><a class="nav-link" href="#services">Services</a></li>
+      <li><a class="nav-link" href="#equipe-specialistes">Équipe</a></li>
+      <li><a class="nav-link" href="#tarifs">Tarifs</a></li>
+      <li><a class="nav-link" href="#assurances">Assurances</a></li>
+      <li><a class="nav-link" href="#contact">Contact</a></li>
+      <li><a id="nav-login-link" class="nav-link login-link-highlight" href="login.html"><i class="fa-solid fa-user-lock"></i> Connexion</a></li>
+      <li><a class="nav-link nav-cta" href="tel:+22521256276" aria-label="Appeler les urgences">🚨 Urgences 24h/7j</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Ouvrir le menu de navigation">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+</header>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+  <a href="#about" onclick="closeMobile()">À propos</a>
+  <a href="#services" onclick="closeMobile()">Services</a>
+  <a href="#equipe-specialistes" onclick="closeMobile()">Équipe</a>
+  <a href="#tarifs" onclick="closeMobile()">Tarifs</a>
+  <a href="#assurances" onclick="closeMobile()">Assurances</a>
+  <a href="#contact" onclick="closeMobile()">Contact</a>
+  <a id="mobile-login-link" class="login-link-highlight" href="login.html"><i class="fa-solid fa-user-lock"></i> Espace Personnel</a>
+  <a href="tel:+22521256276" class="m-cta">🚨 Urgences 24h/7j</a>
+</div>
+
+<main>
+  <!-- ── HERO ── -->
+  <section id="hero">
+    <div class="hero-bg">
+      <img src="assets/img/landing_img_3.png" alt="Vue d'accueil de la Clinique Médicale Refontiq à Abidjan">
+    </div>
+    <div class="hero-overlay"></div>
+    
+    <div class="hero-content">
+      <h1 class="hero-title">
+        Des soins <em>humains</em><br>
+        <strong>pour toute la famille</strong>
+      </h1>
+      <p class="hero-desc">
+        La Clinique Médicale Refontiq vous accueille à Abidjan avec une équipe pluridisciplinaire dévouée — consultations, analyses, maternité et urgences disponibles en permanence.
+      </p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-hero-primary">
+          <span>📅</span> Prendre rendez-vous
+        </a>
+        <a href="#services" class="btn-hero-outline">
+          Découvrir nos services →
+        </a>
+        <a href="app/dashboard.html" class="btn-hero-dashboard">
+          <span>👨‍⚕️</span> MON ESPACE DASHBOARD
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-num">15+</span>
+          <span class="stat-label">Années d'expérience</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">16</span>
+          <span class="stat-label">Spécialités</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">24/7</span>
+          <span class="stat-label">Urgences & Soins</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="urgence-card">
+      <div class="urgence-dot">🚨</div>
+      <div>
+        <h4>Urgences &amp; Soins</h4>
+        <p>21 25 62 76 · 44 03 28 30</p>
+        <div class="urgence-live">Ligne directe</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TRUST BAR ── -->
+  <div class="trust-bar">
+    <div class="trust-track">
+      <div class="trust-item"><i class="fa-solid fa-stethoscope"></i> Médecine Générale</div>
+      <div class="trust-item"><i class="fa-solid fa-baby-carriage"></i> Gynécologie &amp; Pédiatrie</div>
+      <div class="trust-item"><i class="fa-solid fa-heart-pulse"></i> Cardiologie · ORL</div>
+      <div class="trust-item"><i class="fa-solid fa-microscope"></i> Endoscopie · Échographie</div>
+      <div class="trust-item"><i class="fa-solid fa-flask-vial"></i> Analyses Biologiques</div>
+      <div class="trust-item"><i class="fa-solid fa-hospital-user"></i> Accouchement · Chirurgie</div>
+      <!-- Duplicate for infinite scroll -->
+      <div class="trust-item"><i class="fa-solid fa-stethoscope"></i> Médecine Générale</div>
+      <div class="trust-item"><i class="fa-solid fa-baby-carriage"></i> Gynécologie &amp; Pédiatrie</div>
+      <div class="trust-item"><i class="fa-solid fa-heart-pulse"></i> Cardiologie · ORL</div>
+      <div class="trust-item"><i class="fa-solid fa-microscope"></i> Endoscopie · Échographie</div>
+      <div class="trust-item"><i class="fa-solid fa-flask-vial"></i> Analyses Biologiques</div>
+      <div class="trust-item"><i class="fa-solid fa-hospital-user"></i> Accouchement · Chirurgie</div>
+    </div>
+  </div>
+
+  <!-- ── SERVICES ── -->
+  <section id="services" style="background: linear-gradient(to bottom, #ffffff, #f0f7ff);">
+    <div class="section-header reveal">
+      <span class="section-tag">Nos Spécialités</span>
+      <h2 class="section-title">Des soins complets pour <span>toute la famille</span></h2>
+      <p class="section-sub">De la consultation générale aux actes spécialisés, nous couvrons l'ensemble de vos besoins de santé.</p>
+    </div>
+    <div class="services-grid">
+      <article class="service-card reveal">
+        <div class="service-icon" aria-hidden="true">🩺</div>
+        <h3>Consultations Médicales</h3>
+        <p>Médecine générale, gynécologie, pédiatrie, cardiologie, ORL et dermatologie avec des praticiens expérimentés.</p>
+      </article>
+      <article class="service-card reveal">
+        <div class="service-icon" aria-hidden="true">🔬</div>
+        <h3>Analyses Biologiques</h3>
+        <p>Laboratoire d'analyses médicales complet pour des résultats fiables et rapides dans le suivi de votre santé.</p>
+      </article>
+      <article class="service-card reveal">
+        <div class="service-icon" aria-hidden="true">📡</div>
+        <h3>Imagerie &amp; Endoscopie</h3>
+        <p>Échographie, ECG, endoscopie digestive réalisés par des spécialistes avec un équipement de pointe.</p>
+      </article>
+      <article class="service-card reveal">
+        <div class="service-icon" aria-hidden="true">👶</div>
+        <h3>Maternité &amp; Chirurgie</h3>
+        <p>Accompagnement à l'accouchement, suivi prénatal et interventions chirurgicales dans les meilleures conditions.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ── ABOUT ── -->
+  <section id="about">
+    <div class="about-img-wrap reveal">
+      <img src="assets/img/landing_img_4.png" alt="Hall d'accueil de la Clinique Médicale Refontiq" loading="lazy">
+    </div>
+    <div class="about-text reveal">
+      <div class="section-header" style="text-align: left; margin-bottom: 30px;">
+        <span class="section-tag">À Propos de Nous</span>
+        <h2 class="section-title">La <span>Clinique Médicale Refontiq</span>,<br>au cœur d'Abidjan</h2>
+      </div>
+      <p>Située à l'Immeuble Refontiq, 1<sup>er</sup> Étage, face à la gare de Bassam, la Clinique Médicale Refontiq est un établissement de santé polyvalent dédié à offrir des soins accessibles et de qualité à tous.</p>
+      <p>Notre équipe de médecins spécialisés et de personnels soignants engagés travaille chaque jour pour votre bien-être, avec la disponibilité 24h/24 et 7j/7 comme engagement fondamental.</p>
+      <div class="about-feats">
+        <div class="af"><div class="af-check" aria-hidden="true">✓</div> Personnel qualifié</div>
+        <div class="af"><div class="af-check" aria-hidden="true">✓</div> Équipements modernes</div>
+        <div class="af"><div class="af-check" aria-hidden="true">✓</div> Urgences 24h/7j</div>
+        <div class="af"><div class="af-check" aria-hidden="true">✓</div> Soins accessibles</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ÉQUIPE MÉDICALE ── -->
+  <section id="equipe-specialistes">
+    <div class="section-header reveal">
+      <span class="section-tag">Notre Équipe</span>
+      <h2 class="section-title">Des spécialistes <span>à votre service</span></h2>
+      <p class="section-sub">Une équipe pluridisciplinaire de médecins qualifiés pour vous accompagner dans tous vos besoins de santé.</p>
+    </div>
+
+    <div class="director-card reveal">
+      <div class="director-avatar" aria-hidden="true">👨‍⚕️</div>
+      <div class="director-info">
+        <h3>Dr. Duval Jean</h3>
+        <div class="d-role">Gérant & Médecin Directeur</div>
+        <div class="d-title">Spécialiste en Médecine Interne — Fondateur de la CMR</div>
+      </div>
+      <div class="director-badge">Direction Médicale</div>
+    </div>
+
+    <div class="specialists-grid">
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">🏥</span>Chirurgien Général</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">🤰</span>Gynécologue Obstétricien</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">🩺</span>Médecin Généraliste</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">🦷</span>Stomatologue</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">👶</span>Pédiatre</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">🔬</span>Dermatologue</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">🦴</span>Traumatologue</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">👂</span>ORL</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">🧠</span>Neurologue</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">💧</span>Urologue</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">🫁</span>Chirurgien Digestif</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">😷</span>Chirurgien Maxillo-facial</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">⚗️</span>Endocrinologue</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">❤️</span>Cardiologue</div>
+      <div class="spec-card reveal"><span class="spec-icon" aria-hidden="true">🩻</span>Radiologue / Imagerie</div>
+    </div>
+  </section>
+
+  <!-- ── TARIFS ── -->
+  <section id="tarifs" style="background: linear-gradient(to bottom, #ffffff, #fdf2f8);">
+    <div class="section-header reveal">
+      <span class="section-tag">Transparence</span>
+      <h2 class="section-title">Consultations <span>accessibles à tous</span></h2>
+      <p class="section-sub">Nous pratiquons des tarifs réglementés pour garantir l'accès aux soins au plus grand nombre.</p>
+    </div>
+    <div class="tarifs-grid">
+      <div class="tarif-card reveal">
+        <div class="tarif-specialite">🩺 Consultation</div>
+        <div class="tarif-nom">Médecin Généraliste</div>
+        <div class="tarif-prix">17 600 <span>XOF</span></div>
+        <div class="tarif-note">Prise en charge complète pour la médecine générale et les urgences courantes.</div>
+      </div>
+      <div class="tarif-card reveal">
+        <div class="tarif-specialite">🤰 Spécialité</div>
+        <div class="tarif-nom">Gynécologie</div>
+        <div class="tarif-prix">17 600 <span>XOF</span></div>
+        <div class="tarif-note">Suivi de grossesse, consultations prénatales et pathologies gynécologiques.</div>
+      </div>
+      <div class="tarif-card reveal">
+        <div class="tarif-specialite">👶 Spécialité</div>
+        <div class="tarif-nom">Pédiatrie</div>
+        <div class="tarif-prix">17 600 <span>XOF</span></div>
+        <div class="tarif-note">Consultations spécialisées pour nourrissons, enfants et adolescents.</div>
+      </div>
+      <div class="tarif-card reveal">
+        <div class="tarif-specialite">❤️ Spécialité</div>
+        <div class="tarif-nom">Cardiologie</div>
+        <div class="tarif-prix">17 600 <span>XOF</span></div>
+        <div class="tarif-note">Évaluation cardiaque complète et suivi des pathologies cardiovasculaires.</div>
+      </div>
+      <div class="tarif-card reveal">
+        <div class="tarif-specialite">👂 Spécialité</div>
+        <div class="tarif-nom">ORL</div>
+        <div class="tarif-prix">17 600 <span>XOF</span></div>
+        <div class="tarif-note">Consultations spécialisées pour les pathologies du nez, de la gorge et des oreilles.</div>
+      </div>
+    </div>
+    <p style="text-align: center; margin-top: 40px; color: var(--text-muted); font-size: 0.85rem;">* Tarifs indicatifs, peuvent varier selon les actes complémentaires.</p>
+  </section>
+
+  <!-- ── ASSURANCES ── -->
+  <section id="assurances">
+    <div class="assurances-wrap">
+      <div class="assurances-left reveal">
+        <span class="section-tag">Partenaires</span>
+        <h2 class="section-title">Assurances <span>acceptées</span></h2>
+        <p>Nous collaborons avec les principales compagnies d'assurances pour faciliter votre prise en charge.</p>
+      </div>
+      <div class="assurances-grid">
+        <div class="assurance-card reveal"><span class="assurance-logo" aria-hidden="true">🏢</span><h4>ASCOMA</h4></div>
+        <div class="assurance-card reveal"><span class="assurance-logo" aria-hidden="true">🛡️</span><h4>AXA</h4></div>
+        <div class="assurance-card reveal"><span class="assurance-logo" aria-hidden="true">🤝</span><h4>SAHAM</h4></div>
+        <div class="assurance-card reveal"><span class="assurance-logo" aria-hidden="true">💎</span><h4>SUNU</h4></div>
+        <div class="assurance-card reveal"><span class="assurance-logo" aria-hidden="true">🌍</span><h4>NSIA</h4></div>
+        <div class="assurance-card reveal"><span class="assurance-logo" aria-hidden="true">🌟</span><h4>MUGEF-CI</h4></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CONTACT ── -->
+  <section id="contact">
+    <div class="section-header reveal">
+      <span class="section-tag">Contactez-nous</span>
+      <h2 class="section-title">Prenez <span>rendez-vous</span></h2>
+      <p class="section-sub">Contactez-nous ou remplissez le formulaire ci-dessous pour planifier votre consultation.</p>
+    </div>
+    <div class="contact-wrap">
+      <div class="contact-left reveal">
+        <div class="ci">
+          <div class="ci-icon" aria-hidden="true">📍</div>
+          <div class="ci-text">
+            <h4>Adresse</h4>
+            <p>Immeuble Refontiq, 1<sup>er</sup> Étage<br>Face gare de Bassam, Abidjan</p>
+          </div>
+        </div>
+        <div class="ci">
+          <div class="ci-icon" aria-hidden="true">📞</div>
+          <div class="ci-text">
+            <h4>Téléphones</h4>
+            <p>
+              <a href="tel:+22521256276" class="contact-phone-link">21 25 62 76</a><br>
+              <a href="tel:+22544032830" class="contact-phone-link">44 03 28 30</a>
+            </p>
+          </div>
+        </div>
+        <div class="ci">
+          <div class="ci-icon" aria-hidden="true">🕐</div>
+          <div class="ci-text">
+            <h4>Horaires</h4>
+            <p>Consultations : Lun – Sam, 8h – 18h<br>Urgences : <strong class="emergency-strong">24h/24 – 7j/7</strong></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-right reveal">
+        <h3>Demande de rendez-vous</h3>
+        <form id="rdvForm" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prenom">Prénom *</label>
+              <input type="text" id="prenom" name="prenom" placeholder="Votre prénom" required aria-required="true">
+            </div>
+            <div class="form-group">
+              <label for="nom">Nom *</label>
+              <input type="text" id="nom" name="nom" placeholder="Votre nom" required aria-required="true">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="tel">Téléphone *</label>
+            <input type="tel" id="tel" name="tel" placeholder="+225 XX XX XX XX" required aria-required="true">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="rdv-date">Date souhaitée *</label>
+              <input type="date" id="rdv-date" name="date" required aria-required="true">
+            </div>
+            <div class="form-group">
+              <label for="rdv-time">Heure souhaitée *</label>
+              <input type="time" id="rdv-time" name="heure" required aria-required="true">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="specialite">Spécialité souhaitée *</label>
+            <select id="specialite" name="specialite" required aria-required="true">
+              <option value="">Choisir une spécialité...</option>
+              <option>Médecine Générale</option>
+              <option>Gynécologie</option>
+              <option>Pédiatrie</option>
+              <option>Cardiologie</option>
+              <option>ORL</option>
+              <option>Chirurgie</option>
+              <option>Analyse Biologique</option>
+              <option>Urgences</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="message">Message (optionnel)</label>
+            <textarea id="message" name="message" placeholder="Décrivez brièvement votre motif..."></textarea>
+          </div>
+          <button type="submit" class="btn-submit">Envoyer la demande →</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#hero" class="nav-logo">
+        <div class="logo-icon"><i class="fa-solid fa-hospital"></i></div>
+        <div class="logo-text">
+          <div class="logo-title">Clinique Refontiq</div>
+          <p>Excellence Médicale</p>
+        </div>
+      </a>
+      <p>La Clinique Médicale Refontiq est votre partenaire santé de confiance à Abidjan. Des soins de qualité, disponibles 24h/24 et 7j/7 pour toute la famille.</p>
+    </div>
+
+    <div class="footer-links-wrap">
+      <div class="footer-col">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#services">Médecine Générale</a></li>
+          <li><a href="#services">Gynécologie</a></li>
+          <li><a href="#services">Pédiatrie</a></li>
+          <li><a href="#services">Cardiologie · ORL</a></li>
+          <li><a href="#services">Analyses Biologiques</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Clinique</h4>
+        <ul>
+          <li><a href="#about">À propos</a></li>
+          <li><a href="#equipe-specialistes">Notre équipe</a></li>
+          <li><a href="#equipe-specialistes">Spécialités</a></li>
+          <li><a href="#tarifs">Tarifs</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h4>Nous joindre</h4>
+      <ul>
+        <li><a href="tel:+22521256276"><i class="fa-solid fa-phone"></i> 21 25 62 76</a></li>
+        <li><a href="tel:+22544032830"><i class="fa-solid fa-mobile-screen"></i> 44 03 28 30</a></li>
+        <li><p><i class="fa-solid fa-location-dot"></i> Face gare de Bassam<br>Abidjan, Côte d'Ivoire</p></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Clinique Refontiq · Tous droits réservés</p>
+    <div class="socials">
+      <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+      <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+      <a href="#" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+    </div>
+  </div>
+</footer>
+
+<div id="toast" role="alert">✅ Demande envoyée ! Nous vous contacterons bientôt.</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="supabase-config.js" defer></script>
+<script src="assets/landing-main.js" defer></script>
+</body>
+</html>

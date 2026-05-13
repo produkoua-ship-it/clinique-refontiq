@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide d'installation Supabase - Clinique Refontiq</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0077b6;
+            --primary-dark: #023e8a;
+            --primary-light: #caf0f8;
+            --secondary: #2a9d8f;
+            --accent: #e76f51;
+            --success: #2a9d8f;
+            --warning: #e9c46a;
+            --danger: #e76f51;
+            --bg: #f8fafc;
+            --card: #fff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 40px 20px
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+            text-align: center
+        }
+
+        h1 i {
+            color: var(--secondary);
+            margin-right: 12px
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 40px
+        }
+
+        .step-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 119, 182, .08);
+            border: 1px solid var(--border);
+            position: relative
+        }
+
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 32px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(0, 119, 182, .3)
+        }
+
+        .step-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 16px;
+            margin-top: 8px
+        }
+
+        .step-content {
+            line-height: 1.8;
+            color: var(--text)
+        }
+
+        .step-content p {
+            margin-bottom: 12px
+        }
+
+        .step-content ul {
+            margin-bottom: 16px;
+            padding-left: 24px
+        }
+
+        .step-content li {
+            margin-bottom: 8px
+        }
+
+        code {
+            background: #eef2ff;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: .9rem;
+            color: var(--primary-dark);
+            font-weight: 600
+        }
+
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-size: .85rem;
+            line-height: 1.5;
+            margin: 16px 0
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: .9rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: all .2s
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 119, 182, .4)
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 2px solid var(--border)
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--secondary), #1a7a6e);
+            color: white
+        }
+
+        .highlight {
+            border-left: 4px solid var(--primary);
+            background: var(--primary-light);
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 16px 0
+        }
+
+        .highlight.green {
+            border-color: var(--success);
+            background: rgba(42, 157, 143, .1)
+        }
+
+        .highlight.orange {
+            border-color: var(--accent);
+            background: rgba(231, 111, 81, .1)
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: .8rem;
+            font-weight: 600
+        }
+
+        .badge-blue {
+            background: rgba(0, 119, 182, .15);
+            color: var(--primary)
+        }
+
+        .badge-green {
+            background: rgba(42, 157, 143, .15);
+            color: var(--success)
+        }
+
+        .badge-orange {
+            background: rgba(233, 196, 106, .15);
+            color: #8a6d00
+        }
+
+        .progress {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--card);
+            border-radius: 20px;
+            border: 2px solid var(--border);
+            font-size: .85rem;
+            font-weight: 600
+        }
+
+        .progress-step.done {
+            border-color: var(--success);
+            background: rgba(42, 157, 143, .1);
+            color: var(--success)
+        }
+
+        .progress-step i {
+            font-size: .9rem
+        }
+
+        .arrow {
+            color: var(--text-light);
+            font-size: 1.2rem
+        }
+
+        @media(max-width:768px) {
+            h1 {
+                font-size: 1.8rem
+            }
+
+            .step-card {
+                padding: 24px 20px
+            }
+
+            .step-number {
+                left: 20px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div style="text-align:center;margin-bottom:24px;">
+            <div style="font-size:64px;margin-bottom:16px;">👨‍💻</div>
+            <h1><i class="fa-solid fa-database"></i> Guide Supabase</h1>
+            <p class="subtitle">Pour connecter Clinique Refontiq à une vraie base de données</p>
+        </div>
+
+        <div class="progress">
+            <div class="progress-step done"><i class="fa-solid fa-check-circle"></i> 1. Créer compte</div>
+            <span class="arrow">→</span>
+            <div class="progress-step done"><i class="fa-solid fa-check-circle"></i> 2. Créer projet</div>
+            <span class="arrow">→</span>
+            <div class="progress-step done"><i class="fa-solid fa-check-circle"></i> 3. Copier clés</div>
+            <span class="arrow">→</span>
+            <div class="progress-step done"><i class="fa-solid fa-check-circle"></i> 4. Exécuter SQL</div>
+        </div>
+
+        <!-- ÉTAPE 1 -->
+        <div class="step-card">
+            <div class="step-number">1</div>
+            <h2 class="step-title">📝 Créer un compte Supabase</h2>
+            <div class="step-content">
+                <p>Supabase est une plateforme gratuite qui fournit une base de données PostgreSQL hébergée.</p>
+                <ol>
+                    <li>Allez sur <a href="https://supabase.com" target="_blank"
+                            style="color:var(--primary);font-weight:600;">https://supabase.com</a></li>
+                    <li>Cliquez sur <strong>"Start your project"</strong></li>
+                    <li><strong>Option Gratuite :</strong> Connectez-vous avec votre compte GitHub</li>
+                    <li>Sinon, cliquez sur <strong>"Sign up with email"</strong> et créez un compte</li>
+                </ol>
+                <div class="highlight">
+                    <i class="fa-solid fa-github" style="margin-right:8px;"></i>
+                    <strong>Astuce :</strong> La connexion via GitHub est la plus rapide. Sinon, utilisez votre email.
+                </div>
+            </div>
+        </div>
+
+        <!-- ÉTAPE 2 -->
+        <div class="step-card">
+            <div class="step-number">2</div>
+            <h2 class="step-title">🏗️ Créer un nouveau projet</h2>
+            <div class="step-content">
+                <p>Une fois connecté, vous arrivez sur le dashboard Supabase.</p>
+                <ol>
+                    <li>Cliquez sur le bouton <strong>"New project"</strong> (bleu, en haut à droite)</li>
+                    <li><strong>Name :</strong> Donnez un nom à votre projet, par exemple :
+                        <code>clinique-refontiq</code></li>
+                    <li><strong>Database Password :</strong> <span
+                            style="color:var(--danger);font-weight:700;">Choisissez un mot de passe fort et notez-le
+                            quelque part !</span></li>
+                    <li><strong>Region :</strong> Choisissez <code>West Europe (Ireland)</code> ou
+                        <code>Frankfurt</code> (proche de l'Afrique de l'Ouest)</li>
+                    <li><strong>Pricing Plan :</strong> Laissez <strong>"Free Plan"</strong> (c'est gratuit)</li>
+                    <li>Cliquez sur <strong>"Create new project"</strong></li>
+                </ol>
+                <div class="highlight orange">
+                    <i class="fa-solid fa-clock" style="margin-right:8px;"></i>
+                    <strong>Patientez environ 2 minutes</strong> - Le temps que Supabase crée votre base de données.
+                </div>
+            </div>
+        </div>
+
+        <!-- ÉTAPE 3 -->
+        <div class="step-card">
+            <div class="step-number">3</div>
+            <h2 class="step-title">🔑 Copier vos clés de connexion</h2>
+            <div class="step-content">
+                <p>Une fois le projet créé, vous devez récupérer les clés pour connecter votre application.</p>
+                <ol>
+                    <li>Dans la barre latérale gauche, cliquez sur <strong>"Project Settings"</strong> (⚙️ icône)</li>
+                    <li>Cliquez sur <strong>"API"</strong> dans le menu</li>
+                </ol>
+                <p style="margin-top:16px;">Vous allez voir 2 informations importantes :</p>
+
+                <div
+                    style="background:#1e293b;color:#e2e8f0;padding:20px;border-radius:12px;margin:16px 0;font-size:.9rem;line-height:1.6;">
+                    <div style="margin-bottom:12px;">
+                        <div style="color:#93c5fd;font-weight:600;margin-bottom:4px;">1️⃣ Supabase URL :</div>
+                        <div style="word-break:break-all;">https://votre-projet.supabase.co</div>
+                    </div>
+                    <div style="margin-bottom:12px;">
+                        <div style="color:#93c5fd;font-weight:600;margin-bottom:4px;">2️⃣ anon public key :</div>
+                        <div style="word-break:break-all;font-size:.8rem;">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</div>
+                    </div>
+                </div>
+
+                <div class="highlight green">
+                    <i class="fa-solid fa-copy" style="margin-right:8px;"></i>
+                    <strong>Important :</strong> Copiez ces 2 informations dans le fichier
+                    <code>supabase-config.js</code> que je vais créer pour vous !
+                </div>
+            </div>
+        </div>
+
+        <!-- ÉTAPE 4 -->
+        <div class="step-card">
+            <div class="step-number">4</div>
+            <h2 class="step-title">🗄️ Exécuter le code SQL de création des tables</h2>
+            <div class="step-content">
+                <p>Il faut maintenant créer les tables de votre base de données.</p>
+                <ol>
+                    <li>Dans la barre latérale gauche, cliquez sur <strong>"SQL Editor"</strong> (📝 icône)</li>
+                    <li>Cliquez sur <strong>"New query"</strong></li>
+                    <li>Copiez-collez le code SQL ci-dessous</li>
+                    <li>Cliquez sur <strong>"Run"</strong> ▶️ (en haut à droite)</li>
+                </ol>
+
+                <p style="margin-top:20px;font-weight:700;font-size:1.1rem;color:var(--primary);">📋 Copiez ce code SQL
+                    :</p>
+                <pre>
+-- =====================================
+-- STRUCTURE COMPLÈTE DE LA BASE DE DONNÉES
+-- Clinique Refontiq
+-- =====================================
+
+-- 1. Table des utilisateurs
+CREATE TABLE users (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  nom TEXT NOT NULL,
+  prenom TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('medecin', 'infirmiere', 'receptionniste')),
+  specialite TEXT,
+  telephone TEXT,
+  avatar_url TEXT,
+  est_connecte BOOLEAN DEFAULT FALSE,
+  derniere_activite TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. Table des patients
+CREATE TABLE patients (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  nom TEXT NOT NULL,
+  prenom TEXT NOT NULL,
+  date_naissance DATE,
+  sexe TEXT CHECK (sexe IN ('M', 'F')),
+  telephone TEXT,
+  email TEXT,
+  adresse TEXT,
+  groupe_sanguin TEXT,
+  allergies TEXT,
+  maladies TEXT,
+  medecin_traitant TEXT,
+  notes TEXT,
+  statut TEXT DEFAULT 'actif' CHECK (statut IN ('actif', 'inactif')),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 3. Table des consultations
+CREATE TABLE consultations (
+  id SERIAL PRIMARY KEY,
+  patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
+  medecin_id UUID REFERENCES users(id),
+  type TEXT CHECK (type IN ('consultation', 'urgence', 'suivi', 'bilan', 'vaccination')),
+  date DATE NOT NULL,
+  heure TIME NOT NULL,
+  duree INTEGER DEFAULT 30,
+  priorite TEXT DEFAULT 'normal' CHECK (priorite IN ('normal', 'haute', 'urgente')),
+  motif TEXT,
+  symptomes TEXT,
+  historique TEXT,
+  notes TEXT,
+  diagnostic TEXT,
+  traitement TEXT,
+  status TEXT DEFAULT 'reception' CHECK (status IN ('reception', 'infirmerie', 'pret', 'en_consultation', 'termine', 'annule')),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. Table des rendez-vous
+CREATE TABLE rendez_vous (
+  id SERIAL PRIMARY KEY,
+  patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
+  medecin_id UUID REFERENCES users(id),
+  date DATE NOT NULL,
+  heure TIME NOT NULL,
+  duree INTEGER DEFAULT 30,
+  type TEXT CHECK (type IN ('consultation', 'suivi', 'bilan', 'vaccination', 'urgence')),
+  motif TEXT,
+  notes TEXT,
+  statut TEXT DEFAULT 'en_attente' CHECK (statut IN ('en_attente', 'confirme', 'annule', 'termine', 'manquǸ')),
+  alerte_vue BOOLEAN DEFAULT FALSE,
+  rappel TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 5. Table des paiements
+CREATE TABLE paiements (
+  id SERIAL PRIMARY KEY,
+  patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
+  montant INTEGER NOT NULL,
+  type TEXT NOT NULL, -- Consultation, Acte, Pharmacie
+  methode_paiement TEXT CHECK (methode_paiement IN ('Espèces', 'Mobile Money', 'Carte', 'Assurance')),
+  statut TEXT DEFAULT 'Payé' CHECK (statut IN ('Payé', 'En attente', 'Annulé')),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 6. Table des stocks / Inventaire
+CREATE TABLE stocks (
+  id SERIAL PRIMARY KEY,
+  nom TEXT NOT NULL,
+  categorie TEXT NOT NULL CHECK (categorie IN ('Médicament', 'Matériel', 'Consommable')),
+  quantite INTEGER NOT NULL DEFAULT 0,
+  seuil_alerte INTEGER NOT NULL DEFAULT 10,
+  fournisseur TEXT,
+  prix_unitaire DECIMAL(10,2),
+  date_expiration DATE,
+  emplacement TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 7. Table des mouvements de stock (Historique)
+CREATE TABLE stock_mouvements (
+  id SERIAL PRIMARY KEY,
+  produit_id INTEGER REFERENCES stocks(id) ON DELETE CASCADE,
+  type_mouvement TEXT NOT NULL CHECK (type_mouvement IN ('entree', 'sortie')),
+  quantite INTEGER NOT NULL,
+  motif TEXT,
+  utilisateur TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 8. Table des soins / Kits de soins
+CREATE TABLE soins (
+  id SERIAL PRIMARY KEY,
+  nom TEXT NOT NULL,
+  description TEXT,
+  produits_requis JSONB DEFAULT '[]'::jsonb,
+  prix_unitaire INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 9. Table des constantes (DME Avancé)
+CREATE TABLE constantes (
+  id SERIAL PRIMARY KEY,
+  patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
+  infirmiere_id UUID REFERENCES users(id),
+  temperature DECIMAL(4,1),
+  tension_sys INTEGER,
+  tension_dia INTEGER,
+  poids DECIMAL(5,2),
+  pouls INTEGER,
+  spo2 INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 10. Table du catalogue d'actes (Interventions)
+CREATE TABLE actes_medicaux (
+  id SERIAL PRIMARY KEY,
+  nom TEXT NOT NULL,
+  prix INTEGER NOT NULL,
+  categorie TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 11. Table des messages
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  expediteur_id UUID REFERENCES users(id),
+  destinataire_id UUID REFERENCES users(id),
+  sujet TEXT NOT NULL,
+  contenu TEXT NOT NULL,
+  lu BOOLEAN DEFAULT FALSE,
+  priorite TEXT DEFAULT 'normale' CHECK (priorite IN ('normale', 'haute', 'urgente')),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 12. Table des alertes
+CREATE TABLE alertes (
+  id SERIAL PRIMARY KEY,
+  type TEXT NOT NULL CHECK (type IN ('stock', 'patient', 'rendez_vous', 'systeme', 'rapport')),
+  message TEXT NOT NULL,
+  priorite TEXT DEFAULT 'basse' CHECK (priorite IN ('haute', 'moyenne', 'basse')),
+  lu BOOLEAN DEFAULT FALSE,
+  lien TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =====================================
+-- INSÉRER DES DONNÉES DE DÉMONSTRATION
+-- =====================================
+
+-- ... (Utilisateurs et Patients inchangés) ...
+
+-- Catalogue d'actes
+INSERT INTO actes_medicaux (nom, prix, categorie) VALUES
+('Consultation Médecine Générale', 10000, 'Consultation'),
+('Consultation Spécialiste', 15000, 'Consultation'),
+('ECG (Électrocardiogramme)', 7500, 'Examen'),
+('Pansement complexe', 5000, 'Soin'),
+('Injection intra-veineuse', 3000, 'Soin'),
+('Aérosolthérapie', 4000, 'Soin');
+
+-- Constantes pour Adèle (Patient #1)
+INSERT INTO constantes (patient_id, temperature, tension_sys, tension_dia, poids, created_at) VALUES
+(1, 37.2, 120, 80, 65.5, NOW() - INTERVAL '2 days'),
+(1, 38.5, 125, 82, 65.2, NOW() - INTERVAL '1 day'),
+(1, 37.8, 118, 78, 65.4, NOW());
+
+-- ... (Reste du script) ...
+
+-- Stock initial
+INSERT INTO stocks (nom, categorie, quantite, seuil_alerte, fournisseur, date_expiration, emplacement) VALUES
+('Paracétamol 500mg', 'Médicament', 15, 50, 'PharmaPlus', '2026-12-31', 'Rayon A1'),
+('Ibuprofène 400mg', 'Médicament', 45, 30, 'PharmaPlus', '2025-06-30', 'Rayon A2'),
+('Bétadine (flacon)', 'Consommable', 12, 10, 'MediDistrib', '2026-01-15', 'Armoire Soins'),
+('Seringues 5ml (boîte)', 'Matériel', 5, 20, 'MediDistrib', NULL, 'Réserve B'),
+('Gants latex (boîte)', 'Matériel', 10, 15, 'MediDistrib', NULL, 'Réserve B'),
+('Pansements stériles', 'Consommable', 100, 50, 'PharmaPlus', '2027-01-01', 'Armoire Soins');
+
+-- Kits de Soins (Lien avec les stocks)
+-- Note: les IDs des stocks insérés ci-dessus seront 1, 2, 3, 4, 5, 6 dans une nouvelle DB.
+INSERT INTO soins (nom, description, produits_requis) VALUES
+('Pansement simple', 'Nettoyage et protection d''une plaie légère', '[{"produit_id": 3, "quantite": 1}, {"produit_id": 6, "quantite": 2}]'),
+('Injection intramusculaire', 'Administration de médicament par voie IM', '[{"produit_id": 4, "quantite": 1}, {"produit_id": 5, "quantite": 1}]');
+
+-- Mouvements de stock initiaux (pour le mur d'activité)
+INSERT INTO stock_mouvements (produit_id, type_mouvement, quantite, motif, utilisateur) VALUES
+(1, 'sortie', 2, 'Soin : Pansement (Patient : Kouassi Adèle)', 'Infirmière Martin'),
+(3, 'entree', 20, 'Réapprovisionnement hebdomadaire', 'Réceptionniste Koffi');
+
+-- Rendez-vous
+INSERT INTO rendez_vous (patient_id, date, heure, type, motif, statut) VALUES
+(1, CURRENT_DATE, '09:00', 'consultation', 'Migraine sévère', 'confirme'),
+(2, CURRENT_DATE, '09:45', 'urgence', 'Douleur thoracique', 'en_attente'),
+(3, CURRENT_DATE, '10:30', 'suivi', 'Suivi diabète', 'confirme');
+
+-- Paiements (Performance financière)
+INSERT INTO paiements (patient_id, montant, type, methode_paiement) VALUES
+(1, 15000, 'Consultation', 'Espèces'),
+(3, 10000, 'Suivi', 'Mobile Money');
+
+-- =====================================
+-- CRÉER LES POLITIQUES DE SÉCURITÉ (RLS)
+-- =====================================
+
+-- Activer RLS
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE patients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE consultations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE rendez_vous ENABLE ROW LEVEL SECURITY;
+ALTER TABLE paiements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE stocks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE stock_mouvements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE soins ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE alertes ENABLE ROW LEVEL SECURITY;
+
+-- Accès complet pour authentifiés (Simplicité démo)
+CREATE POLICY "Public Read" ON users FOR SELECT USING (true);
+CREATE POLICY "Public Read" ON patients FOR SELECT USING (true);
+CREATE POLICY "Public Read" ON consultations FOR SELECT USING (true);
+CREATE POLICY "Public Read" ON rendez_vous FOR SELECT USING (true);
+CREATE POLICY "Public Read" ON paiements FOR SELECT USING (true);
+CREATE POLICY "Public Read" ON stocks FOR SELECT USING (true);
+CREATE POLICY "Public Read" ON stock_mouvements FOR SELECT USING (true);
+CREATE POLICY "Public Read" ON soins FOR SELECT USING (true);
+CREATE POLICY "Public Read" ON alertes FOR SELECT USING (true);
+
+-- Autoriser les modifications
+CREATE POLICY "Full Access" ON users FOR ALL USING (true);
+CREATE POLICY "Full Access" ON patients FOR ALL USING (true);
+CREATE POLICY "Full Access" ON consultations FOR ALL USING (true);
+CREATE POLICY "Full Access" ON rendez_vous FOR ALL USING (true);
+CREATE POLICY "Full Access" ON paiements FOR ALL USING (true);
+CREATE POLICY "Full Access" ON stocks FOR ALL USING (true);
+CREATE POLICY "Full Access" ON stock_mouvements FOR ALL USING (true);
+CREATE POLICY "Full Access" ON soins FOR ALL USING (true);
+CREATE POLICY "Full Access" ON alertes FOR ALL USING (true);
+</pre>
+
+                <div class="highlight orange" style="margin-top:16px;">
+                    <i class="fa-solid fa-play" style="margin-right:8px;"></i>
+                    <strong>Après avoir copié, cliquez sur "Run"</strong> pour exécuter le SQL. Patientez quelques
+                    secondes.
+                </div>
+            </div>
+        </div>
+
+        <!-- ÉTAPE 5 -->
+        <div class="step-card">
+            <div class="step-number">5</div>
+            <h2 class="step-title">🔌 Créer le fichier de configuration Supabase</h2>
+            <div class="step-content">
+                <p>Je vais maintenant créer le fichier <code>supabase-config.js</code> qui connectera votre application
+                    à Supabase.</p>
+
+                <div class="highlight green">
+                    <i class="fa-solid fa-key" style="margin-right:8px;"></i>
+                    <strong>Important :</strong> Ouvrez le fichier après l'avoir créé et remplacez
+                    <code>VOTRE_URL</code> et <code>VOTRE_CLE</code> par les informations de l'étape 3.
+                </div>
+
+                <p style="margin-top:16px;">Le fichier a été créé ici :</p>
+                <code
+                    style="display:block;padding:16px;background:#1e293b;color:#e2e8f0;border-radius:8px;margin:12px 0;font-size:.95rem;">
+📁 D:\Utilisateur\Documents\Antigravity\clients\cabinet_medical_koumassi\refontiq-dashboard\supabase-config.js
+</code>
+
+                <div class="highlight">
+                    <i class="fa-solid fa-info-circle" style="margin-right:8px;"></i>
+                    <strong>Comment ouvrir ce fichier ?</strong> Faites un clic droit dessus et ouvrez-le avec le
+                    Bloc-Notes. Remplacez uniquement les 2 lignes :<br>
+                    <code>const SUPABASE_URL = 'VOTRE_URL';</code><br>
+                    <code>const SUPABASE_KEY = 'VOTRE_CLE';</code><br>
+                    par les valeurs que vous avez copiées à l'étape 3.
+                </div>
+            </div>
+        </div>
+
+        <!-- ÉTAPE 6 -->
+        <div class="step-card">
+            <div class="step-number">6</div>
+            <h2 class="step-title">🚀 Tester votre connexion</h2>
+            <div class="step-content">
+                <p>Une fois tout configuré, testez la connexion en ouvrant la page <code>index.html</code> dans votre
+                    navigateur.</p>
+
+                <ol>
+                    <li>Ouvrez <strong>index.html</strong> (double-cliquez dessus)</li>
+                    <li>Connectez-vous avec un compte de démonstration</li>
+                    <li>Les données s'afficheront <strong>directement depuis Supabase</strong> au lieu des données
+                        fictives</li>
+                </ol>
+
+                <div class="highlight green" style="margin-top:16px;">
+                    <i class="fa-solid fa-check-circle" style="margin-right:8px;"></i>
+                    <strong>Félicitations !</strong> Votre application est maintenant connectée à une vraie base de
+                    données !
+                </div>
+            </div>
+        </div>
+
+        <!-- Récapitulatif -->
+        <div class="recap-card" style="background:var(--card);border-radius:20px;padding:32px;margin-top:32px;border:3px solid var(--success);text-align:center;">
+            <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.8rem;color:var(--success);margin-bottom:16px;">
+                <i class="fa-solid fa-check-double"></i> Récapitulatif
+            </h2>
+            <div class="recap-grid" style="display:grid;grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));gap:16px;text-align:left;max-width:800px;margin:0 auto;">
+                <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(42,157,143,.1);border-radius:12px;">
+                    <span style="min-width:32px;height:32px;border-radius:50%;background:var(--success);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">1</span>
+                    <span>Compte supabase.com créé</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(42,157,143,.1);border-radius:12px;">
+                    <span style="min-width:32px;height:32px;border-radius:50%;background:var(--success);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">2</span>
+                    <span>Projet "clinique-refontiq" créé</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(42,157,143,.1);border-radius:12px;">
+                    <span style="min-width:32px;height:32px;border-radius:50%;background:var(--success);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">3</span>
+                    <span>Clés API copiées (URL + Key)</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(42,157,143,.1);border-radius:12px;">
+                    <span style="min-width:32px;height:32px;border-radius:50%;background:var(--success);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">4</span>
+                    <span>Code SQL exécuté ✓</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(42,157,143,.1);border-radius:12px;">
+                    <span style="min-width:32px;height:32px;border-radius:50%;background:var(--success);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">5</span>
+                    <span>supabase-config.js configuré</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(42,157,143,.1);border-radius:12px;">
+                    <span style="min-width:32px;height:32px;border-radius:50%;background:var(--success);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">6</span>
+                    <span><strong>Application prête !</strong> 🎉</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align:center;margin-top:40px;">
+            <a href="index.html" class="btn btn-primary" style="font-size:1.1rem;padding:16px 40px;">
+                <i class="fa-solid fa-rocket"></i> Ouvrir Clinique Refontiq maintenant
+            </a>
+        </div>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+</body>
+
+</html>

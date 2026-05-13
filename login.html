@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Clinique Refontiq</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Palette Médicale Adaptée */
+            --primary: #0077b6;
+            --primary-dark: #023e8a;
+            --primary-light: #caf0f8;
+            --secondary: #2a9d8f;
+            --secondary-dark: #264653;
+            --accent: #e76f51;
+            --success: #2a9d8f;
+            --warning: #e9c46a;
+            --danger: #e76f51;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 20px rgba(0, 119, 182, 0.08);
+            --shadow-lg: 0 20px 60px rgba(0, 119, 182, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .login-container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .login-left {
+            padding: 40px;
+        }
+
+        .logo-section {
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .logo-text h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+        }
+
+        .logo-text p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 119, 182, 0.1);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .feature-content h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .feature-content p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        .login-right {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: var(--text-light);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: var(--bg);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 119, 182, 0.1);
+            background: white;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 119, 182, 0.4);
+        }
+
+        .form-divider {
+            text-align: center;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .form-divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .form-divider span {
+            background: var(--card);
+            padding: 0 16px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .remember-me input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        .forgot-password {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .demo-accounts {
+            margin-top: 32px;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .demo-accounts h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .demo-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+
+        .demo-btn {
+            padding: 12px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .demo-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .demo-btn i {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 4px;
+            color: var(--primary);
+        }
+
+        .demo-btn span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .login-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .login-left {
+                display: none;
+            }
+
+            .login-right {
+                padding: 32px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-right { padding: 24px; }
+            .demo-buttons { grid-template-columns: 1fr; }
+        }
+
+        .mobile-back-link {
+            display: none;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 100px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+
+        @media (max-width: 968px) {
+            .mobile-back-link {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+        }
+
+        /* Panneau Première Connexion */
+        .first-login-panel {
+            display: none;
+            margin-top: 20px;
+            padding: 24px;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 16px;
+            border: 2px solid rgba(0, 119, 182, 0.15);
+        }
+        .first-login-panel h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            color: var(--primary-dark);
+            margin-bottom: 6px;
+        }
+        .first-login-panel p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+        .step-indicator {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        .step-dot {
+            flex: 1;
+            height: 4px;
+            border-radius: 4px;
+            background: var(--border);
+            transition: 0.3s;
+        }
+        .step-dot.active { background: var(--primary); }
+        .btn-link {
+            background: none; border: none; color: var(--primary);
+            font-size: 0.85rem; cursor: pointer; text-decoration: underline;
+            font-family: inherit; padding: 0; margin-top: 12px;
+        }
+        /* Preloader */
+        #preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #f8fafc; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+        .loader-pill {
+            padding: 12px 24px; background: white; border-radius: 100px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: flex;
+            align-items: center; gap: 12px; border: 1px solid var(--border);
+        }
+        .loader-spin {
+            width: 20px; height: 20px; border: 3px solid var(--primary-light);
+            border-top-color: var(--primary); border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #preloader.fade-out { opacity: 0; visibility: hidden; }
+
+        /* Premium Loader bar for login */
+        .loader-bar { width: 180px; height: 4px; background: rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden; margin: 15px 0; }
+        .loader-progress { width: 0%; height: 100%; background: var(--primary); border-radius: 10px; animation: progress 2s ease-in-out infinite; }
+        @keyframes progress { 0% { width: 0; } 50% { width: 70%; } 100% { width: 100%; } }
+    </style>
+</head>
+
+<body>
+    <div id="preloader" style="background: white; flex-direction: column;">
+        <div class="logo-icon" style="background: var(--primary); color: white; width: 50px; height: 50px; border-radius: 12px; font-size: 24px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+            <i class="fa-solid fa-hospital"></i>
+        </div>
+        <div style="color: var(--secondary); font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.1rem; letter-spacing: 1px;">CLINIQUE REFONTIQ</div>
+        <div class="loader-bar"><div class="loader-progress"></div></div>
+        <span style="font-weight: 500; color: var(--text-light); font-size: 0.85rem;">Sécurisation de l'accès...</span>
+    </div>
+    <a href="index.html" class="mobile-back-link">
+        <i class="fa-solid fa-arrow-left"></i> Retour à l'accueil
+    </a>
+    <div class="login-container">
+        <div class="login-left">
+            <div class="logo-section">
+                <a href="index.html" style="text-decoration: none; color: var(--text-light); font-size: 0.9rem; margin-bottom: 20px; display: inline-block;">
+                    <i class="fa-solid fa-arrow-left"></i> Retour à l'accueil
+                </a>
+                <div class="logo-icon">
+                    <i class="fa-solid fa-hospital"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Clinique Refontiq</h1>
+                    <p>Système de Gestion Médicale</p>
+                </div>
+            </div>
+
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Sécurité Avancée</h3>
+                        <p>Données patients cryptées et protégées selon les normes médicales</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Rapidité d'Accès</h3>
+                        <p>Interface intuitive pour un accès rapide aux informations critiques</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Multi-Rôles</h3>
+                        <p>Adapté pour médecins, infirmières et réceptionnistes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="login-right">
+            <div class="login-header">
+                <h2>Bienvenue</h2>
+                <p>Connectez-vous à votre espace Clinique Refontiq</p>
+            </div>
+
+            <div class="demo-accounts" style="margin-top: 0; margin-bottom: 32px; border-color: var(--primary); background: var(--primary-light);">
+                <h4>Accès Rapide (Démo)</h4>
+                <div class="demo-buttons">
+                    <button class="demo-btn" onclick="accesRapide('medecin')">
+                        <i class="fa-solid fa-user-doctor"></i>
+                        <span>Médecin</span>
+                    </button>
+                    <button class="demo-btn" onclick="accesRapide('infirmiere')">
+                        <i class="fa-solid fa-user-nurse"></i>
+                        <span>Infirmière</span>
+                    </button>
+                    <button class="demo-btn" onclick="accesRapide('reception')">
+                        <i class="fa-solid fa-headset"></i>
+                        <span>Réception</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-divider" style="margin-bottom: 32px;"><span>Ou connectez-vous manuellement</span></div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="email">Email professionnel</label>
+                    <input type="email" id="email" placeholder="exemple@refontiq.ci" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Rôle</label>
+                    <select id="role" required>
+                        <option value="">Sélectionnez votre rôle</option>
+                        <option value="medecin">Médecin</option>
+                        <option value="infirmiere">Infirmière</option>
+                        <option value="receptionniste">Réceptionniste</option>
+                    </select>
+                </div>
+                <div class="remember-forgot">
+                    <label class="remember-me">
+                        <input type="checkbox" id="remember">
+                        <span>Se souvenir de moi</span>
+                    </label>
+                    <a href="#" class="forgot-password">Mot de passe oublié ?</a>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    Se connecter
+                </button>
+            </form>
+
+            <!-- Bouton Première Connexion -->
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn-link" onclick="togglePremièreConnexion()">
+                    <i class="fa-solid fa-user-plus" style="margin-right:5px;"></i> Première connexion ? Activer mon compte
+                </button>
+            </div>
+
+            <!-- Panneau Première Connexion -->
+            <div class="first-login-panel" id="first-login-panel">
+                <h3><i class="fa-solid fa-key" style="margin-right:8px; color:var(--primary);"></i> Activer mon compte</h3>
+                <p>Votre médecin vous a remis un identifiant et un code à 4 chiffres. Entrez-les ci-dessous.</p>
+
+                <!-- Étape 1 : Identifiant + Code -->
+                <div id="step-1">
+                    <div class="step-indicator">
+                        <div class="step-dot active"></div>
+                        <div class="step-dot"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Votre identifiant</label>
+                        <input type="text" id="inv-username" placeholder="Ex: marie.infirmiere">
+                    </div>
+                    <div class="form-group">
+                        <label>Code d'invitation (4 chiffres)</label>
+                        <input type="text" id="inv-code" placeholder="Ex: 8529" maxlength="4" style="letter-spacing: 8px; font-size: 1.3rem; font-weight:700; text-align:center;">
+                    </div>
+                    <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="verifierCode()">
+                        <i class="fa-solid fa-check"></i> Vérifier le code
+                    </button>
+                </div>
+
+                <!-- Étape 2 : Choisir email + mot de passe -->
+                <div id="step-2" style="display:none;">
+                    <div class="step-indicator">
+                        <div class="step-dot active"></div>
+                        <div class="step-dot active"></div>
+                    </div>
+                    <div style="padding: 12px; background: rgba(16,185,129,0.1); border-radius: 10px; margin-bottom: 16px;">
+                        <p style="color: var(--secondary); margin: 0; font-weight:600; font-size:0.85rem;">
+                            <i class="fa-solid fa-circle-check"></i> Code valide ! Bienvenue, <span id="inv-welcome-name"></span>
+                        </p>
+                    </div>
+                    <div class="form-group">
+                        <label>Votre adresse email (pour vous connecter)</label>
+                        <input type="email" id="inv-email" placeholder="ex: marie@refontiq.ci">
+                    </div>
+                    <div class="form-group">
+                        <label>Choisissez un mot de passe</label>
+                        <input type="password" id="inv-password" placeholder="Minimum 6 caractères">
+                    </div>
+                    <button class="btn btn-primary" style="width:100%; margin-top:8px; background: linear-gradient(135deg, var(--secondary), #1a7a6e) !important;" onclick="activerCompte()">
+                        <i class="fa-solid fa-rocket"></i> Créer mon compte
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.1/dist/umd/supabase.js"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        // Afficher / Cacher le panneau Première Connexion
+        function togglePremièreConnexion() {
+            const panel = document.getElementById('first-login-panel');
+            const isHidden = panel.style.display === 'none' || panel.style.display === '';
+            panel.style.display = isHidden ? 'block' : 'none';
+            if (isHidden) panel.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Étape 1 : Vérifier l'identifiant + code invitation
+        let invitationData = null;
+        async function verifierCode() {
+            const username = document.getElementById('inv-username').value.trim().toLowerCase();
+            const code = document.getElementById('inv-code').value.trim();
+
+            if (!username || !code) {
+                window.notifier("Remplissez l'identifiant et le code.", 'error');
+                return;
+            }
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+            if (!supabase) return;
+
+            const { data, error } = await supabase
+                .from('invitations')
+                .select('*')
+                .eq('nom_utilisateur', username)
+                .eq('code_invitation', code)
+                .eq('utilise', false)
+                .single();
+
+            if (error || !data) {
+                window.notifier("Code invalide ou déjà utilisé. Vérifiez avec votre médecin.", 'error');
+                return;
+            }
+
+            // Code valide : passer à l'étape 2
+            invitationData = data;
+            document.getElementById('inv-welcome-name').textContent = data.nom;
+            document.getElementById('step-1').style.display = 'none';
+            document.getElementById('step-2').style.display = 'block';
+        }
+
+        // Étape 2 : Créer le compte définitif
+        async function activerCompte() {
+            if (!invitationData) return;
+
+            const email    = document.getElementById('inv-email').value.trim();
+            const password = document.getElementById('inv-password').value;
+
+            if (!email || password.length < 6) {
+                window.notifier("Email valide et mot de passe (min. 6 car.) requis.", 'error');
+                return;
+            }
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+            if (!supabase) return;
+
+            // 1. Créer le compte dans la table 'users'
+            const { error: userError } = await supabase.from('users').insert([{
+                email: email,
+                nom: invitationData.nom,
+                prenom: invitationData.prenom || '',
+                role: invitationData.role
+            }]);
+
+            if (userError) {
+                window.notifier("Erreur : cet email est peut-être déjà utilisé.", 'error');
+                return;
+            }
+
+            // 2. Marquer l'invitation comme utilisée
+            await supabase.from('invitations').update({ utilise: true }).eq('id', invitationData.id);
+
+            // 3. Essayer de connecter directement l'utilisateur
+            const res = await window.SupabaseAPI.loginUser(supabase, email);
+            
+            if (res && res.success) {
+                const userData = {
+                    email: res.data.email,
+                    role: res.data.role,
+                    name: res.data.nom,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem('currentUser', JSON.stringify(userData));
+                window.notifier("Compte créé avec succès ! Bienvenue " + invitationData.nom + " !");
+                setTimeout(() => window.location.href = 'app/dashboard.html', 1500);
+            } else if (res && res.reason === 'ALREADY_LOGGED_IN') {
+                window.notifier(`Le compte est créé, mais l'accès est refusé : ${res.activeUser} est déjà connecté(e) en tant que ${invitationData.role}. Réessayez plus tard.`, 'error');
+                setTimeout(() => window.location.reload(), 3000);
+            } else {
+                window.notifier("Le compte a été créé, mais la connexion automatique a échoué. Veuillez vous connecter manuellement.", 'error');
+                setTimeout(() => window.location.reload(), 3000);
+            }
+        }
+
+        // Accès Rapide : remplir les champs automatiquement
+        function accesRapide(type) {
+            const emailField    = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+            const roleField     = document.getElementById('role');
+
+            if (type === 'medecin') {
+                emailField.value = 'dr.duval@refontiq.ci';
+                passwordField.value = 'password123';
+                roleField.value = 'medecin';
+            } else if (type === 'infirmiere') {
+                emailField.value = 'infirmiere@refontiq.ci';
+                passwordField.value = 'password123';
+                roleField.value = 'infirmiere';
+            } else if (type === 'reception') {
+                emailField.value = 'reception@refontiq.ci';
+                passwordField.value = 'password123';
+                roleField.value = 'receptionniste';
+            }
+
+            [emailField, passwordField, roleField].forEach(el => {
+                el.style.borderColor = 'var(--primary)';
+                el.style.background  = 'var(--primary-light)';
+                setTimeout(() => { el.style.borderColor = ''; el.style.background = ''; }, 600);
+            });
+            window.notifier("Champs remplis ! Cliquez sur Se connecter.");
+        }
+
+        // Connexion classique
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email    = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const supabase = await window.SupabaseAPI.initSupabase();
+            if (!supabase) {
+                window.notifier("Impossible de se connecter à la base de données.", 'error');
+                return;
+            }
+
+            // Bouton en mode chargement
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Connexion...';
+            submitBtn.disabled = true;
+
+            const res = await window.SupabaseAPI.loginUser(supabase, email);
+            
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+
+            if (res && res.success) {
+                const userData = {
+                    email: res.data.email,
+                    role: res.data.role,
+                    name: res.data.nom,
+                    timestamp: new Date().toISOString()
+                };
+                localStorage.setItem('currentUser', JSON.stringify(userData));
+                window.location.href = 'app/dashboard.html';
+            } else {
+                if (res && res.reason === 'ALREADY_LOGGED_IN') {
+                    // Message spécifique pour le blocage de session multiple
+                    const roleName = document.getElementById('role').options[document.getElementById('role').selectedIndex].text;
+                    window.notifier(`Accès refusé : ${res.activeUser} est déjà en service en tant que ${roleName}. Une seule personne autorisée à la fois.`, 'error', 10000);
+                } else {
+                    window.notifier("Accès refusé : email non enregistré dans la base de données.", 'error');
+                }
+            }
+        }
+
+        // Vérifier si déjà connecté
+        window.onload = function () {
+            // Masquer le preloader
+            setTimeout(() => {
+                const preloader = document.getElementById('preloader');
+                if (preloader) preloader.classList.add('fade-out');
+            }, 600);
+            
+            if (localStorage.getItem('currentUser')) window.location.href = 'app/dashboard.html';
+        };
+    </script>
+</body>
+
+</html>
