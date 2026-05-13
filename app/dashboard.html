@@ -9,6 +9,11 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="../assets/img/icon-192.png">
     
     <link href="../assets/premium-style.css" rel="stylesheet">
     <link href="../assets/ai-assistant.css" rel="stylesheet">
@@ -746,6 +751,15 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log("🛠️ Initialisation du dashboard...");
             
+            // PWA Service Worker Registration
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('../sw.js')
+                        .then(reg => console.log('PWA: Service Worker enregistré !'))
+                        .catch(err => console.error('PWA: Échec SW', err));
+                });
+            }
+
             // Initialiser les dates du filtre
             document.getElementById('filter-start-date').value = currentStartDate;
             document.getElementById('filter-end-date').value = currentEndDate;
