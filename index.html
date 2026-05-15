@@ -52,6 +52,32 @@
   <link rel="stylesheet" href="assets/landing-style.css">
 </head>
 <body>
+  
+<!-- ── PRELOADER ── -->
+<div id="preloader">
+  <div class="loader-logo"><img src="assets/img/icon-512.png" alt="Logo Refontiq"></div>
+  <div class="loader-text">CLINIQUE REFONTIQ</div>
+  <div class="loader-bar"><div class="loader-progress" id="loaderProgress"></div></div>
+  <p style="color: rgba(255,255,255,0.4); font-size: 0.8rem; margin-top: 15px; letter-spacing: 1px;">Chargement de l'expérience médicale...</p>
+</div>
+
+<script>
+  // Gestion du preloader (une seule fois par session)
+  (function() {
+    const preloader = document.getElementById('preloader');
+    const loaderProgress = document.getElementById('loaderProgress');
+    
+    if (sessionStorage.getItem('site_loaded')) {
+      preloader.style.display = 'none';
+    } else {
+      setTimeout(() => { if(loaderProgress) loaderProgress.style.width = '100%'; }, 50);
+      window.addEventListener('load', () => {
+        sessionStorage.setItem('site_loaded', 'true');
+        setTimeout(() => { preloader.classList.add('fade-out'); }, 1200);
+      });
+    }
+  })();
+</script>
 
 <!-- ── DECORATIVE SHAPES ── -->
 <div class="bg-shape shape-1"></div>

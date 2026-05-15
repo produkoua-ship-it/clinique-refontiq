@@ -252,6 +252,7 @@
 
         function updateThemeIcon(theme) {
             const btn = document.getElementById('theme-toggle');
+            if (!btn) return;
             const icon = btn.querySelector('i');
             if (icon) {
                 if (theme === 'dark') {
@@ -286,8 +287,9 @@
             }
 
             // Remplissage UI
-            document.getElementById('p-nom-complet').textContent = `${p.nom} ${p.prenom || ''}`;
-            document.getElementById('p-avatar').textContent = (p.nom[0] + (p.prenom ? p.prenom[0] : '')).toUpperCase();
+            document.getElementById('p-nom-complet').textContent = `${p.nom || 'Sans Nom'} ${p.prenom || ''}`;
+            const initials = ((p.nom ? p.nom[0] : '?') + (p.prenom ? p.prenom[0] : '')).toUpperCase();
+            document.getElementById('p-avatar').textContent = initials;
             document.getElementById('p-ref').textContent = `Référence: ${p.id.substring(0,8).toUpperCase()}`;
             
             // Calcul de l'âge
