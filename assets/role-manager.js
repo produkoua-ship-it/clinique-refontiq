@@ -33,8 +33,7 @@ const RoleManager = {
         if (!container) return; // Ignore if the page doesn't have a sidebar
         
         // --- INJECTION MOBILE HEADER UNIQUE ---
-        const mainContent = document.querySelector('.main-content');
-        if (mainContent && !document.querySelector('.mobile-header')) {
+        if (!document.querySelector('.mobile-header')) {
             let pageTitle = document.title.split('-')[0].trim();
             if (pageTitle === 'Clinique Refontiq') pageTitle = 'Dashboard';
             
@@ -51,12 +50,17 @@ const RoleManager = {
                             <div class="logo-text">Clinique Refontiq</div>
                         </div>
                     </div>
-                    <div class="mobile-page-title">
-                        ${pageTitle}
+                    <div class="mobile-header-right">
+                        <button class="mobile-calendar-btn" onclick="toggleDateFilter()">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </button>
+                        <div class="mobile-page-title">
+                            ${pageTitle}
+                        </div>
                     </div>
                 </header>
             `;
-            mainContent.insertAdjacentHTML('afterbegin', headerHTML);
+            document.body.insertAdjacentHTML('afterbegin', headerHTML);
         }
         // --- FIN INJECTION MOBILE HEADER ---
 
@@ -202,5 +206,45 @@ window.updateThemeIcon = (theme) => {
     }
 })();
 
+window.toggleQuickActions = () => {
+    const overlay = document.getElementById('quickOverlay');
+    const popup = document.getElementById('quickActionsPopup');
+    if (overlay && popup) {
+        overlay.classList.toggle('active');
+        popup.classList.toggle('active');
+    }
+};
+
 // Initialisation globale
-document.addEventListener('DOMContentLoaded', () => RoleManager.init());
+document.addEventListener('DOMContentLoaded', () => {
+    RoleManager.init();
+
+    // Injection globale du bouton retour sur mobile (sauf sur le dashboard)
+    const isMobile = window.innerWidth <= 968;
+    const currentPage = window.location.pathname.split('/').pop();
+    const isDashboard = currentPage === 'dashboard.html' || currentPage === '';
+    
+    if (isMobile && !isDashboard) {
+        const pageTitle = document.querySelector('.page-title');
+        if (pageTitle && !document.getElementById('mobile-global-back')) {
+            const backBtn = document.createElement('button');
+            backBtn.id = 'mobile-global-back';
+            backBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
+            backBtn.style.cssText = 'background: rgba(14, 165, 233, 0.1); border: none; font-size: 1.1rem; color: var(--primary); margin-right: 12px; cursor: pointer; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05);';
+            backBtn.onclick = () => {
+                if (window.history.length > 2) {
+                    window.history.back();
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+            };
+            
+            const h1 = pageTitle.querySelector('h1');
+            if (h1) {
+                h1.style.display = 'flex';
+                h1.style.alignItems = 'center';
+                h1.insertBefore(backBtn, h1.firstChild);
+            }
+        }
+    }
+});

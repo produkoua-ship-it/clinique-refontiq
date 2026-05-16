@@ -16,7 +16,21 @@
         @media print {
             body * { visibility: hidden; }
             #ordonnance-print, #ordonnance-print * { visibility: visible; }
-            #ordonnance-print { position: fixed; top: 0; left: 0; width: 100%; padding: 40px; }
+            #ordonnance-print { 
+                position: absolute; 
+                top: 0; 
+                left: 0; 
+                width: 100%; 
+                height: 100%;
+                background: white !important;
+                padding: 0;
+                margin: 0;
+            }
+            @page {
+                size: A4;
+                margin: 2cm;
+            }
+            .no-print { display: none !important; }
         }
     </style>
 </head>
@@ -38,8 +52,11 @@
                         <i class="fa-solid fa-arrow-left"></i> Retour
                     </button>
                     <div>
-                        <h1>Nouvelle Consultation</h1>
-                        <p>Enregistrement d'une nouvelle visite</p>
+                        <div style="display: flex; align-items: center;">
+                            <a href="dashboard.html" class="mobile-back-header-btn" style="display: none; background: rgba(14, 165, 233, 0.1); color: var(--primary); width: 40px; height: 40px; border-radius: 12px; align-items: center; justify-content: center; text-decoration: none; flex-shrink: 0; margin-right: 12px;"><i class="fa-solid fa-arrow-left"></i></a>
+                            <h1 id="consultation-page-title">Nouvelle Consultation</h1>
+                        </div>
+                        <p id="consultation-page-subtitle">Enregistrement d'une nouvelle visite</p>
                     </div>
                 </div>
                 <div class="top-actions">
@@ -141,14 +158,45 @@
             await chargerActes();
             await chargerDernieresConsultations();
             
-            // Si on vient d'un dossier patient, pré-sélectionner
             const urlParams = new URLSearchParams(window.location.search);
             const patientId = urlParams.get('patient_id');
-            if (patientId) {
-                document.getElementById('c-patient').value = patientId;
-                onPatientChange();
+            const consultId = urlParams.get('id');
+
+            if (consultId) {
+                // Si on a un ID de consultation, on charge la consultation pour la compléter
+                await chargerConsultationExistante(consultId);
+            } else if (patientId) {
+                // Si on a juste un ID de patient, on le pré-sélectionne
+                const p = allPatients.find(x => String(x.id) === String(patientId));
+                if (p) {
+                    document.getElementById('c-patient').value = p.id;
+                    document.getElementById('c-patient-search').value = `${p.nom} ${p.prenom || ''}`;
+                    onPatientChange(p);
+                }
             }
         });
+
+        async function chargerConsultationExistante(id) {
+            const supabase = await window.SupabaseAPI.initSupabase();
+            const { data: c, error } = await supabase
+                .from('consultations')
+                .select('*, patients(id, nom, prenom)')
+                .eq('id', id)
+                .single();
+
+            if (c && c.patients) {
+                const patient = c.patients;
+                document.getElementById('c-patient').value = patient.id;
+                document.getElementById('c-patient-search').value = `${patient.nom} ${patient.prenom || ''}`;
+                document.getElementById('c-type').value = c.motif || 'Générale';
+                if (c.symptomes) document.getElementById('c-symptomes').value = c.symptomes;
+                
+                // On garde l'ID de consultation pour la mise à jour (UPDATE au lieu de INSERT)
+                window._editingConsultId = id;
+                
+                onPatientChange(patient);
+            }
+        }
 
 
 
@@ -167,7 +215,7 @@
         async function chargerPatients() {
             const supabase = await window.SupabaseAPI.initSupabase();
             const { data: pts } = await supabase.from('patients').select('id, nom, prenom').order('nom');
-            window.allPatients = pts || [];
+            allPatients = pts || [];
             const list = document.getElementById('patients-list');
             if (pts) {
                 list.innerHTML = pts.map(p => `<option value="${p.nom} ${p.prenom}">${p.id}</option>`).join('');
@@ -176,24 +224,52 @@
 
         function onPatientSearchChange() {
             const val = document.getElementById('c-patient-search').value;
-            const p = window.allPatients.find(x => `${x.nom} ${x.prenom}` === val);
+            const p = allPatients.find(x => `${x.nom} ${x.prenom}` === val);
             if (p) {
                 document.getElementById('c-patient').value = p.id;
                 onPatientChange();
             }
         }
 
-        function onPatientChange() {
+        async function onPatientChange(providedPatient = null) {
             const pid = document.getElementById('c-patient').value;
             const infoBox = document.getElementById('selected-patient-info');
-            if (!pid) { infoBox.style.display = 'none'; return; }
+            if (!pid && !providedPatient) { infoBox.style.display = 'none'; return; }
 
-            const patient = allPatients.find(p => p.id === pid);
+            const patient = providedPatient || allPatients.find(p => String(p.id) === String(pid));
             if (patient) {
                 infoBox.style.display = 'block';
+                const fullName = `${patient.nom} ${patient.prenom || ''}`;
+                document.getElementById('c-patient-search').value = fullName;
                 document.getElementById('sp-avatar').textContent = (patient.nom[0] + (patient.prenom ? patient.prenom[0] : '')).toUpperCase();
-                document.getElementById('sp-name').textContent = `${patient.nom} ${patient.prenom || ''}`;
+                document.getElementById('sp-name').textContent = fullName;
                 document.getElementById('sp-date').textContent = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+                
+                // Mettre à jour le titre de la page pour plus de clarté
+                const titleEl = document.getElementById('consultation-page-title');
+                if (titleEl) titleEl.textContent = `Consultation : ${fullName}`;
+
+                // --- NOUVEAUTÉ : Marquer comme 'en cours' pour le dashboard ---
+                const supabase = await window.SupabaseAPI.initSupabase();
+                const today = new Date().toISOString().split('T')[0];
+                
+                // On cherche s'il y a une consultation "prête" ou "infirmerie" pour ce patient aujourd'hui
+                const { data: activeConsult } = await supabase
+                    .from('consultations')
+                    .select('id')
+                    .eq('patient_id', patient.id)
+                    .eq('date', today)
+                    .not('status', 'eq', 'termine')
+                    .limit(1)
+                    .single();
+
+                if (activeConsult) {
+                    await supabase.from('consultations').update({ status: 'en_cours' }).eq('id', activeConsult.id);
+                    console.log('[STATUS] Patient marqué "en cours"');
+                } else {
+                    // Si aucune consultation n'existe, on en crée une technique pour bloquer le dashboard
+                    // (Optionnel selon le workflow, mais ici on assure que le patient disparait du dashboard)
+                }
             }
         }
 
@@ -294,7 +370,7 @@
             const supabase = await window.SupabaseAPI.initSupabase();
             const now = new Date();
             
-            // 1. Enregistrer la consultation
+            // 1. Enregistrer la consultation (UPDATE si on édite, INSERT sinon)
             const consult = {
                 patient_id: patientId,
                 motif: document.getElementById('c-type').value,
@@ -306,7 +382,25 @@
                 status: 'termine'
             };
 
-            const { data: cData, error: cError } = await supabase.from('consultations').insert([consult]).select().single();
+            let cData, cError;
+            if (window._editingConsultId) {
+                const { data, error } = await supabase
+                    .from('consultations')
+                    .update(consult)
+                    .eq('id', window._editingConsultId)
+                    .select()
+                    .single();
+                cData = data;
+                cError = error;
+            } else {
+                const { data, error } = await supabase
+                    .from('consultations')
+                    .insert([consult])
+                    .select()
+                    .single();
+                cData = data;
+                cError = error;
+            }
             
             if (cError) {
                 window.notifier("Erreur : " + cError.message, 'error');
@@ -340,6 +434,7 @@
             // Sauvegarder les données pour l'impression
             window._lastConsultData = {
                 patient: allPatients.find(p => p.id === patientId),
+                symptomes: consult.symptomes,
                 diag: consult.notes,
                 traitement: consult.historique,
                 actes: detailsActes,
@@ -371,33 +466,98 @@
             const d = window._lastConsultData;
             if (!d) return;
             const nom = d.patient ? `${d.patient.nom} ${d.patient.prenom || ''}` : 'Patient';
+            
+            // Récupérer le nom du médecin connecté
+            const userJson = localStorage.getItem('currentUser');
+            const user = userJson ? JSON.parse(userJson) : { name: 'Médecin' };
+            const medecinName = user.name || 'Médecin traitant';
+
             document.getElementById('ordonnance-print').innerHTML = `
-                <div style="font-family: Georgia, serif; max-width: 700px; margin: 0 auto;">
-                    <div style="display:flex; justify-content:space-between; border-bottom:2px solid #0f172a; padding-bottom:16px; margin-bottom:24px;">
+                <div style="font-family: 'Inter', 'Segoe UI', sans-serif; color: #1e293b; line-height: 1.5; padding: 20px;">
+                    <!-- Header Branding -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #0ea5e9; padding-bottom: 20px; margin-bottom: 30px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 60px; height: 60px; background: #0ea5e9; color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                                <i class="fa-solid fa-hospital"></i>
+                            </div>
+                            <div>
+                                <h1 style="margin: 0; font-family: 'Space Grotesk'; font-size: 1.8rem; font-weight: 800; color: #0f172a; letter-spacing: -1px;">CLINIQUE REFONTIQ</h1>
+                                <div style="font-size: 0.85rem; color: #64748b; font-weight: 500; margin-top: 2px;">Excellence en Soins Médicaux</div>
+                            </div>
+                        </div>
+                        <div style="text-align: right; font-size: 0.8rem; color: #64748b; line-height: 1.4;">
+                            <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px;">COORDONNÉES</div>
+                            <div>Cité Management, Abidjan, Côte d'Ivoire</div>
+                            <div>Tel: +225 07 00 00 00 00</div>
+                            <div>Email: contact@refontiq.ci</div>
+                        </div>
+                    </div>
+
+                    <!-- Title & Date -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                        <div style="background: #f1f5f9; padding: 10px 24px; border-radius: 8px; border-left: 5px solid #0ea5e9;">
+                            <h2 style="margin: 0; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: #0f172a;">ORDONNANCE MÉDICALE</h2>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700;">Date du jour</div>
+                            <div style="font-size: 1rem; font-weight: 700; color: #0f172a;">${d.date}</div>
+                        </div>
+                    </div>
+
+                    <!-- Patient Info -->
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 30px; display: flex; gap: 40px;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 5px;">Patient(e)</div>
+                            <div style="font-size: 1.3rem; font-weight: 800; color: #0f172a; font-family: 'Space Grotesk';">${nom}</div>
+                        </div>
+                        <div style="width: 150px;">
+                            <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 5px;">Réf. Dossier</div>
+                            <div style="font-size: 1rem; font-weight: 600; color: #0f172a;">#${d.patient ? d.patient.id.substring(0, 8).toUpperCase() : '---'}</div>
+                        </div>
+                    </div>
+
+                    <!-- Medical Content -->
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px;">
+                        ${d.symptomes ? `
                         <div>
-                            <div style="font-size:1.5rem; font-weight:700;">Clinique Médicale Eden</div>
-                            <div style="color:#64748b; font-size:0.9rem;">Clinique Refontiq — Espace Médical</div>
+                            <div style="font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: #64748b; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px; margin-bottom: 10px;">Symptômes & Motifs</div>
+                            <div style="font-size: 0.95rem; color: #334155; font-style: italic;">${d.symptomes}</div>
                         </div>
-                        <div style="text-align:right; font-size:0.85rem; color:#64748b;">
-                            <div><strong>Date :</strong> ${d.date}</div>
-                            <div><strong>N° Ordonnance :</strong> ${Date.now().toString().slice(-6)}</div>
+                        ` : ''}
+
+                        <div>
+                            <div style="font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: #0ea5e9; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 10px;">Diagnostic & Observations</div>
+                            <div style="font-size: 1rem; color: #1e293b; font-weight: 500;">${d.diag || 'Voir dossier médical'}</div>
+                        </div>
+
+                        <div>
+                            <div style="font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: #10b981; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 10px;">Prescription Médicale</div>
+                            <div style="font-size: 1.1rem; color: #0f172a; white-space: pre-wrap; font-family: 'Inter', sans-serif; min-height: 150px; line-height: 1.6;">${d.traitement || 'Aucun traitement prescrit.'}</div>
                         </div>
                     </div>
-                    <div style="margin-bottom:20px;">
-                        <strong>Patient :</strong> ${nom}
+
+                    <!-- Optional Acts -->
+                    ${d.actes.length > 0 ? `
+                    <div style="margin-bottom: 30px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                        <div style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: #64748b; margin-bottom: 6px;">Actes médicaux réalisés</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                            ${d.actes.map(a => `<span style="font-size: 0.85rem; color: #334155; background: white; padding: 2px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">${a}</span>`).join('')}
+                        </div>
                     </div>
-                    <div style="margin-bottom:20px;">
-                        <div style="font-weight:700; text-transform:uppercase; font-size:0.8rem; color:#64748b; margin-bottom:6px;">Diagnostic</div>
-                        <div style="padding:12px; background:#f8fafc; border-left:3px solid #0f172a;">${d.diag || 'Voir dossier'}</div>
+                    ` : ''}
+
+                    <!-- Signature Area -->
+                    <div style="margin-top: 60px; display: flex; justify-content: flex-end;">
+                        <div style="text-align: center; min-width: 250px;">
+                            <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 60px; font-style: italic;">Cachet et Signature du Médecin</div>
+                            <div style="font-weight: 800; font-size: 1rem; color: #0f172a; border-top: 1px solid #e2e8f0; padding-top: 10px;">${medecinName}</div>
+                        </div>
                     </div>
-                    <div style="margin-bottom:24px;">
-                        <div style="font-weight:700; text-transform:uppercase; font-size:0.8rem; color:#64748b; margin-bottom:6px;">Traitement prescrit</div>
-                        <div style="padding:12px; background:#f8fafc; border-left:3px solid #10b981; white-space:pre-wrap;">${d.traitement || 'Aucun traitement prescrit'}</div>
-                    </div>
-                    ${d.actes.length > 0 ? `<div style="margin-bottom:24px;"><div style="font-weight:700; font-size:0.8rem; color:#64748b; margin-bottom:6px;">ACTES RÉALISÉS</div><ul>${d.actes.map(a => `<li>${a}</li>`).join('')}</ul><strong>Total : ${d.total.toLocaleString()} FCFA</strong></div>` : ''}
-                    <div style="margin-top:60px; display:flex; justify-content:flex-end;">
-                        <div style="text-align:center;">
-                            <div style="width:150px; border-top:1px solid #0f172a; padding-top:8px; font-size:0.85rem;">Signature & Cachet</div>
+
+                    <!-- Footer Branding -->
+                    <div style="position: absolute; bottom: 30px; left: 20px; right: 20px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 15px;">
+                        <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">
+                            Document généré par le système de gestion clinique Refontiq — Abidjan
                         </div>
                     </div>
                 </div>
@@ -408,5 +568,61 @@
 
 
     </script>
+
+        <!-- ── BOTTOM NAVIGATION MOBILE ── -->
+        <nav class="mobile-bottom-nav" style="display: none;">
+            <a href="dashboard.html" class="mobile-nav-item">
+                <i class="fa-solid fa-house"></i>
+                <span>Accueil</span>
+            </a>
+            <a href="patients.html" class="mobile-nav-item">
+                <i class="fa-solid fa-users"></i>
+                <span>Patients</span>
+            </a>
+            <button class="mobile-nav-item more-btn" onclick="toggleQuickActions()">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+            <a href="rendez-vous.html" class="mobile-nav-item">
+                <i class="fa-solid fa-calendar"></i>
+                <span>RDV</span>
+            </a>
+            <a href="parametres.html" class="mobile-nav-item">
+                <i class="fa-solid fa-gear"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+
+        <!-- ── QUICK ACTIONS OVERLAY MOBILE ── -->
+        <div class="mobile-quick-overlay" id="quickOverlay" onclick="toggleQuickActions()"></div>
+        <div class="mobile-quick-actions" id="quickActionsPopup">
+            <h3 style="font-family: 'Space Grotesk'; margin-bottom: 20px; text-align: center;">Actions Rapides</h3>
+            <div class="quick-actions-grid">
+                <a href="consultations.html" class="quick-action-item">
+                    <i class="fa-solid fa-file-medical"></i>
+                    <span>Consultation</span>
+                </a>
+                <a href="patients.html?action=new" class="quick-action-item">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>Patient</span>
+                </a>
+                <a href="rendez-vous.html" class="quick-action-item">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                    <span>Prendre RDV</span>
+                </a>
+                <a href="vitals-tablet.html" class="quick-action-item">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    <span>Constantes</span>
+                </a>
+                <a href="stocks.html" class="quick-action-item">
+                    <i class="fa-solid fa-box-open"></i>
+                    <span>Stocks</span>
+                </a>
+                <a href="finance.html" class="quick-action-item">
+                    <i class="fa-solid fa-coins"></i>
+                    <span>Caisse</span>
+                </a>
+            </div>
+        </div>
+
 </body>
 </html>

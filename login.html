@@ -374,7 +374,9 @@
 
         @media (max-width: 480px) {
             .login-right { padding: 24px; }
-            .demo-buttons { grid-template-columns: 1fr; }
+            .demo-buttons { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+            .demo-btn { padding: 8px 4px; }
+            .demo-btn span { font-size: 0.65rem; }
         }
 
         .mobile-back-link {

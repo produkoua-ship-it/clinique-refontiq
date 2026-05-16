@@ -1,34 +1,43 @@
 const fs = require('fs');
+const path = require('path');
 
-let file = fs.readFileSync('dossier-patient.html', 'utf8');
+const dir = 'app';
+const files = fs.readdirSync(dir).filter(f => f.endsWith('.html') && f !== 'dashboard.html');
 
-const targetStr = `<div class="page-header">
-                <h1>Dossier Patient</h1>
-                <p>Consultez les informations médicales complètes du patient.</p>
-            </div>`;
+const injection = `<a href="dashboard.html" class="mobile-back-header-btn" style="display: none; background: rgba(14, 165, 233, 0.1); color: var(--primary); width: 40px; height: 40px; border-radius: 12px; align-items: center; justify-content: center; text-decoration: none; flex-shrink: 0; margin-right: 12px;"><i class="fa-solid fa-arrow-left"></i></a>`;
 
-const replaceStr = `<div class="page-header" style="display: flex; align-items: center; gap: 20px;">
-                <button onclick="window.history.back()" class="btn btn-outline" style="padding: 10px 20px; flex-shrink: 0; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: white; color: var(--text); border-radius: 12px; cursor: pointer; font-family: inherit; font-weight: 600; transition: all 0.2s;">
-                    <i class="fa-solid fa-arrow-left"></i> Retour
-                </button>
-                <div>
-                    <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; color: var(--text);">Dossier Patient</h1>
-                    <p style="margin: 4px 0 0 0; color: var(--text-light); font-size: 0.95rem;">Consultez les informations médicales complètes du patient.</p>
-                </div>
-            </div>`;
-
-if (file.includes(targetStr)) {
-    file = file.replace(targetStr, replaceStr);
-    fs.writeFileSync('dossier-patient.html', file, 'utf8');
-    console.log("Added back button using strict match");
-} else {
-    // try a more lenient regex match
-    const regex = /<div class="page-header">\s*<h1>Dossier Patient<\/h1>\s*<p>Consultez les informations médicales complètes du patient.<\/p>\s*<\/div>/;
-    if (regex.test(file)) {
-        file = file.replace(regex, replaceStr);
-        fs.writeFileSync('dossier-patient.html', file, 'utf8');
-        console.log("Added back button using regex match");
-    } else {
-        console.log("Could not find the page header to replace");
+files.forEach(file => {
+    let filePath = path.join(dir, file);
+    let content = fs.readFileSync(filePath, 'utf8');
+    
+    // Check if already injected
+    if (content.includes('mobile-back-header-btn')) {
+        console.log(`Skipping ${file} - already injected`);
+        return;
     }
-}
+
+    // Replace <h1>Title</h1> with the flex container
+    // We'll search for <div class="page-title"> and the next line <h1>...</h1>
+    // Actually, finding <h1> and prepending the injection if it's inside <div class="page-title"> is safer.
+    
+    // Regex to match <div class="page-title">...<h1>...</h1>
+    // Some pages just have <h1> inside <div class="card-header"> or something.
+    // Let's just find the first <h1> and inject the button right before it, wrapping it if necessary.
+    
+    const h1Match = content.match(/<h1(.*?)>(.*?)<\/h1>/i);
+    if (h1Match) {
+        const originalH1 = h1Match[0];
+        const newH1 = `<div style="display: flex; align-items: center;">
+                            ${injection}
+                            ${originalH1.replace('style="', 'style="margin:0; ')}
+                        </div>`;
+        
+        // Only replace the FIRST occurrence
+        content = content.replace(originalH1, newH1);
+        
+        fs.writeFileSync(filePath, content);
+        console.log(`Injected into ${file}`);
+    } else {
+        console.log(`No <h1> found in ${file}`);
+    }
+});

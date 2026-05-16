@@ -1,4 +1,4 @@
-const CACHE_NAME = 'refontiq-v1';
+const CACHE_NAME = 'refontiq-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -11,6 +11,7 @@ const ASSETS_TO_CACHE = [
 
 // Installation du Service Worker
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[SW] Mise en cache des ressources critiques');
@@ -24,7 +25,9 @@ self.addEventListener('install', (event) => {
 // Activation
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    Promise.all([
+      self.clients.claim(),
+      caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {

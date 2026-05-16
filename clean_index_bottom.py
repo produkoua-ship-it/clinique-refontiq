@@ -1,41 +1,27 @@
 import os
-import re
 
-file_path = r'D:\Utilisateur\Documents\Antigravity\A-index-dashboard\refontiq-dashboard\index.html'
+# Fix premium-style.css
+css_path = 'assets/premium-style.css'
+with open(css_path, 'r', encoding='utf-8') as f:
+    css_content = f.read()
 
-with open(file_path, 'r', encoding='utf-8') as f:
-    content = f.read()
+if '\\n\n/* GLOBAL MOBILE BOTTOM NAV & QUICK ACTIONS */' in css_content:
+    css_content = css_content.replace('\\n\n/* GLOBAL MOBILE BOTTOM NAV & QUICK ACTIONS */', '\n/* GLOBAL MOBILE BOTTOM NAV & QUICK ACTIONS */')
+    with open(css_path, 'w', encoding='utf-8') as f:
+        f.write(css_content)
+    print("Fixed premium-style.css")
 
-# 1. Remove onsubmit="handleSubmit(event)"
-content = content.replace('onsubmit="handleSubmit(event)"', '')
-
-# 2. Remove the scripts after </footer>
-footer_end = '</footer>'
-footer_idx = content.find(footer_end)
-
-if footer_idx != -1:
-    after_footer = content[footer_idx + len(footer_end):]
-    
-    # We want to keep </body></html> and the toast div
-    # But we want to remove the <script> block
-    
-    # Find the toast div to keep it
-    toast_div = '<div id="toast">✅ Demande envoyée ! Nous vous contacterons bientôt.</div>'
-    
-    # New content for after footer
-    new_after_footer = f"""
-{toast_div}
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="supabase-config.js" defer></script>
-<script src="assets/landing-main.js" defer></script>
-</body>
-</html>"""
-    
-    new_content = content[:footer_idx + len(footer_end)] + new_after_footer
-    
-    with open(file_path, 'w', encoding='utf-8') as f:
-        f.write(new_content)
-    print("Successfully cleaned up the bottom of index.html.")
-else:
-    print("Footer not found.")
+# Fix HTML files in app/
+app_dir = 'app'
+for file in os.listdir(app_dir):
+    if file.endswith('.html'):
+        filepath = os.path.join(app_dir, file)
+        with open(filepath, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        
+        # Replace '\n</body>' with '</body>'
+        if '\\n</body>' in html_content:
+            html_content = html_content.replace('\\n</body>', '\n</body>')
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            print(f"Fixed {file}")

@@ -60,7 +60,10 @@
 
             <div class="top-bar">
                 <div class="page-title">
-                    <h1>Gestion Financière</h1>
+                    <div style="display: flex; align-items: center;">
+                            <a href="dashboard.html" class="mobile-back-header-btn" style="display: none; background: rgba(14, 165, 233, 0.1); color: var(--primary); width: 40px; height: 40px; border-radius: 12px; align-items: center; justify-content: center; text-decoration: none; flex-shrink: 0; margin-right: 12px;"><i class="fa-solid fa-arrow-left"></i></a>
+                            <h1>Gestion Financière</h1>
+                        </div>
                     <p>Suivi des revenus et dépenses</p>
                 </div>
                 <div class="actions">
@@ -341,5 +344,61 @@
 
 
     </script>
+
+        <!-- ── BOTTOM NAVIGATION MOBILE ── -->
+        <nav class="mobile-bottom-nav" style="display: none;">
+            <a href="dashboard.html" class="mobile-nav-item">
+                <i class="fa-solid fa-house"></i>
+                <span>Accueil</span>
+            </a>
+            <a href="patients.html" class="mobile-nav-item">
+                <i class="fa-solid fa-users"></i>
+                <span>Patients</span>
+            </a>
+            <button class="mobile-nav-item more-btn" onclick="toggleQuickActions()">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+            <a href="rendez-vous.html" class="mobile-nav-item">
+                <i class="fa-solid fa-calendar"></i>
+                <span>RDV</span>
+            </a>
+            <a href="parametres.html" class="mobile-nav-item">
+                <i class="fa-solid fa-gear"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+
+        <!-- ── QUICK ACTIONS OVERLAY MOBILE ── -->
+        <div class="mobile-quick-overlay" id="quickOverlay" onclick="toggleQuickActions()"></div>
+        <div class="mobile-quick-actions" id="quickActionsPopup">
+            <h3 style="font-family: 'Space Grotesk'; margin-bottom: 20px; text-align: center;">Actions Rapides</h3>
+            <div class="quick-actions-grid">
+                <a href="consultations.html" class="quick-action-item">
+                    <i class="fa-solid fa-file-medical"></i>
+                    <span>Consultation</span>
+                </a>
+                <a href="patients.html?action=new" class="quick-action-item">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>Patient</span>
+                </a>
+                <a href="rendez-vous.html" class="quick-action-item">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                    <span>Prendre RDV</span>
+                </a>
+                <a href="vitals-tablet.html" class="quick-action-item">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    <span>Constantes</span>
+                </a>
+                <a href="stocks.html" class="quick-action-item">
+                    <i class="fa-solid fa-box-open"></i>
+                    <span>Stocks</span>
+                </a>
+                <a href="finance.html" class="quick-action-item">
+                    <i class="fa-solid fa-coins"></i>
+                    <span>Caisse</span>
+                </a>
+            </div>
+        </div>
+
 </body>
 </html>
