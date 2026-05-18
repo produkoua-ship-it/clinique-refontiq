@@ -769,7 +769,34 @@
                 el.style.background  = 'var(--primary-light)';
                 setTimeout(() => { el.style.borderColor = ''; el.style.background = ''; }, 600);
             });
-            window.notifier("Champs remplis ! Cliquez sur Se connecter.");
+            
+            window.notifier("Connexion automatique...");
+            
+            // Connexion automatique
+            setTimeout(async () => {
+                const supabase = await window.SupabaseAPI.initSupabase();
+                if (!supabase) return;
+                
+                const res = await window.SupabaseAPI.loginUser(supabase, emailField.value);
+                
+                if (res && res.success) {
+                    const userData = {
+                        email: res.data.email,
+                        role: res.data.role,
+                        name: res.data.nom,
+                        timestamp: new Date().toISOString()
+                    };
+                    localStorage.setItem('currentUser', JSON.stringify(userData));
+                    window.location.href = 'app/dashboard.html';
+                } else {
+                    if (res && res.reason === 'ALREADY_LOGGED_IN') {
+                        const roleName = roleField.options[roleField.selectedIndex].text;
+                        window.notifier(`Accès refusé : ${res.activeUser} est déjà en service en tant que ${roleName}.`, 'error');
+                    } else {
+                        window.notifier("Échec de la connexion automatique.", 'error');
+                    }
+                }
+            }, 500); // Petit délai pour laisser l'utilisateur voir les champs se remplir
         }
 
         // Connexion classique

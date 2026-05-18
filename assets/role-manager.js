@@ -13,15 +13,15 @@ const RoleManager = {
     async init() {
         const user = this.getCurrentUser();
         if (!user) return;
-        
+
         console.log(`[RoleManager] User: ${user.name} | Role: ${user.role}`);
-        
+
         await this.loadSidebar(user.role);
-        
+
         this.updateProfileDisplay(user);
         this.applyPermissions(user.role);
         this.highlightActiveMenu();
-        
+
         // Re-injecter le bouton de déconnexion car la sidebar vient d'être créée
         if (typeof injecterBoutonDeconnexion === 'function') {
             injecterBoutonDeconnexion();
@@ -31,12 +31,12 @@ const RoleManager = {
     async loadSidebar(role) {
         const container = document.getElementById('sidebar-container');
         if (!container) return; // Ignore if the page doesn't have a sidebar
-        
+
         // --- INJECTION MOBILE HEADER UNIQUE ---
         if (!document.querySelector('.mobile-header')) {
             let pageTitle = document.title.split('-')[0].trim();
             if (pageTitle === 'Clinique Refontiq') pageTitle = 'Dashboard';
-            
+
             const headerHTML = `
                 <header class="mobile-header">
                     <div class="mobile-header-left">
@@ -64,10 +64,15 @@ const RoleManager = {
         }
         // --- FIN INJECTION MOBILE HEADER ---
 
-        let url = 'components/sidebar-medecin.html';
-        if (role === this.roles.RECEPTIONNISTE) url = 'components/sidebar-reception.html';
-        if (role === this.roles.INFIRMIERE) url = 'components/sidebar-infirmiere.html';
-        
+        let basePath = 'app/components/';
+        if (window.location.pathname.includes('/app/')) {
+            basePath = 'components/';
+        }
+
+        let url = basePath + 'sidebar-medecin.html';
+        if (role === this.roles.RECEPTIONNISTE) url = basePath + 'sidebar-reception.html';
+        if (role === this.roles.INFIRMIERE) url = basePath + 'sidebar-infirmiere.html';
+
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error('Erreur de chargement du composant HTML');
@@ -87,10 +92,6 @@ const RoleManager = {
             item.classList.remove('active');
             if (item.getAttribute('data-page') === currentPage || item.id === `menu-${currentPage}` || item.id === `nav-${currentPage}`) {
                 item.classList.add('active');
-                const parentGroup = item.closest('.nav-group');
-                if (parentGroup) {
-                    parentGroup.classList.add('active');
-                }
             }
         });
     },
@@ -138,7 +139,7 @@ const RoleManager = {
             // Cacher les widgets financiers sur le dashboard principal
             const financeWidgets = document.querySelectorAll('.stat-card[onclick*="finance.html"], .stat-card[onclick*="reporting.html"]');
             financeWidgets.forEach(el => el.style.display = 'none');
-            
+
             // Cacher le bouton de rapport journalier
             const reportBtn = document.getElementById('btn-rapport');
             if (reportBtn) reportBtn.style.display = 'none';
@@ -159,7 +160,7 @@ const RoleManager = {
 
         if (accessRules[currentPage] && !accessRules[currentPage].includes(role)) {
             console.warn(`[RoleManager] Access denied for ${currentPage} (Role: ${role})`);
-            window.location.href = 'dashboard.html';
+            window.location.href = '/app/dashboard.html';
         }
     }
 };
@@ -196,7 +197,7 @@ window.updateThemeIcon = (theme) => {
 };
 
 // Auto-initialisation du thème au plus tôt (avant le rendu du body)
-(function() {
+(function () {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -215,15 +216,25 @@ window.toggleQuickActions = () => {
     }
 };
 
+// Enregistrement du Service Worker PWA
+function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('../sw.js')
+            .then(reg => console.log('[PWA] Service Worker enregistré !'))
+            .catch(err => console.error('[PWA] Échec SW', err));
+    }
+}
+
 // Initialisation globale
 document.addEventListener('DOMContentLoaded', () => {
+    registerServiceWorker();
     RoleManager.init();
 
     // Injection globale du bouton retour sur mobile (sauf sur le dashboard)
     const isMobile = window.innerWidth <= 968;
     const currentPage = window.location.pathname.split('/').pop();
     const isDashboard = currentPage === 'dashboard.html' || currentPage === '';
-    
+
     if (isMobile && !isDashboard) {
         const pageTitle = document.querySelector('.page-title');
         if (pageTitle && !document.getElementById('mobile-global-back')) {
@@ -238,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.location.href = 'dashboard.html';
                 }
             };
-            
+
             const h1 = pageTitle.querySelector('h1');
             if (h1) {
                 h1.style.display = 'flex';

@@ -590,14 +590,14 @@
             console.log("Tentative de confirmation du RDV id:", id);
             try {
                 const supabase = await window.SupabaseAPI.initSupabase();
-                const { data, error } = await supabase.from('rendez_vous').update({ statut: 'confirme' }).eq('id', id).select();
+                const { error } = await supabase.from('rendez_vous').update({ statut: 'confirme' }).eq('id', id);
                 
                 if (error) {
                     console.error("Erreur SQL lors de la confirmation :", error);
                     if (window.notifier) window.notifier("Erreur lors de la confirmation : " + error.message, 'error');
                     else alert("Erreur: " + error.message);
                 } else {
-                    console.log("Confirmation réussie :", data);
+                    console.log("Confirmation réussie");
                     if (window.notifier) window.notifier("Rendez-vous confirmé !");
                     // Recharge IMMÉDIATEMENT les deux listes sans attendre le temps réel
                     if (typeof chargerRDVEnAttente === 'function') await chargerRDVEnAttente();

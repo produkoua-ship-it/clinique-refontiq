@@ -215,7 +215,16 @@
                     payload.patient_id = null;
                 }
 
-                const { error } = await supabase.from('hospitalisations').upsert([payload], { onConflict: 'numero_lit' });
+                const { data: existing } = await supabase.from('hospitalisations').select('numero_lit').eq('numero_lit', id);
+                
+                let error;
+                if (existing && existing.length > 0) {
+                    const res = await supabase.from('hospitalisations').update(payload).eq('numero_lit', id);
+                    error = res.error;
+                } else {
+                    const res = await supabase.from('hospitalisations').insert([payload]);
+                    error = res.error;
+                }
                 
                 if (error) window.notifier("Erreur : " + error.message, 'error');
                 else window.notifier(status === 'nettoyage' ? "Lit " + id + " en nettoyage" : "Patient assigné au lit " + id);

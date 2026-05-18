@@ -14,42 +14,83 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="../assets/img/icon-192.png">
-    
+
     <link href="../assets/premium-style.css?v=1.1" rel="stylesheet">
     <link href="../assets/ai-assistant.css" rel="stylesheet">
-    
+
     <script src="../assets/role-manager.js?v=1.1"></script>
     <style>
         /* Optimisation Tablette et Mobile */
         @media (max-width: 1024px) {
-            .intelligence-grid, .stats-grid {
+
+            .intelligence-grid,
+            .stats-grid {
                 grid-template-columns: 1fr !important;
                 gap: 16px !important;
             }
         }
+
         /* Optimisation Mobile pour les nouveaux éléments */
         @media (max-width: 992px) {
-            .intelligence-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
-            .main-content-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
-            .intelligence-grid .card { min-height: auto !important; }
+            .intelligence-grid {
+                grid-template-columns: 1fr !important;
+                gap: 16px !important;
+            }
+
+            .main-content-grid {
+                grid-template-columns: 1fr !important;
+                gap: 16px !important;
+            }
+
+            .intelligence-grid .card {
+                min-height: auto !important;
+            }
         }
+
         @keyframes flashAlert {
-            0% { background-color: rgba(239, 68, 68, 0.1); }
-            50% { background-color: rgba(239, 68, 68, 0.3); }
-            100% { background-color: rgba(239, 68, 68, 0.1); }
+            0% {
+                background-color: rgba(239, 68, 68, 0.1);
+            }
+
+            50% {
+                background-color: rgba(239, 68, 68, 0.3);
+            }
+
+            100% {
+                background-color: rgba(239, 68, 68, 0.1);
+            }
         }
+
         .waiting-alert {
             animation: flashAlert 1.5s infinite;
             border-left: 4px solid #ef4444 !important;
         }
+
         @keyframes pulseGreen {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            }
+
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+            }
+
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+            }
         }
+
         .status-ready-pulse {
-            width: 12px; height: 12px; background: #22c55e; border-radius: 50%;
-            display: inline-block; animation: pulseGreen 2s infinite; margin-right: 8px;
+            width: 12px;
+            height: 12px;
+            background: #22c55e;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulseGreen 2s infinite;
+            margin-right: 8px;
         }
 
         /* Widget Période de Date */
@@ -57,6 +98,7 @@
             position: relative;
             display: inline-block;
         }
+
         .btn-date-filter {
             background: var(--card);
             border: 1px solid var(--border);
@@ -70,45 +112,96 @@
             align-items: center;
             gap: 10px;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .btn-date-filter i {
             color: var(--primary);
             font-size: 1rem;
         }
+
         .btn-date-filter:hover {
             border-color: var(--primary);
             transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
+
+        /* Modal date filter overlay */
+        .date-filter-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 2099;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .date-filter-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
         .date-dropdown {
-            position: absolute;
-            top: calc(100% + 10px);
-            right: 0;
-            width: 280px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 380px;
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+            border-radius: 24px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
             z-index: 2100;
-            padding: 20px;
+            padding: 28px 24px;
             display: none;
-            backdrop-filter: blur(20px);
-            animation: fadeInScale 0.2s ease-out;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: translateY(-10px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
+
         .date-dropdown.active {
             display: block;
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
         }
+
+        .date-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--bg);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .date-close-btn:hover {
+            background: var(--border);
+            color: var(--text);
+        }
+
         .date-presets {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-bottom: 18px;
         }
+
         .preset-btn {
             background: var(--bg);
             border: 1px solid var(--border);
@@ -121,19 +214,23 @@
             transition: 0.2s;
             text-align: center;
         }
+
         .preset-btn:hover {
             background: var(--primary);
             color: white;
             border-color: var(--primary);
         }
+
         .preset-btn.active {
             background: var(--primary);
             color: white;
         }
+
         .custom-range {
             border-top: 1px solid var(--border);
             padding-top: 15px;
         }
+
         .custom-range p {
             font-size: 0.75rem;
             font-weight: 700;
@@ -142,12 +239,14 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
         .date-inputs {
             display: flex;
             flex-direction: column;
             gap: 10px;
             margin-bottom: 15px;
         }
+
         .date-input-group label {
             display: block;
             font-size: 0.65rem;
@@ -155,6 +254,7 @@
             margin-bottom: 4px;
             margin-left: 4px;
         }
+
         .date-inputs input {
             width: 100%;
             background: var(--bg);
@@ -165,6 +265,7 @@
             color: var(--text);
             font-family: inherit;
         }
+
         .btn-apply-filter {
             width: 100%;
             background: linear-gradient(135deg, var(--primary), #00b4d8);
@@ -178,42 +279,134 @@
             transition: 0.3s;
             box-shadow: 0 4px 15px rgba(0, 119, 182, 0.3);
         }
+
         .btn-apply-filter:hover {
             transform: scale(1.02);
             box-shadow: 0 6px 20px rgba(0, 119, 182, 0.4);
         }
+
+        /* Offline indicator */
+        .offline-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 99999;
+            background: #ef4444;
+            color: white;
+            text-align: center;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: none;
+            transform: translateY(-100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .offline-banner.active {
+            display: block;
+            transform: translateY(0);
+        }
+
+        .offline-banner i {
+            margin-right: 8px;
+        }
+
         /* Preloader */
         #preloader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #0f172a; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 9999;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
             transition: opacity 0.6s ease, visibility 0.6s;
         }
-        .loader-logo { 
-            width: 90px; height: 90px;
-            display: flex; align-items: center; justify-content: center;
+
+        .loader-logo {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 24px;
             animation: logo-zoom 2s infinite ease-in-out;
             filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.4));
         }
+
         .loader-logo img {
             width: 100%;
             height: 100%;
             border-radius: 20px;
             object-fit: cover;
         }
+
         @keyframes logo-zoom {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
         }
-        .loader-bar { width: 200px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
-        .loader-progress { width: 0%; height: 100%; background: var(--primary); transition: width 2s ease; }
-        #preloader.fade-out { opacity: 0; visibility: hidden; }
+
+        .loader-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .loader-progress {
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            transition: width 2s ease;
+        }
+
+        #preloader.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
         body {
             animation: fadeIn 1.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Hide mobile menus on desktop */
+        @media (min-width: 1025px) {
+
+            .mobile-bottom-nav,
+            .mobile-quick-overlay,
+            .mobile-quick-actions {
+                display: none !important;
+            }
+        }
 
         /* Mobile Enhancements */
         @media (max-width: 1024px) {
@@ -230,11 +423,14 @@
                 justify-content: space-around;
                 align-items: center;
                 padding-bottom: env(safe-area-inset-bottom);
-                box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+                box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
                 transform: translateZ(0);
             }
-            [data-theme="dark"] .mobile-bottom-nav { background: #1e293b; }
-            
+
+            [data-theme="dark"] .mobile-bottom-nav {
+                background: #1e293b;
+            }
+
             .mobile-nav-item {
                 display: flex;
                 flex-direction: column;
@@ -246,9 +442,15 @@
                 font-weight: 600;
                 flex: 1;
             }
-            .mobile-nav-item.active { color: var(--primary); }
-            .mobile-nav-item i { font-size: 1.2rem; }
-            
+
+            .mobile-nav-item.active {
+                color: var(--primary);
+            }
+
+            .mobile-nav-item i {
+                font-size: 1.2rem;
+            }
+
             .mobile-nav-item.more-btn {
                 background: var(--primary);
                 color: white;
@@ -261,23 +463,34 @@
                 justify-content: center;
                 flex: none;
             }
-            .mobile-nav-item.more-btn i { font-size: 1.4rem; }
+
+            .mobile-nav-item.more-btn i {
+                font-size: 1.4rem;
+            }
 
             .mobile-quick-overlay {
                 position: fixed;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background: rgba(0,0,0,0.4);
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.4);
                 backdrop-filter: blur(4px);
                 z-index: 2200;
                 display: none;
                 opacity: 0;
                 transition: 0.3s;
             }
-            .mobile-quick-overlay.active { display: block; opacity: 1; }
-            
+
+            .mobile-quick-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+
             .mobile-quick-actions {
                 position: fixed;
-                top: 50%; left: 50%;
+                top: 50%;
+                left: 50%;
                 transform: translate(-50%, -50%) scale(0.9);
                 width: 90%;
                 max-width: 380px;
@@ -286,21 +499,23 @@
                 padding: 30px 20px;
                 z-index: 2300;
                 transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
                 opacity: 0;
                 pointer-events: none;
             }
-            .mobile-quick-actions.active { 
+
+            .mobile-quick-actions.active {
                 transform: translate(-50%, -50%) scale(1);
                 opacity: 1;
                 pointer-events: auto;
             }
-            
+
             .quick-actions-grid {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
                 gap: 15px;
             }
+
             .quick-action-item {
                 display: flex;
                 flex-direction: column;
@@ -315,7 +530,12 @@
                 font-weight: 600;
                 transition: 0.2s;
             }
-            .quick-action-item:active { transform: scale(0.95); background: var(--primary-light); }
+
+            .quick-action-item:active {
+                transform: scale(0.95);
+                background: var(--primary-light);
+            }
+
             .quick-action-item i {
                 width: 45px;
                 height: 45px;
@@ -328,8 +548,14 @@
                 font-size: 1.2rem;
                 box-shadow: var(--shadow);
             }
-            .desktop-only { display: none !important; }
-            .mobile-spacer { display: block !important; }
+
+            .desktop-only {
+                display: none !important;
+            }
+
+            .mobile-spacer {
+                display: block !important;
+            }
         }
     </style>
 </head>
@@ -337,8 +563,12 @@
 <body>
     <div id="preloader">
         <div class="loader-logo"><img src="../assets/img/icon-512.png" alt="Logo Refontiq"></div>
-        <div style="color: white; font-family: 'Space Grotesk'; font-weight: 700; margin-bottom: 16px; font-size: 1.2rem; letter-spacing: 1px;">CLINIQUE REFONTIQ</div>
-        <div class="loader-bar"><div class="loader-progress" id="loaderProgress"></div></div>
+        <div
+            style="color: white; font-family: 'Space Grotesk'; font-weight: 700; margin-bottom: 16px; font-size: 1.2rem; letter-spacing: 1px;">
+            CLINIQUE REFONTIQ</div>
+        <div class="loader-bar">
+            <div class="loader-progress" id="loaderProgress"></div>
+        </div>
         <p style="color: #94a3b8; font-size: 0.8rem; margin-top: 12px;">Sécurisation des données en cours...</p>
     </div>
     <script>
@@ -348,29 +578,37 @@
         }
     </script>
 
+    <!-- Offline Banner -->
+    <div class="offline-banner" id="offlineBanner">
+        <i class="fa-solid fa-wifi-slash"></i> Mode hors ligne — Les données affichées peuvent ne pas être à jour
+    </div>
+
     <div class="dashboard-container">
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
         <div id="sidebar-container"></div>
 
         <main class="main-content">
-            
+
 
             <div class="top-bar animate-fade-up">
                 <div class="page-title">
                     <h1 id="dashboard-title">Tableau de bord</h1>
-                    <p id="currentDateDisplay"><i class="fa-solid fa-calendar-day" style="margin-right: 8px; color: var(--primary);"></i>Chargement...</p>
+                    <p id="currentDateDisplay"><i class="fa-solid fa-calendar-day"
+                            style="margin-right: 8px; color: var(--primary);"></i>Chargement...</p>
                 </div>
-                
+
                 <div style="display: flex; gap: 16px; align-items: center;">
                     <div class="date-filter-container">
-                        <button class="btn glass" onclick="toggleDateFilter()" id="dateFilterBtn" style="border-radius: 12px; font-weight: 600;">
+                        <button class="btn glass" onclick="toggleDateFilter()" id="dateFilterBtn"
+                            style="border-radius: 12px; font-weight: 600;">
                             <i class="fa-solid fa-calendar-days" style="color: var(--primary);"></i>
                             <span id="selected-period">Aujourd'hui</span>
                             <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; opacity: 0.5;"></i>
                         </button>
                     </div>
 
-                    <div id="realtime-status" class="desktop-only glass" style="display: flex; align-items: center; gap: 8px; color: #10b981; padding: 8px 16px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
+                    <div id="realtime-status" class="desktop-only glass"
+                        style="display: flex; align-items: center; gap: 8px; color: #10b981; padding: 8px 16px; border-radius: 12px; font-size: 0.75rem; font-weight: 700;">
                         <span class="online-indicator"></span> Flux Actif
                     </div>
 
@@ -380,7 +618,8 @@
                         </button>
                     </div>
 
-                    <button class="btn btn-primary animate-scale-in" id="action-btn" onclick="window.location.href='consultations.html'">
+                    <button class="btn btn-primary animate-scale-in" id="action-btn"
+                        onclick="window.location.href='consultations.html'">
                         <i class="fa-solid fa-plus"></i> <span>Action Rapide</span>
                     </button>
                 </div>
@@ -389,17 +628,23 @@
             <!-- VUE RÉCEPTIONNISTE -->
             <div id="receptionist-dashboard" style="display: none;" class="animate-fade-up">
                 <!-- Hero Reception -->
-                <div class="card glass-card" style="background: linear-gradient(135deg, var(--primary), #0284c7); border: none; color: white; padding: 32px; margin-bottom: 32px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
+                <div class="card glass-card"
+                    style="background: linear-gradient(135deg, var(--primary), #0284c7); border: none; color: white; padding: 32px; margin-bottom: 32px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
                         <div>
-                            <h2 style="font-family: 'Space Grotesk'; font-size: 1.8rem; margin-bottom: 8px;">Bonjour, <span id="user-greeting-recep">Accueil</span></h2>
+                            <h2 style="font-family: 'Space Grotesk'; font-size: 1.8rem; margin-bottom: 8px;">Bonjour,
+                                <span id="user-greeting-recep">Accueil</span>
+                            </h2>
                             <p style="opacity: 0.9; font-size: 1rem;">Prêt à accueillir nos patients aujourd'hui ?</p>
                         </div>
                         <div style="display: flex; gap: 12px;">
-                            <button onclick="window.location.href='patients.html?action=new'" class="btn" style="background: white; color: var(--primary); font-weight: 700; padding: 12px 24px;">
+                            <button onclick="window.location.href='patients.html?action=new'" class="btn"
+                                style="background: white; color: var(--primary); font-weight: 700; padding: 12px 24px;">
                                 <i class="fa-solid fa-user-plus"></i> Nouveau Patient
                             </button>
-                            <button onclick="window.location.href='rendez-vous.html'" class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                            <button onclick="window.location.href='rendez-vous.html'" class="btn"
+                                style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
                                 <i class="fa-solid fa-calendar-plus"></i> Nouveau RDV
                             </button>
                         </div>
@@ -409,10 +654,12 @@
                 <div class="intelligence-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
                     <div class="card" style="margin: 0; padding: 0;">
                         <div class="card-header" style="padding: 24px 24px 0;">
-                            <h2 class="card-title"><i class="fa-solid fa-list-ul" style="color: var(--primary);"></i> File d'attente du jour</h2>
+                            <h2 class="card-title"><i class="fa-solid fa-list-ul" style="color: var(--primary);"></i>
+                                File d'attente du jour</h2>
                             <div class="search-box">
                                 <i class="fa-solid fa-search"></i>
-                                <input type="text" id="waitlist-search" placeholder="Rechercher un patient..." onkeyup="filterWaitlist()" style="width: 280px; border-radius: 12px;">
+                                <input type="text" id="waitlist-search" placeholder="Rechercher un patient..."
+                                    onkeyup="filterWaitlist()" style="width: 280px; border-radius: 12px;">
                             </div>
                         </div>
                         <div class="table-container" style="padding: 12px;">
@@ -426,7 +673,13 @@
                                     </tr>
                                 </thead>
                                 <tbody id="waitlist-body-recep">
-                                    <tr><td colspan="4" style="text-align: center; padding: 48px; color: var(--text-light);"><i class="fa-solid fa-circle-notch fa-spin" style="margin-bottom: 12px; font-size: 1.5rem; display: block;"></i>Chargement du flux...</td></tr>
+                                    <tr>
+                                        <td colspan="4"
+                                            style="text-align: center; padding: 48px; color: var(--text-light);"><i
+                                                class="fa-solid fa-circle-notch fa-spin"
+                                                style="margin-bottom: 12px; font-size: 1.5rem; display: block;"></i>Chargement
+                                            du flux...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -434,62 +687,85 @@
 
                     <div style="display: flex; flex-direction: column; gap: 24px;">
                         <!-- AI Insight Reception -->
-                        <div class="card glass-card animate-slide-in ai-card" id="ai-card-reception" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none; min-height: 200px;">
+                        <div class="card glass-card animate-slide-in ai-card" id="ai-card-reception"
+                            style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none; min-height: 200px;">
                             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                                <div style="width: 40px; height: 40px; background: rgba(14, 165, 233, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary);" class="ai-icon-bg">
+                                <div style="width: 40px; height: 40px; background: rgba(14, 165, 233, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary);"
+                                    class="ai-icon-bg">
                                     <i class="fa-solid fa-brain"></i>
                                 </div>
                                 <h3 style="font-family: 'Space Grotesk'; font-size: 1.1rem;">Assistant Intelligent</h3>
                             </div>
-                            <div id="ai-suggestion-recep" class="ai-suggestion-box" style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6;">
+                            <div id="ai-suggestion-recep" class="ai-suggestion-box"
+                                style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6;">
                                 Analyse du flux patient en cours...
                             </div>
-                            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 0.7rem; color: #94a3b8; font-weight: 600; text-transform: uppercase;" class="ai-priority-label">Temps de réponse optimal</span>
+                            <div
+                                style="margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                                <span
+                                    style="font-size: 0.7rem; color: #94a3b8; font-weight: 600; text-transform: uppercase;"
+                                    class="ai-priority-label">Temps de réponse optimal</span>
                                 <div class="online-indicator ai-status-dot"></div>
                             </div>
                         </div>
 
                         <!-- Caisse widget -->
-                        <div class="card animate-slide-in" style="border-left: 4px solid var(--secondary); animation-delay: 0.1s;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
-                                <h3 class="card-title" style="font-size: 1rem;"><i class="fa-solid fa-wallet" style="color: var(--secondary);"></i> Recettes du Jour</h3>
-                                <a href="finance.html" style="font-size: 0.75rem; color: var(--primary); text-decoration: none; font-weight: 600;">Détails <i class="fa-solid fa-arrow-right"></i></a>
+                        <div class="card animate-slide-in"
+                            style="border-left: 4px solid var(--secondary); animation-delay: 0.1s;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                                <h3 class="card-title" style="font-size: 1rem;"><i class="fa-solid fa-wallet"
+                                        style="color: var(--secondary);"></i> Recettes du Jour</h3>
+                                <a href="finance.html"
+                                    style="font-size: 0.75rem; color: var(--primary); text-decoration: none; font-weight: 600;">Détails
+                                    <i class="fa-solid fa-arrow-right"></i></a>
                             </div>
                             <div id="caisse-summary">
-                                <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Space Grotesk';">Chargement...</div>
+                                <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Space Grotesk';">
+                                    Chargement...</div>
                             </div>
                         </div>
 
                         <!-- Notes Rapides (Beautified) -->
-                        <div class="card animate-slide-in" style="background: var(--card); animation-delay: 0.2s; border: 1px solid var(--border); overflow: hidden; position: relative;">
-                            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary);"></div>
-                            <h3 class="card-title" style="font-size: 1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                                <i class="fa-solid fa-feather-pointed" style="color: var(--primary);"></i> 
+                        <div class="card animate-slide-in"
+                            style="background: var(--card); animation-delay: 0.2s; border: 1px solid var(--border); overflow: hidden; position: relative;">
+                            <div
+                                style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary);">
+                            </div>
+                            <h3 class="card-title"
+                                style="font-size: 1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-feather-pointed" style="color: var(--primary);"></i>
                                 Note au Médecin
                             </h3>
-                            
+
                             <div style="margin-bottom: 12px;">
-                                <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 6px; display: block;">Patient Concerné</label>
-                                <select id="note-patient-select" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.85rem; outline: none; transition: 0.3s;">
+                                <label
+                                    style="font-size: 0.7rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 6px; display: block;">Patient
+                                    Concerné</label>
+                                <select id="note-patient-select"
+                                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.85rem; outline: none; transition: 0.3s;">
                                     <option value="">Sélectionner un patient...</option>
                                 </select>
                             </div>
 
                             <div style="margin-bottom: 16px;">
-                                <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 6px; display: block;">Votre Message</label>
+                                <label
+                                    style="font-size: 0.7rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 6px; display: block;">Votre
+                                    Message</label>
                                 <div style="position: relative;">
-                                    <textarea id="note-to-doc" placeholder="Indiquez une urgence, un détail ou une particularité importante..." 
+                                    <textarea id="note-to-doc"
+                                        placeholder="Indiquez une urgence, un détail ou une particularité importante..."
                                         style="width: 100%; height: 120px; padding: 12px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg); font-size: 0.9rem; transition: all 0.3s ease; resize: none; font-family: 'Inter', sans-serif; line-height: 1.5; outline: none;"
                                         onfocus="this.style.borderColor='var(--primary)'; this.style.boxShadow='0 0 0 4px rgba(14, 165, 233, 0.1)';"
                                         onblur="this.style.borderColor='var(--border)'; this.style.boxShadow='none';"></textarea>
-                                    <div style="position: absolute; bottom: 8px; right: 8px; font-size: 0.65rem; color: var(--text-light); opacity: 0.5;">
+                                    <div
+                                        style="position: absolute; bottom: 8px; right: 8px; font-size: 0.65rem; color: var(--text-light); opacity: 0.5;">
                                         <i class="fa-solid fa-keyboard"></i> Presse-papiers actif
                                     </div>
                                 </div>
                             </div>
 
-                            <button class="btn btn-primary" onclick="sendNoteToDoc()" 
+                            <button class="btn btn-primary" onclick="sendNoteToDoc()"
                                 style="width: 100%; border-radius: 12px; padding: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);">
                                 <i class="fa-solid fa-paper-plane"></i> Transmettre au Médecin
                             </button>
@@ -501,17 +777,22 @@
             <!-- VUE INFIRMIÈRE -->
             <div id="nurse-dashboard" style="display: none;" class="animate-fade-up">
                 <!-- Hero Nurse -->
-                <div class="card glass-card" style="background: linear-gradient(135deg, var(--secondary), #1e7e72); border: none; color: white; padding: 32px; margin-bottom: 32px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
+                <div class="card glass-card"
+                    style="background: linear-gradient(135deg, var(--secondary), #1e7e72); border: none; color: white; padding: 32px; margin-bottom: 32px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
                         <div>
-                            <h2 style="font-family: 'Space Grotesk'; font-size: 1.8rem; margin-bottom: 8px;">Station de Soins, <span id="user-greeting-nurse">Infirmerie</span></h2>
+                            <h2 style="font-family: 'Space Grotesk'; font-size: 1.8rem; margin-bottom: 8px;">Station de
+                                Soins, <span id="user-greeting-nurse">Infirmerie</span></h2>
                             <p style="opacity: 0.9; font-size: 1rem;">Triage et surveillance clinique active.</p>
                         </div>
                         <div style="display: flex; gap: 12px;">
-                            <button onclick="window.location.href='vitals-tablet.html'" class="btn" style="background: white; color: var(--secondary); font-weight: 700; padding: 12px 24px;">
+                            <button onclick="window.location.href='vitals-tablet.html'" class="btn"
+                                style="background: white; color: var(--secondary); font-weight: 700; padding: 12px 24px;">
                                 <i class="fa-solid fa-heart-pulse"></i> Prendre Constantes
                             </button>
-                            <button onclick="window.location.href='stocks.html'" class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                            <button onclick="window.location.href='stocks.html'" class="btn"
+                                style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
                                 <i class="fa-solid fa-pills"></i> Pharmacie
                             </button>
                         </div>
@@ -519,19 +800,30 @@
                 </div>
 
                 <!-- Next Patient Spotlight (Nurse) -->
-                <div id="next-patient-widget-nurse" class="animate-scale-in" style="margin-bottom: 32px; display: none;">
-                    <div class="card" style="background: linear-gradient(135deg, var(--primary), #0ea5e9); border: none; color: white; padding: 0; position: relative;">
-                        <div style="padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; position: relative; z-index: 2;">
+                <div id="next-patient-widget-nurse" class="animate-scale-in"
+                    style="margin-bottom: 32px; display: none;">
+                    <div class="card"
+                        style="background: linear-gradient(135deg, var(--primary), #0ea5e9); border: none; color: white; padding: 0; position: relative;">
+                        <div
+                            style="padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; position: relative; z-index: 2;">
                             <div style="display: flex; align-items: center; gap: 20px;">
-                                <div id="np-avatar-nurse" style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; border: 2px solid rgba(255,255,255,0.3);">?</div>
+                                <div id="np-avatar-nurse"
+                                    style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; border: 2px solid rgba(255,255,255,0.3);">
+                                    ?</div>
                                 <div>
-                                    <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-bottom: 4px;">Prochain patient (Triage)</div>
-                                    <h3 id="np-name-nurse" style="font-family: 'Space Grotesk'; font-size: 1.4rem; font-weight: 700; margin: 0;">Chargement...</h3>
-                                    <div id="np-motif-nurse" style="font-size: 0.9rem; margin-top: 4px; opacity: 0.9;">Motif</div>
+                                    <div
+                                        style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-bottom: 4px;">
+                                        Prochain patient (Triage)</div>
+                                    <h3 id="np-name-nurse"
+                                        style="font-family: 'Space Grotesk'; font-size: 1.4rem; font-weight: 700; margin: 0;">
+                                        Chargement...</h3>
+                                    <div id="np-motif-nurse" style="font-size: 0.9rem; margin-top: 4px; opacity: 0.9;">
+                                        Motif</div>
                                 </div>
                             </div>
                             <div style="display: flex; gap: 12px;">
-                                <button id="btn-start-vitals" class="btn" style="background: white; color: var(--primary); font-weight: 700; padding: 12px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                                <button id="btn-start-vitals" class="btn"
+                                    style="background: white; color: var(--primary); font-weight: 700; padding: 12px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                                     <i class="fa-solid fa-heart-pulse"></i> Prendre les constantes
                                 </button>
                             </div>
@@ -542,8 +834,10 @@
                 <div class="intelligence-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
                     <div class="card" style="margin: 0; padding: 0;">
                         <div class="card-header" style="padding: 24px 24px 0;">
-                            <h2 class="card-title"><i class="fa-solid fa-stethoscope" style="color: #6366f1;"></i> File de Triage</h2>
-                            <span class="nav-badge animate-scale-in" id="nurse-waitlist-count" style="background: #4f46e5; display: inline-block;">0</span>
+                            <h2 class="card-title"><i class="fa-solid fa-stethoscope" style="color: #6366f1;"></i> File
+                                de Triage</h2>
+                            <span class="nav-badge animate-scale-in" id="nurse-waitlist-count"
+                                style="background: #4f46e5; display: inline-block;">0</span>
                         </div>
                         <div class="table-container" style="padding: 12px;">
                             <table style="width: 100%;">
@@ -556,7 +850,13 @@
                                     </tr>
                                 </thead>
                                 <tbody id="nurse-waitlist-body">
-                                    <tr><td colspan="4" style="text-align: center; padding: 48px; color: var(--text-light);"><i class="fa-solid fa-hourglass-start fa-spin" style="margin-bottom: 12px; font-size: 1.5rem; display: block;"></i>En attente de patients...</td></tr>
+                                    <tr>
+                                        <td colspan="4"
+                                            style="text-align: center; padding: 48px; color: var(--text-light);"><i
+                                                class="fa-solid fa-hourglass-start fa-spin"
+                                                style="margin-bottom: 12px; font-size: 1.5rem; display: block;"></i>En
+                                            attente de patients...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -564,57 +864,81 @@
 
                     <div style="display: flex; flex-direction: column; gap: 24px;">
                         <!-- AI Insight Nurse -->
-                        <div class="card glass-card animate-slide-in ai-card" id="ai-card-nurse" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none; min-height: 200px;">
+                        <div class="card glass-card animate-slide-in ai-card" id="ai-card-nurse"
+                            style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none; min-height: 200px;">
                             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                                <div style="width: 40px; height: 40px; background: rgba(139, 92, 246, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #a78bfa;" class="ai-icon-bg">
+                                <div style="width: 40px; height: 40px; background: rgba(139, 92, 246, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #a78bfa;"
+                                    class="ai-icon-bg">
                                     <i class="fa-solid fa-brain"></i>
                                 </div>
                                 <h3 style="font-family: 'Space Grotesk'; font-size: 1.1rem;">Vigie Médicale IA</h3>
                             </div>
-                            <div id="ai-suggestion-nurse" class="ai-suggestion-box" style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6;">
+                            <div id="ai-suggestion-nurse" class="ai-suggestion-box"
+                                style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6;">
                                 Surveillance des constantes vitales...
                             </div>
-                            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 0.7rem; color: #94a3b8; font-weight: 600; text-transform: uppercase;" class="ai-priority-label">Précision Diagnostique</span>
-                                <div class="online-indicator ai-status-dot" style="background: #a78bfa; box-shadow: 0 0 8px #a78bfa;"></div>
+                            <div
+                                style="margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                                <span
+                                    style="font-size: 0.7rem; color: #94a3b8; font-weight: 600; text-transform: uppercase;"
+                                    class="ai-priority-label">Précision Diagnostique</span>
+                                <div class="online-indicator ai-status-dot"
+                                    style="background: #a78bfa; box-shadow: 0 0 8px #a78bfa;"></div>
                             </div>
                         </div>
 
                         <!-- Stock Alert widget -->
-                        <div class="card animate-slide-in" style="border-left: 4px solid var(--danger); animation-delay: 0.1s;">
-                            <h3 class="card-title" style="font-size: 1rem; margin-bottom: 16px;"><i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> Alertes Stocks</h3>
-                            <div id="stock-alerts-list" style="display: flex; flex-direction: column; gap: 12px; max-height: 200px; overflow-y: auto; margin-bottom: 16px;">
-                                <p style="font-size: 0.85rem; color: var(--text-light);">Vérification de l'inventaire...</p>
+                        <div class="card animate-slide-in"
+                            style="border-left: 4px solid var(--danger); animation-delay: 0.1s;">
+                            <h3 class="card-title" style="font-size: 1rem; margin-bottom: 16px;"><i
+                                    class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> Alertes
+                                Stocks</h3>
+                            <div id="stock-alerts-list"
+                                style="display: flex; flex-direction: column; gap: 12px; max-height: 200px; overflow-y: auto; margin-bottom: 16px;">
+                                <p style="font-size: 0.85rem; color: var(--text-light);">Vérification de l'inventaire...
+                                </p>
                             </div>
-                            <button onclick="window.location.href='stocks.html'" class="btn" style="width: 100%; background: var(--bg); font-size: 0.8rem; border: 1px solid var(--border);">Gérer le stock</button>
+                            <button onclick="window.location.href='stocks.html'" class="btn"
+                                style="width: 100%; background: var(--bg); font-size: 0.8rem; border: 1px solid var(--border);">Gérer
+                                le stock</button>
                         </div>
 
                         <!-- Note au Médecin (Nurse version) -->
-                        <div class="card animate-slide-in" style="background: var(--card); animation-delay: 0.2s; border: 1px solid var(--border); overflow: hidden; position: relative;">
-                            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #6366f1;"></div>
-                            <h3 class="card-title" style="font-size: 1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                                <i class="fa-solid fa-notes-medical" style="color: #6366f1;"></i> 
+                        <div class="card animate-slide-in"
+                            style="background: var(--card); animation-delay: 0.2s; border: 1px solid var(--border); overflow: hidden; position: relative;">
+                            <div
+                                style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #6366f1;">
+                            </div>
+                            <h3 class="card-title"
+                                style="font-size: 1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-notes-medical" style="color: #6366f1;"></i>
                                 Observations pour le Médecin
                             </h3>
-                            
+
                             <div style="margin-bottom: 12px;">
-                                <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 6px; display: block;">Patient en cours</label>
-                                <select id="note-patient-select-nurse" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.85rem; outline: none; transition: 0.3s;">
+                                <label
+                                    style="font-size: 0.7rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 6px; display: block;">Patient
+                                    en cours</label>
+                                <select id="note-patient-select-nurse"
+                                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.85rem; outline: none; transition: 0.3s;">
                                     <option value="">Sélectionner un patient...</option>
                                 </select>
                             </div>
 
                             <div style="margin-bottom: 16px;">
-                                <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 6px; display: block;">Observations cliniques</label>
+                                <label
+                                    style="font-size: 0.7rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin-bottom: 6px; display: block;">Observations
+                                    cliniques</label>
                                 <div style="position: relative;">
-                                    <textarea id="note-to-doc-nurse" placeholder="Indiquez des observations cliniques ou urgences détectées..." 
+                                    <textarea id="note-to-doc-nurse"
+                                        placeholder="Indiquez des observations cliniques ou urgences détectées..."
                                         style="width: 100%; height: 100px; padding: 12px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--bg); font-size: 0.9rem; transition: all 0.3s ease; resize: none; font-family: 'Inter', sans-serif; line-height: 1.5; outline: none;"
                                         onfocus="this.style.borderColor='#6366f1'; this.style.boxShadow='0 0 0 4px rgba(99, 102, 241, 0.1)';"
                                         onblur="this.style.borderColor='var(--border)'; this.style.boxShadow='none';"></textarea>
                                 </div>
                             </div>
 
-                            <button class="btn btn-primary" onclick="sendNoteToDoc('nurse')" 
+                            <button class="btn btn-primary" onclick="sendNoteToDoc('nurse')"
                                 style="width: 100%; border-radius: 12px; padding: 12px; font-weight: 700; background: #4f46e5 !important; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);">
                                 <i class="fa-solid fa-share-from-square"></i> Envoyer au Médecin
                             </button>
@@ -622,9 +946,13 @@
 
                         <!-- Clinical Note -->
                         <div class="card animate-slide-in" style="background: var(--bg); animation-delay: 0.2s;">
-                            <h3 class="card-title" style="font-size: 1rem; margin-bottom: 16px;"><i class="fa-solid fa-comment-medical"></i> Note d'Observation</h3>
-                            <textarea id="nurse-note" placeholder="Observations cliniques pour le médecin..." style="height: 100px; margin-bottom: 16px; font-size: 0.85rem;"></textarea>
-                            <button class="btn btn-primary" id="btn-envoyer-doc" onclick="sendNurseNote()" style="width: 100%; border-radius: 12px; background: #4f46e5 !important;">Envoyer au Docteur</button>
+                            <h3 class="card-title" style="font-size: 1rem; margin-bottom: 16px;"><i
+                                    class="fa-solid fa-comment-medical"></i> Note d'Observation</h3>
+                            <textarea id="nurse-note" placeholder="Observations cliniques pour le médecin..."
+                                style="height: 100px; margin-bottom: 16px; font-size: 0.85rem;"></textarea>
+                            <button class="btn btn-primary" id="btn-envoyer-doc" onclick="sendNurseNote()"
+                                style="width: 100%; border-radius: 12px; background: #4f46e5 !important;">Envoyer au
+                                Docteur</button>
                         </div>
                     </div>
                 </div>
@@ -633,24 +961,33 @@
             <!-- VUE MÉDICALE -->
             <div id="medical-dashboard" style="display: none;" class="animate-fade-up">
                 <!-- Hero Medical -->
-                <div class="card glass-card" style="background: linear-gradient(135deg, #0f172a, #1e293b); border: none; color: white; padding: 32px; margin-bottom: 32px; overflow: visible;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 24px;">
+                <div class="card glass-card"
+                    style="background: linear-gradient(135deg, #0f172a, #1e293b); border: none; color: white; padding: 32px; margin-bottom: 32px; overflow: visible;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 24px;">
                         <div>
                             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                                 <div class="online-indicator"></div>
-                                <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--secondary);">Session Active</span>
+                                <span
+                                    style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--secondary);">Session
+                                    Active</span>
                             </div>
-                            <h2 style="font-family: 'Space Grotesk'; font-size: 1.8rem; margin-bottom: 4px;">Bonjour, Dr. <span id="user-greeting-med">Médecin</span></h2>
+                            <h2 style="font-family: 'Space Grotesk'; font-size: 1.8rem; margin-bottom: 4px;">Bonjour,
+                                Dr. <span id="user-greeting-med">Médecin</span></h2>
                             <p style="opacity: 0.7; font-size: 1rem;">Voici l'état de votre service aujourd'hui.</p>
                         </div>
                         <div class="stats-mini-row" style="display: flex; gap: 24px;">
                             <div style="text-align: right;">
-                                <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase;">Consultations</div>
-                                <div style="font-size: 1.5rem; font-weight: 700; font-family: 'Space Grotesk';" id="val-consultations-hero">0</div>
+                                <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase;">Consultations
+                                </div>
+                                <div style="font-size: 1.5rem; font-weight: 700; font-family: 'Space Grotesk';"
+                                    id="val-consultations-hero">0</div>
                             </div>
                             <div style="text-align: right;">
-                                <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase;">Patients Prêts</div>
-                                <div style="font-size: 1.5rem; font-weight: 700; font-family: 'Space Grotesk'; color: var(--secondary);" id="val-ready-hero">0</div>
+                                <div style="font-size: 0.75rem; opacity: 0.6; text-transform: uppercase;">Patients Prêts
+                                </div>
+                                <div style="font-size: 1.5rem; font-weight: 700; font-family: 'Space Grotesk'; color: var(--secondary);"
+                                    id="val-ready-hero">0</div>
                             </div>
                         </div>
                     </div>
@@ -658,34 +995,53 @@
 
                 <!-- Next Patient Spotlight -->
                 <div id="next-patient-widget" class="animate-scale-in" style="margin-bottom: 32px; display: none;">
-                    <div class="card" style="background: linear-gradient(135deg, var(--primary), #0ea5e9); border: none; color: white; padding: 0; position: relative;">
-                        <div style="padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; position: relative; z-index: 2;">
+                    <div class="card"
+                        style="background: linear-gradient(135deg, var(--primary), #0ea5e9); border: none; color: white; padding: 0; position: relative;">
+                        <div
+                            style="padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; position: relative; z-index: 2;">
                             <div style="display: flex; align-items: center; gap: 20px;">
-                                <div id="np-avatar" style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; border: 2px solid rgba(255,255,255,0.3);">?</div>
+                                <div id="np-avatar"
+                                    style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; border: 2px solid rgba(255,255,255,0.3);">
+                                    ?</div>
                                 <div>
-                                    <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-bottom: 4px;">Patient suivant</div>
-                                    <a id="np-name-link" href="#" style="text-decoration: none; color: inherit; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                                        <h3 id="np-name" style="font-family: 'Space Grotesk'; font-size: 1.4rem; font-weight: 700; margin: 0;">Chargement...</h3>
+                                    <div
+                                        style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-bottom: 4px;">
+                                        Patient suivant</div>
+                                    <a id="np-name-link" href="#"
+                                        style="text-decoration: none; color: inherit; transition: opacity 0.2s;"
+                                        onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                                        <h3 id="np-name"
+                                            style="font-family: 'Space Grotesk'; font-size: 1.4rem; font-weight: 700; margin: 0;">
+                                            Chargement...</h3>
                                     </a>
                                     <p id="np-motif" style="font-size: 0.9rem; opacity: 0.9; margin-top: 4px;"></p>
                                 </div>
                             </div>
                             <div style="display: flex; align-items: center; gap: 32px;">
                                 <div style="text-align: center;">
-                                    <div style="font-size: 0.7rem; opacity: 0.7; text-transform: uppercase;">Heure prévue</div>
-                                    <div id="np-heure" style="font-size: 1.4rem; font-weight: 700; font-family: 'Space Grotesk';">--:--</div>
+                                    <div style="font-size: 0.7rem; opacity: 0.7; text-transform: uppercase;">Heure
+                                        prévue</div>
+                                    <div id="np-heure"
+                                        style="font-size: 1.4rem; font-weight: 700; font-family: 'Space Grotesk';">--:--
+                                    </div>
                                 </div>
                                 <div style="text-align: center;">
-                                    <div style="font-size: 0.7rem; opacity: 0.7; text-transform: uppercase;">Attente</div>
-                                    <div id="np-countdown" style="font-size: 1.4rem; font-weight: 700; font-family: 'Space Grotesk'; color: #fbbf24;">--</div>
+                                    <div style="font-size: 0.7rem; opacity: 0.7; text-transform: uppercase;">Attente
+                                    </div>
+                                    <div id="np-countdown"
+                                        style="font-size: 1.4rem; font-weight: 700; font-family: 'Space Grotesk'; color: #fbbf24;">
+                                        --</div>
                                 </div>
-                                <a id="np-link" href="#" class="btn" style="background: white; color: var(--primary); font-weight: 700; padding: 12px 24px; border-radius: 12px;">
+                                <a id="np-link" href="#" class="btn"
+                                    style="background: white; color: var(--primary); font-weight: 700; padding: 12px 24px; border-radius: 12px;">
                                     Ouvrir le dossier <i class="fa-solid fa-folder-open" style="margin-left: 8px;"></i>
                                 </a>
                             </div>
                         </div>
                         <!-- Background patterns -->
-                        <div style="position: absolute; top: 0; right: 0; bottom: 0; width: 300px; background: linear-gradient(to left, rgba(255,255,255,0.1), transparent); clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%);"></div>
+                        <div
+                            style="position: absolute; top: 0; right: 0; bottom: 0; width: 300px; background: linear-gradient(to left, rgba(255,255,255,0.1), transparent); clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%);">
+                        </div>
                     </div>
                 </div>
 
@@ -693,31 +1049,40 @@
                 <div class="stats-grid">
                     <div class="stat-card animate-scale-in" onclick="window.location.href='patients.html'">
                         <div class="stat-header">
-                            <div class="stat-icon" style="background: rgba(14, 165, 233, 0.1); color: var(--primary);"><i class="fa-solid fa-user-injured"></i></div>
+                            <div class="stat-icon" style="background: rgba(14, 165, 233, 0.1); color: var(--primary);">
+                                <i class="fa-solid fa-user-injured"></i>
+                            </div>
                             <div class="stat-trend" id="trend-patients">--</div>
                         </div>
                         <div class="stat-value" id="val-patients">0</div>
                         <div class="stat-label">Total Patients</div>
                     </div>
-                    <div class="stat-card animate-scale-in" style="animation-delay: 0.1s;" onclick="window.location.href='consultations.html'">
+                    <div class="stat-card animate-scale-in" style="animation-delay: 0.1s;"
+                        onclick="window.location.href='consultations.html'">
                         <div class="stat-header">
-                            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--secondary);"><i class="fa-solid fa-stethoscope"></i></div>
+                            <div class="stat-icon"
+                                style="background: rgba(16, 185, 129, 0.1); color: var(--secondary);"><i
+                                    class="fa-solid fa-stethoscope"></i></div>
                             <div class="stat-trend positive"><i class="fa-solid fa-check"></i> Actif</div>
                         </div>
                         <div class="stat-value" id="val-consultations">0</div>
                         <div class="stat-label">Consultations du jour</div>
                     </div>
-                    <div class="stat-card animate-scale-in" style="animation-delay: 0.2s;" onclick="window.location.href='rendez-vous.html'">
+                    <div class="stat-card animate-scale-in" style="animation-delay: 0.2s;"
+                        onclick="window.location.href='rendez-vous.html'">
                         <div class="stat-header">
-                            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--accent);"><i class="fa-solid fa-calendar-check"></i></div>
+                            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--accent);"><i
+                                    class="fa-solid fa-calendar-check"></i></div>
                             <div class="stat-trend"><i class="fa-solid fa-clock"></i> Jour</div>
                         </div>
                         <div class="stat-value" id="val-rdv">0</div>
                         <div class="stat-label">Rendez-vous prévus</div>
                     </div>
-                    <div class="stat-card animate-scale-in" style="animation-delay: 0.3s;" onclick="window.location.href='finance.html'">
+                    <div class="stat-card animate-scale-in" style="animation-delay: 0.3s;"
+                        onclick="window.location.href='finance.html'">
                         <div class="stat-header">
-                            <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: #a78bfa;"><i class="fa-solid fa-chart-line"></i></div>
+                            <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: #a78bfa;"><i
+                                    class="fa-solid fa-chart-line"></i></div>
                             <div class="stat-trend" id="trend-revenus">--</div>
                         </div>
                         <div class="stat-value" id="val-revenus">0</div>
@@ -726,11 +1091,16 @@
                 </div>
 
                 <!-- Intelligence Hub Medical -->
-                <div class="intelligence-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 32px;">
+                <div class="intelligence-grid"
+                    style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 32px;">
                     <div class="card" style="margin: 0; padding: 24px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                            <h3 class="card-title" style="font-size: 1.1rem;"><i class="fa-solid fa-chart-bar" style="color: var(--primary);"></i> Activité Clinique</h3>
-                            <div style="font-size: 0.75rem; color: var(--text-light); background: var(--bg); padding: 6px 12px; border-radius: 20px; font-weight: 600;">Derniers 7 jours</div>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <h3 class="card-title" style="font-size: 1.1rem;"><i class="fa-solid fa-chart-bar"
+                                    style="color: var(--primary);"></i> Activité Clinique</h3>
+                            <div
+                                style="font-size: 0.75rem; color: var(--text-light); background: var(--bg); padding: 6px 12px; border-radius: 20px; font-weight: 600;">
+                                Derniers 7 jours</div>
                         </div>
                         <div style="height: 250px;">
                             <canvas id="activityChart"></canvas>
@@ -738,20 +1108,27 @@
                     </div>
 
                     <!-- AI Medical Insight -->
-                    <div class="card glass-card animate-slide-in ai-card" id="ai-card-medical" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none; margin: 0;">
+                    <div class="card glass-card animate-slide-in ai-card" id="ai-card-medical"
+                        style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none; margin: 0;">
                         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                            <div style="width: 40px; height: 40px; background: rgba(14, 165, 233, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary);" class="ai-icon-bg">
+                            <div style="width: 40px; height: 40px; background: rgba(14, 165, 233, 0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary);"
+                                class="ai-icon-bg">
                                 <i class="fa-solid fa-brain"></i>
                             </div>
                             <h3 style="font-family: 'Space Grotesk'; font-size: 1.1rem;">Assistant Diagnostic IA</h3>
                         </div>
-                        <div id="ai-suggestion-med" class="ai-suggestion-box" style="font-size: 0.95rem; color: #cbd5e1; line-height: 1.6;">
+                        <div id="ai-suggestion-med" class="ai-suggestion-box"
+                            style="font-size: 0.95rem; color: #cbd5e1; line-height: 1.6;">
                             Prêt pour l'analyse clinique...
                         </div>
-                        <div style="margin-top: auto; padding-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+                        <div
+                            style="margin-top: auto; padding-top: 24px; display: flex; justify-content: space-between; align-items: center;">
                             <div style="display: flex; flex-direction: column;">
-                                <span style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;" class="ai-priority-label">Moteur d'analyse</span>
-                                <span style="font-size: 0.8rem; font-weight: 700; color: white;">Refontiq Intelligence v2</span>
+                                <span
+                                    style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;"
+                                    class="ai-priority-label">Moteur d'analyse</span>
+                                <span style="font-size: 0.8rem; font-weight: 700; color: white;">Refontiq Intelligence
+                                    v2</span>
                             </div>
                             <div class="online-indicator ai-status-dot"></div>
                         </div>
@@ -760,9 +1137,12 @@
 
                 <!-- Medical Waitlist (Post-Infirmerie) -->
                 <div class="card animate-fade-up" style="border-left: 4px solid var(--secondary); margin-bottom: 32px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2 class="card-title" style="font-size: 1.1rem; color: var(--secondary);"><i class="fa-solid fa-check-double"></i> Patients prêts pour consultation</h2>
-                        <span id="realtime-ready-badge" class="nav-badge" style="background: var(--secondary); display: none;">NOUVEAU</span>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 class="card-title" style="font-size: 1.1rem; color: var(--secondary);"><i
+                                class="fa-solid fa-check-double"></i> Patients prêts pour consultation</h2>
+                        <span id="realtime-ready-badge" class="nav-badge"
+                            style="background: var(--secondary); display: none;">NOUVEAU</span>
                     </div>
                     <div class="table-container">
                         <table style="width: 100%;">
@@ -774,7 +1154,12 @@
                                 </tr>
                             </thead>
                             <tbody id="medical-waitlist-body">
-                                <tr><td colspan="3" style="text-align: center; padding: 40px; color: var(--text-light);"><i class="fa-solid fa-circle-notch fa-spin" style="margin-right: 10px;"></i>Synchronisation du flux médical...</td></tr>
+                                <tr>
+                                    <td colspan="3"
+                                        style="text-align: center; padding: 40px; color: var(--text-light);"><i
+                                            class="fa-solid fa-circle-notch fa-spin"
+                                            style="margin-right: 10px;"></i>Synchronisation du flux médical...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -786,46 +1171,63 @@
                 <div style="display: flex; flex-direction: column; gap: 24px;">
                     <!-- Patients récents -->
                     <div class="card" style="margin: 0;">
-                        <div class="card-header"><h3>Patients récents</h3><a href="patients.html" style="color:var(--primary); text-decoration:none; font-size:0.9rem;">Voir tout →</a></div>
+                        <div class="card-header">
+                            <h3>Patients récents</h3><a href="patients.html"
+                                style="color:var(--primary); text-decoration:none; font-size:0.9rem;">Voir tout →</a>
+                        </div>
                         <div id="recent-patients">
                             <p style="color: var(--text-light); padding: 16px 0;">Chargement...</p>
                         </div>
                     </div>
-                    
+
                     <!-- Alertes critiques -->
                     <div class="card" style="margin: 0;">
-                        <div class="card-header"><h3>Alertes critiques</h3></div>
+                        <div class="card-header">
+                            <h3>Alertes critiques</h3>
+                        </div>
                         <div id="critical-alerts">Chargement...</div>
                     </div>
                 </div>
-                
+
                 <!-- Mur de Notifications (Option 4) - Colonne Droite -->
                 <div class="card" style="margin: 0; display: flex; flex-direction: column;">
                     <div class="card-header" style="border-bottom: 1px solid var(--border);">
-                        <h3><i class="fa-solid fa-bolt" style="margin-right: 8px; color: #fbbf24;"></i>Activité en direct</h3>
+                        <h3><i class="fa-solid fa-bolt" style="margin-right: 8px; color: #fbbf24;"></i>Activité en
+                            direct</h3>
                     </div>
                     <div id="notification-wall" style="flex: 1; padding: 10px 0; max-height: 600px; overflow-y: auto;">
-                        <p style="color: var(--text-light); text-align: center; padding: 20px;">Aucune activité récente.</p>
+                        <p style="color: var(--text-light); text-align: center; padding: 20px;">Aucune activité récente.
+                        </p>
                     </div>
                 </div>
             </div>
 
             <!-- RAPPORT JOURNALIER (Médecin uniquement) -->
             <div id="rapport-journalier" style="display: none; margin-top: 24px;">
-                <div style="background: var(--card); border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden;">
+                <div
+                    style="background: var(--card); border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden;">
                     <!-- En-tête du rapport -->
-                    <div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding: 28px 32px; color: white;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div
+                        style="background: linear-gradient(135deg, #0f172a, #1e293b); padding: 28px 32px; color: white;">
+                        <div
+                            style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
                             <div style="display: flex; align-items: center; gap: 16px;">
-                                <div style="width: 50px; height: 50px; background: rgba(14,165,233,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fa-solid fa-clipboard-list" style="font-size: 1.4rem; color: #38bdf8;"></i>
+                                <div
+                                    style="width: 50px; height: 50px; background: rgba(14,165,233,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fa-solid fa-clipboard-list"
+                                        style="font-size: 1.4rem; color: #38bdf8;"></i>
                                 </div>
                                 <div>
-                                    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; margin: 0;">Rapport Journalier</h2>
-                                    <p id="rapport-date" style="margin: 4px 0 0; font-size: 0.85rem; opacity: 0.7;">Chargement...</p>
+                                    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; margin: 0;">
+                                        Rapport Journalier</h2>
+                                    <p id="rapport-date" style="margin: 4px 0 0; font-size: 0.85rem; opacity: 0.7;">
+                                        Chargement...</p>
                                 </div>
                             </div>
-                            <div style="font-size: 0.75rem; background: rgba(56,189,248,0.15); padding: 6px 14px; border-radius: 8px; color: #7dd3fc;"><i class="fa-solid fa-robot" style="margin-right: 6px;"></i>Généré automatiquement</div>
+                            <div
+                                style="font-size: 0.75rem; background: rgba(56,189,248,0.15); padding: 6px 14px; border-radius: 8px; color: #7dd3fc;">
+                                <i class="fa-solid fa-robot" style="margin-right: 6px;"></i>Généré automatiquement
+                            </div>
                         </div>
                     </div>
 
@@ -833,15 +1235,31 @@
                     <div style="padding: 28px 32px;">
                         <!-- Section Présence Équipe -->
                         <div style="margin-bottom: 28px;">
-                            <h4 style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;"><span style="width: 32px; height: 32px; background: rgba(16,185,129,0.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;"><i class="fa-solid fa-users" style="color: var(--secondary); font-size: 0.85rem;"></i></span> Présence Équipe</h4>
-                            <div id="rapport-presence" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">Chargement...</div>
+                            <h4
+                                style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;">
+                                <span
+                                    style="width: 32px; height: 32px; background: rgba(16,185,129,0.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;"><i
+                                        class="fa-solid fa-users"
+                                        style="color: var(--secondary); font-size: 0.85rem;"></i></span> Présence Équipe
+                            </h4>
+                            <div id="rapport-presence"
+                                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">
+                                Chargement...</div>
                         </div>
 
                         <hr style="border: none; border-top: 1px solid var(--border); margin: 20px 0;">
 
                         <!-- Section RDV du jour -->
                         <div style="margin-bottom: 28px;">
-                            <h4 style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;"><span style="width: 32px; height: 32px; background: rgba(245,158,11,0.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;"><i class="fa-solid fa-calendar-check" style="color: var(--accent); font-size: 0.85rem;"></i></span> Rendez-vous du jour <span id="rapport-rdv-count" style="font-size: 0.75rem; background: var(--primary-light); color: var(--primary); padding: 2px 10px; border-radius: 20px; font-weight: 700;">0</span></h4>
+                            <h4
+                                style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;">
+                                <span
+                                    style="width: 32px; height: 32px; background: rgba(245,158,11,0.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;"><i
+                                        class="fa-solid fa-calendar-check"
+                                        style="color: var(--accent); font-size: 0.85rem;"></i></span> Rendez-vous du
+                                jour <span id="rapport-rdv-count"
+                                    style="font-size: 0.75rem; background: var(--primary-light); color: var(--primary); padding: 2px 10px; border-radius: 20px; font-weight: 700;">0</span>
+                            </h4>
                             <div id="rapport-rdv">Chargement...</div>
                         </div>
 
@@ -849,7 +1267,15 @@
 
                         <!-- Section Patients enregistrés -->
                         <div style="margin-bottom: 28px;">
-                            <h4 style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;"><span style="width: 32px; height: 32px; background: rgba(14,165,233,0.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;"><i class="fa-solid fa-user-plus" style="color: var(--primary); font-size: 0.85rem;"></i></span> Nouveaux patients aujourd'hui <span id="rapport-patients-count" style="font-size: 0.75rem; background: rgba(16,185,129,0.1); color: var(--secondary); padding: 2px 10px; border-radius: 20px; font-weight: 700;">0</span></h4>
+                            <h4
+                                style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;">
+                                <span
+                                    style="width: 32px; height: 32px; background: rgba(14,165,233,0.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;"><i
+                                        class="fa-solid fa-user-plus"
+                                        style="color: var(--primary); font-size: 0.85rem;"></i></span> Nouveaux patients
+                                aujourd'hui <span id="rapport-patients-count"
+                                    style="font-size: 0.75rem; background: rgba(16,185,129,0.1); color: var(--secondary); padding: 2px 10px; border-radius: 20px; font-weight: 700;">0</span>
+                            </h4>
                             <div id="rapport-patients">Chargement...</div>
                         </div>
 
@@ -857,97 +1283,90 @@
 
                         <!-- Section Stocks en alerte -->
                         <div>
-                            <h4 style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;"><span style="width: 32px; height: 32px; background: rgba(239,68,68,0.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;"><i class="fa-solid fa-box-open" style="color: var(--danger); font-size: 0.85rem;"></i></span> Stocks en alerte</h4>
+                            <h4
+                                style="font-family: 'Space Grotesk'; font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;">
+                                <span
+                                    style="width: 32px; height: 32px; background: rgba(239,68,68,0.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;"><i
+                                        class="fa-solid fa-box-open"
+                                        style="color: var(--danger); font-size: 0.85rem;"></i></span> Stocks en alerte
+                            </h4>
                             <div id="rapport-stocks">Chargement...</div>
                         </div>
                     </div>
                 </div>
             </div>
-            </div> <!-- Fin de medical-dashboard wrap -->
-            
-            <!-- Calendrier / Date Filter Dropdown (Placé ici pour être visible sur mobile même si la top-bar est cachée) -->
-            <div class="date-dropdown" id="dateFilterDropdown">
-                <div class="date-presets">
-                    <button class="preset-btn" onclick="selectPreset('today', 'Aujourd\'hui')">Aujourd'hui</button>
-                    <button class="preset-btn" onclick="selectPreset('yesterday', 'Hier')">Hier</button>
-                    <button class="preset-btn" onclick="selectPreset('7days', '7 Jours')">7 Jours</button>
-                    <button class="preset-btn" onclick="selectPreset('30days', '30 Jours')">30 Jours</button>
-                    <button class="preset-btn" onclick="selectPreset('thisMonth', 'Ce mois')">Ce mois</button>
-                    <button class="preset-btn" onclick="selectPreset('lastMonth', 'Mois dernier')">Mois dernier</button>
-                </div>
-                <div class="custom-range">
-                    <p>Personnalisé</p>
-                    <div class="date-inputs">
-                        <div class="date-input-group">
-                            <label>Du</label>
-                            <input type="date" id="filter-start-date">
-                        </div>
-                        <div class="date-input-group">
-                            <label>Au</label>
-                            <input type="date" id="filter-end-date">
-                        </div>
-                    </div>
-                    <button class="btn-apply-filter" onclick="applyCustomFilter()">Appliquer</button>
-                </div>
-            </div>
-            <!-- Espaceur pour le scroll mobile (évite que le dernier widget soit caché par la barre du bas) -->
-            <div style="height: 120px; width: 100%; display: none;" class="mobile-spacer"></div>
-        </main>
+    </div> <!-- Fin de medical-dashboard wrap -->
 
-        <!-- ── BOTTOM NAVIGATION MOBILE ── -->
-        <nav class="mobile-bottom-nav" style="display: none;">
-            <a href="dashboard.html" class="mobile-nav-item active">
-                <i class="fa-solid fa-house"></i>
-                <span>Accueil</span>
-            </a>
-            <a href="patients.html" class="mobile-nav-item">
-                <i class="fa-solid fa-users"></i>
-                <span>Patients</span>
-            </a>
-            <button class="mobile-nav-item more-btn" onclick="toggleQuickActions()">
-                <i class="fa-solid fa-plus"></i>
-            </button>
-            <a href="rendez-vous.html" class="mobile-nav-item">
-                <i class="fa-solid fa-calendar"></i>
-                <span>RDV</span>
-            </a>
-            <a href="parametres.html" class="mobile-nav-item">
-                <i class="fa-solid fa-gear"></i>
-                <span>Profil</span>
-            </a>
-        </nav>
+    <!-- Date Filter Overlay -->
+    <div class="date-filter-overlay" id="dateFilterOverlay" onclick="toggleDateFilter()"></div>
 
-        <!-- ── QUICK ACTIONS OVERLAY MOBILE ── -->
-        <div class="mobile-quick-overlay" id="quickOverlay" onclick="toggleQuickActions()"></div>
-        <div class="mobile-quick-actions" id="quickActionsPopup">
-            <h3 style="font-family: 'Space Grotesk'; margin-bottom: 20px; text-align: center;">Actions Rapides</h3>
-            <div class="quick-actions-grid">
-                <a href="consultations.html" class="quick-action-item">
-                    <i class="fa-solid fa-file-medical"></i>
-                    <span>Consultation</span>
-                </a>
-                <a href="patients.html?action=new" class="quick-action-item">
-                    <i class="fa-solid fa-user-plus"></i>
-                    <span>Patient</span>
-                </a>
-                <a href="rendez-vous.html" class="quick-action-item">
-                    <i class="fa-solid fa-calendar-plus"></i>
-                    <span>Prendre RDV</span>
-                </a>
-                <a href="vitals-tablet.html" class="quick-action-item">
-                    <i class="fa-solid fa-heart-pulse"></i>
-                    <span>Constantes</span>
-                </a>
-                <a href="stocks.html" class="quick-action-item">
-                    <i class="fa-solid fa-box-open"></i>
-                    <span>Stocks</span>
-                </a>
-                <a href="finance.html" class="quick-action-item">
-                    <i class="fa-solid fa-coins"></i>
-                    <span>Caisse</span>
-                </a>
-            </div>
+    <!-- Calendrier / Date Filter Dropdown (Placé ici pour être visible sur mobile même si la top-bar est cachée) -->
+    <div class="date-dropdown" id="dateFilterDropdown">
+        <div class="date-presets">
+            <button class="preset-btn" onclick="selectPreset('today', 'Aujourd\'hui')">Aujourd'hui</button>
+            <button class="preset-btn" onclick="selectPreset('yesterday', 'Hier')">Hier</button>
+            <button class="preset-btn" onclick="selectPreset('7days', '7 Jours')">7 Jours</button>
+            <button class="preset-btn" onclick="selectPreset('30days', '30 Jours')">30 Jours</button>
+            <button class="preset-btn" onclick="selectPreset('thisMonth', 'Ce mois')">Ce mois</button>
+            <button class="preset-btn" onclick="selectPreset('lastMonth', 'Mois dernier')">Mois dernier</button>
         </div>
+        <div class="custom-range">
+            <p>Personnalisé</p>
+            <div class="date-inputs">
+                <div class="date-input-group">
+                    <label>Du</label>
+                    <input type="date" id="filter-start-date">
+                </div>
+                <div class="date-input-group">
+                    <label>Au</label>
+                    <input type="date" id="filter-end-date">
+                </div>
+            </div>
+            <button class="btn-apply-filter" onclick="applyCustomFilter()">Appliquer</button>
+        </div>
+    </div>
+    <!-- Espaceur pour le scroll mobile (évite que le dernier widget soit caché par la barre du bas) -->
+    <div style="height: 120px; width: 100%; display: none;" class="mobile-spacer"></div>
+    </main>
+
+    <!-- ── BOTTOM NAVIGATION MOBILE ── -->
+    <nav class="mobile-bottom-nav" style="display: none;">
+        <button class="mobile-nav-item more-btn" onclick="toggleQuickActions()">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+    </nav>
+
+    <!-- ── QUICK ACTIONS OVERLAY MOBILE ── -->
+    <div class="mobile-quick-overlay" id="quickOverlay" onclick="toggleQuickActions()"></div>
+    <div class="mobile-quick-actions" id="quickActionsPopup">
+        <h3 style="font-family: 'Space Grotesk'; margin-bottom: 20px; text-align: center;">Actions Rapides</h3>
+        <div class="quick-actions-grid">
+            <a href="consultations.html" class="quick-action-item">
+                <i class="fa-solid fa-file-medical"></i>
+                <span>Consultation</span>
+            </a>
+            <a href="patients.html?action=new" class="quick-action-item">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Patient</span>
+            </a>
+            <a href="rendez-vous.html" class="quick-action-item">
+                <i class="fa-solid fa-calendar-plus"></i>
+                <span>Prendre RDV</span>
+            </a>
+            <a href="vitals-tablet.html" class="quick-action-item">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span>Constantes</span>
+            </a>
+            <a href="stocks.html" class="quick-action-item">
+                <i class="fa-solid fa-box-open"></i>
+                <span>Stocks</span>
+            </a>
+            <a href="finance.html" class="quick-action-item">
+                <i class="fa-solid fa-coins"></i>
+                <span>Caisse</span>
+            </a>
+        </div>
+    </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -964,7 +1383,7 @@
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeIcon(newTheme);
-            
+
             // Re-render charts for theme compatibility
             if (typeof refreshDashboard === 'function') refreshDashboard();
         }
@@ -977,7 +1396,9 @@
         }
 
         function toggleDateFilter() {
+            const overlay = document.getElementById('dateFilterOverlay');
             const dropdown = document.getElementById('dateFilterDropdown');
+            overlay.classList.toggle('active');
             dropdown.classList.toggle('active');
         }
 
@@ -1000,14 +1421,14 @@
         function selectPreset(preset, label) {
             const now = new Date();
             let start, end;
-            
+
             // Reset active state
             document.querySelectorAll('.preset-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.textContent === label) btn.classList.add('active');
             });
 
-            switch(preset) {
+            switch (preset) {
                 case 'today':
                     start = end = now.toISOString().split('T')[0];
                     break;
@@ -1044,13 +1465,15 @@
             currentEndDate = end;
             document.getElementById('selected-period').textContent = label;
             document.getElementById('dateFilterDropdown').classList.remove('active');
-            refreshDashboard();
+            const overlay = document.getElementById('dateFilterOverlay');
+            if (overlay) overlay.classList.remove('active');
+            refreshDashboard(currentStartDate, currentEndDate);
         }
 
         function applyCustomFilter() {
             const start = document.getElementById('filter-start-date').value;
             const end = document.getElementById('filter-end-date').value;
-            
+
             if (!start || !end) {
                 alert("Veuillez sélectionner une date de début et de fin.");
                 return;
@@ -1058,32 +1481,34 @@
 
             currentStartDate = start;
             currentEndDate = end;
-            
+
             const startStr = new Date(start).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
             const endStr = new Date(end).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-            
+
             document.getElementById('selected-period').textContent = `${startStr} - ${endStr}`;
             document.getElementById('dateFilterDropdown').classList.remove('active');
-            
+            const overlay = document.getElementById('dateFilterOverlay');
+            if (overlay) overlay.classList.remove('active');
+
             // Highlight custom if needed or just remove presets active state
             document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
-            
-            refreshDashboard();
+
+            refreshDashboard(currentStartDate, currentEndDate);
         }
 
         async function refreshDashboard() {
             console.log(`🔄 Rafraîchissement du dashboard pour la période: ${currentStartDate} au ${currentEndDate}`);
-            
+
             // Reload stats with dates
             chargerStatsCompletes(currentStartDate, currentEndDate).catch(err => console.error("❌ Erreur Stats:", err));
-            
+
             // Optionally reload other widgets that depend on date
             // For now, we focus on stats.
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
             console.log("🛠️ Initialisation du dashboard...");
-            
+
             // PWA Service Worker Registration
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
@@ -1105,12 +1530,12 @@
                 if (savedTheme) theme = savedTheme;
                 document.documentElement.setAttribute('data-theme', theme);
                 if (typeof updateThemeIcon === 'function') updateThemeIcon(theme);
-            } catch(e) { console.error("Erreur Thème:", e); }
+            } catch (e) { console.error("Erreur Thème:", e); }
 
             // 2. Adapter l'interface (Date, Titre, Rôle) - CRITIQUE
             try {
                 await adapterDashboardParRole();
-            } catch(e) { console.error("Erreur Adaptation Rôle:", e); }
+            } catch (e) { console.error("Erreur Adaptation Rôle:", e); }
 
             // 3. Charger les données en parallèle (Non-bloquant pour l'UI)
             // GESTION DU PRELOADER (Splash Screen) : Uniquement à l'entrée initiale
@@ -1121,7 +1546,7 @@
             if (isFirstEntry) {
                 if (loaderProgress) loaderProgress.style.width = '100%';
                 sessionStorage.setItem('dashboard_entered', 'true');
-                
+
                 setTimeout(() => {
                     if (preloader) preloader.classList.add('fade-out');
                 }, 800);
@@ -1151,7 +1576,7 @@
                 const channel = supabase.channel('dashboard-auto-sync')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'consultations' }, () => {
                         window.refreshDashboard(currentStartDate, currentEndDate);
-                        refreshWaitlistReception(); 
+                        refreshWaitlistReception();
                         refreshNurseWaitlist();
                         refreshMedicalWaitlist();
                     })
@@ -1173,12 +1598,12 @@
 
             // Premier chargement
             window.refreshDashboard(currentStartDate, currentEndDate);
-            
+
             try {
                 if (user.role === 'medecin' && typeof chargerRapportJournalier === 'function') {
                     chargerRapportJournalier();
                 }
-            } catch(e) {}
+            } catch (e) { }
         });
 
         async function adapterDashboardParRole() {
@@ -1196,7 +1621,7 @@
 
                 const titleEl = document.getElementById('dashboard-title');
                 const btn = document.getElementById('action-btn');
-                
+
                 if (role === 'receptionniste') {
                     if (titleEl) titleEl.textContent = 'Accueil & Encaissements';
                     if (btn) btn.style.display = 'none';
@@ -1241,10 +1666,10 @@
                 // 1. Patients
                 const pEl = document.getElementById('val-patients');
                 if (pEl) pEl.textContent = patientsRes.count || 0;
-                
+
                 const patientLabel = document.querySelector('.stat-card[onclick*="patients.html"] .stat-label');
                 if (patientLabel) patientLabel.textContent = "Nouveaux Patients";
-                
+
                 // 2. Consultations
                 const valConsult = document.getElementById('val-consultations');
                 if (valConsult) valConsult.textContent = consultsRes.count || 0;
@@ -1254,16 +1679,16 @@
                 // 3. RDV
                 const rEl = document.getElementById('val-rdv');
                 if (rEl) rEl.textContent = rdvRes.count || 0;
-                
+
                 // 4. Lits
                 const lEl = document.getElementById('val-lits');
                 if (lEl) lEl.textContent = `${litsRes.count || 0} / 20`;
-                
+
                 // 5. Revenus
                 const total = payRes.data ? payRes.data.reduce((sum, p) => sum + (p.montant || 0), 0) : 0;
                 const revEl = document.getElementById('val-revenus');
                 if (revEl) revEl.textContent = total.toLocaleString() + ' FCFA';
-                
+
                 // Mise à jour pour le dashboard réceptionniste (Caisse)
                 const caisseSum = document.getElementById('caisse-summary');
                 if (caisseSum) {
@@ -1367,8 +1792,8 @@
                 patientsDiv.innerHTML = newPatients.length > 0 ? `
                     <div style="display: grid; gap: 8px;">
                         ${newPatients.map(p => {
-                            const t = new Date(p.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-                            return `
+                    const t = new Date(p.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                    return `
                             <div style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: var(--bg); border-radius: 10px; border: 1px solid var(--border);">
                                 <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(16,185,129,0.1); color: var(--secondary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;">${p.nom[0]}</div>
                                 <div style="flex: 1;">
@@ -1378,7 +1803,7 @@
                                 <div style="font-size: 0.75rem; color: var(--text-light);">Inscrit à ${t}</div>
                             </div>
                             `;
-                        }).join('')}
+                }).join('')}
                     </div>
                 ` : '<p style="color: var(--text-light); font-size: 0.85rem;"><i class="fa-solid fa-user-check" style="margin-right: 6px;"></i>Aucun nouveau patient aujourd\'hui.</p>';
             }
@@ -1408,7 +1833,7 @@
         async function initMedicalDashboard() {
             const supabase = await window.SupabaseAPI.initSupabase();
             await chargerFileAttenteMedecin();
-            
+
             if (!isMedicalSubscribed) {
                 supabase.channel('suivi-patients')
                     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'consultations' }, payload => {
@@ -1417,7 +1842,7 @@
                         if (payload.new.status === 'medecin') {
                             if (window.notifier) window.notifier("Nouveau patient prêt pour consultation !", "success");
                             const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
-                            audio.play().catch(() => {});
+                            audio.play().catch(() => { });
                         }
                         chargerFileAttenteMedecin();
                     })
@@ -1437,7 +1862,7 @@
                 .select('*, patients(nom, prenom)')
                 .not('status', 'in', '("termine","en_cours")')
                 .order('id', { ascending: true });
-            
+
             if (error) { console.error('[ERREUR] Consultations:', error.message); return; }
             const container = document.getElementById('doctor-waitlist');
             if (!container) return;
@@ -1448,7 +1873,7 @@
                     let statusIcon = '🟠';
                     let statusLabel = 'À l\'accueil';
                     let readyPulse = '';
-                    
+
                     if (c.status === 'infirmerie') {
                         statusIcon = '🔵';
                         statusLabel = 'Chez l\'infirmière';
@@ -1491,7 +1916,7 @@
             list.innerHTML = data.map(p => {
                 const dateInsc = new Date(p.created_at);
                 const dateStr = dateInsc.toLocaleDateString('fr-FR');
-                const timeStr = dateInsc.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+                const timeStr = dateInsc.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
                 return `
                 <div class="patient-item" onclick="window.location.href='dossier-patient.html?id=${p.id}'" style="display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s;">
                     <div style="width:40px; height:40px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:700;">${p.nom[0]}</div>
@@ -1554,12 +1979,12 @@
                 .from('consultations')
                 .select('patient_id')
                 .eq('date', today);
-            
+
             const activePatientIds = new Set(activeConsultsToday?.map(c => String(c.patient_id)) || []);
-            
+
             // On ne garde que les RDV des patients qui ne sont pas encore passés en consultation
             let data = allRdvsToday?.filter(r => !activePatientIds.has(String(r.patient_id)) && r.heure >= currentTime) || [];
-            
+
             // Si rien aujourd'hui ou tous déjà reçus, chercher le prochain jour
             if (data.length === 0) {
                 const res = await supabase
@@ -1588,19 +2013,19 @@
             widget.style.display = 'block';
             const avatarEl = document.getElementById('np-avatar');
             if (avatarEl) avatarEl.textContent = (patient.nom[0] + (patient.prenom ? patient.prenom[0] : '')).toUpperCase();
-            
+
             const nameEl = document.getElementById('np-name');
             if (nameEl) nameEl.textContent = `${patient.nom} ${patient.prenom || ''}`;
-            
+
             const motifEl = document.getElementById('np-motif');
             if (motifEl) motifEl.textContent = rdv.motif || 'Consultation';
-            
+
             const heureEl = document.getElementById('np-heure');
             if (heureEl) heureEl.textContent = rdv.heure.substring(0, 5);
-            
+
             const linkEl = document.getElementById('np-link');
             if (linkEl) linkEl.href = `dossier-patient.html?id=${patient.id}`;
-            
+
             const nameLinkEl = document.getElementById('np-name-link');
             if (nameLinkEl) nameLinkEl.href = `consultations.html?patient_id=${patient.id}`;
 
@@ -1612,7 +2037,7 @@
 
                 const el = document.getElementById('np-countdown');
                 if (!el) return;
-                
+
                 if (diffMs <= 0) {
                     el.innerHTML = '<span style="color:#22c55e; animation: pulse 1s infinite;">Maintenant !</span>';
                     return;
@@ -1735,8 +2160,8 @@
                 patientsDiv.innerHTML = `
                     <div style="display: grid; gap: 8px;">
                         ${newPatients.map(p => {
-                            const t = new Date(p.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-                            return `
+                    const t = new Date(p.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                    return `
                             <div style="display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: var(--bg); border-radius: 10px; border: 1px solid var(--border);">
                                 <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(16,185,129,0.1); color: var(--secondary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;">${p.nom[0]}</div>
                                 <div style="flex: 1;">
@@ -1746,7 +2171,7 @@
                                 <div style="font-size: 0.75rem; color: var(--text-light);">Inscrit à ${t}</div>
                             </div>
                             `;
-                        }).join('')}
+                }).join('')}
                     </div>
                 `;
             } else {
@@ -1808,10 +2233,10 @@
                 const supabase = await window.SupabaseAPI.initSupabase();
                 const wall = document.getElementById('notification-wall');
                 if (!wall) return;
-                
+
                 const { data } = await supabase.from('consultations').select('*, patients(nom, prenom)').order('id', { ascending: false }).limit(6);
                 if (!data || data.length === 0) { wall.innerHTML = '<p style="text-align:center; padding:20px; color:var(--text-light);">Aucune activité.</p>'; return; }
-                
+
                 wall.innerHTML = data.map(c => `
                     <div style="display:flex; gap:12px; padding:12px; background:var(--bg); border-radius:10px; margin-bottom:10px; border:1px solid var(--border);">
                         <div style="width:8px; height:8px; border-radius:50%; background:${c.status === 'termine' ? 'var(--secondary)' : 'var(--primary)'}; margin-top:5px;"></div>
@@ -1836,7 +2261,7 @@
                 const now = new Date();
                 const last7Days = [];
                 const labels = [];
-                
+
                 for (let i = 6; i >= 0; i--) {
                     const d = new Date();
                     d.setDate(now.getDate() - i);
@@ -1952,11 +2377,11 @@
                 const supabase = await window.SupabaseAPI.initSupabase();
                 const aiBoxes = document.querySelectorAll('.ai-suggestion-box');
                 if (aiBoxes.length === 0) return;
-                
+
                 const userJson = localStorage.getItem('currentUser');
                 const user = userJson ? JSON.parse(userJson) : {};
                 const role = user.role || 'medecin';
-                
+
                 const now = new Date();
                 const today = now.toISOString().split('T')[0];
 
@@ -1974,7 +2399,7 @@
                 const enAttenteMedecin = docConsultRes.data || [];
 
                 let suggestion = "";
-                let priority = "low"; 
+                let priority = "low";
 
                 if (role === 'receptionniste') {
                     const hour = now.getHours();
@@ -2053,17 +2478,17 @@
                 if (window.notifier) window.notifier("Numéro de téléphone manquant pour ce patient.", 'error');
                 return;
             }
-            
+
             const cleanPhone = telephone.replace(/\D/g, '');
             const finalPhone = cleanPhone.length === 10 ? '225' + cleanPhone : cleanPhone;
-            
+
             const dateObj = new Date(date);
             const dateStr = dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
             const heureStr = heure.substring(0, 5);
-            
+
             const message = `Bonjour ${nom}, c'est la Clinique Refontiq. Nous vous confirmons votre rendez-vous le ${dateStr} à ${heureStr}. Merci de nous prévenir en cas d'empêchement.`;
             const encodedMsg = encodeURIComponent(message);
-            
+
             window.open(`https://wa.me/${finalPhone}?text=${encodedMsg}`, '_blank');
         }
 
@@ -2093,18 +2518,18 @@
                     .select('*, patients(nom, prenom, telephone, created_at)')
                     .neq('status', 'termine')
                     .order('id', { ascending: false });
-                
+
                 if (error) throw error;
 
                 const tbody = document.getElementById('waitlist-body-recep');
                 if (!tbody) return;
-                
+
                 if (waitlist && waitlist.length > 0) {
                     tbody.innerHTML = waitlist.map(c => {
                         const p = c.patients || { nom: 'Patient', prenom: 'Inconnu', telephone: '' };
                         const statusClass = c.status === 'infirmerie' ? 'status-nurse' : (c.status === 'medecin' ? 'status-ready' : (c.status === 'en_cours' ? 'status-active' : 'status-waiting'));
                         const statusLabel = c.status === 'infirmerie' ? 'Infirmerie' : (c.status === 'medecin' ? 'Prêt' : (c.status === 'en_cours' ? 'En consultation' : 'Accueil'));
-                        
+
                         return `
                             <tr>
                                 <td>
@@ -2159,12 +2584,12 @@
                     .from('consultations')
                     .select('patient_id')
                     .eq('date', today);
-                
+
                 const activePatientIds = new Set(activeConsultsToday?.map(c => String(c.patient_id)) || []);
-                
+
                 // On ne garde que les RDV des patients qui ne sont pas encore passés en consultation
                 let data = allRdvsToday?.filter(r => !activePatientIds.has(String(r.patient_id)) && r.heure >= currentTime) || [];
-                
+
                 // Si rien aujourd'hui ou tous déjà reçus, chercher le prochain jour
                 if (data.length === 0) {
                     const res = await supabase
@@ -2185,7 +2610,7 @@
                     document.getElementById('np-name-nurse').textContent = 'Aucun rendez-vous';
                     document.getElementById('np-motif-nurse').textContent = 'Planning vide';
                     document.getElementById('np-avatar-nurse').innerHTML = '<i class="fa-solid fa-check"></i>';
-                    
+
                     const btnVitals = document.getElementById('btn-start-vitals');
                     if (btnVitals) {
                         btnVitals.style.opacity = '0.5';
@@ -2196,12 +2621,12 @@
 
                 const rdv = data[0];
                 const p = rdv.patients || { nom: 'Patient', prenom: '' };
-                
+
                 widget.style.display = 'block';
                 document.getElementById('np-name-nurse').textContent = `${p.nom} ${p.prenom || ''}`;
-                document.getElementById('np-motif-nurse').textContent = `${rdv.heure.substring(0,5)} — ${rdv.motif || 'Consultation'}`;
+                document.getElementById('np-motif-nurse').textContent = `${rdv.heure.substring(0, 5)} — ${rdv.motif || 'Consultation'}`;
                 document.getElementById('np-avatar-nurse').textContent = p.nom[0];
-                
+
                 const btnVitals = document.getElementById('btn-start-vitals');
                 if (btnVitals) {
                     btnVitals.style.opacity = '1';
@@ -2217,7 +2642,7 @@
             try {
                 const supabase = await window.SupabaseAPI.initSupabase();
                 const { data: waitlist, error } = await supabase.from('consultations').select('*, patients(nom, prenom)').eq('status', 'infirmerie').order('id', { ascending: true });
-                
+
                 if (error) throw error;
 
                 const tbody = document.getElementById('nurse-waitlist-body');
@@ -2264,7 +2689,7 @@
                     .select('*, patients(nom, prenom)')
                     .eq('status', 'medecin')
                     .order('id', { ascending: true });
-                
+
                 if (error) throw error;
 
                 const tbody = document.getElementById('medical-waitlist-body');
@@ -2300,7 +2725,7 @@
             const suffix = role === 'nurse' ? '-nurse' : '';
             const patientId = document.getElementById('note-patient-select' + suffix).value;
             const note = document.getElementById('note-to-doc' + suffix).value;
-            
+
             if (!patientId) return window.notifier("Veuillez sélectionner un patient.", "error");
             if (!note) return window.notifier("Veuillez saisir une note.", "error");
 
@@ -2311,7 +2736,7 @@
 
             try {
                 const supabase = await window.SupabaseAPI.initSupabase();
-                
+
                 // On récupère la dernière consultation en cours pour ce patient
                 const { data: consults } = await supabase
                     .from('consultations')
@@ -2326,14 +2751,14 @@
                     // On ajoute la note aux symptômes existants ou on crée une nouvelle ligne
                     const roleLabel = role === 'nurse' ? 'INFIRMERIE' : 'RÉCEPTION';
                     const newSymptomes = (c.symptomes ? c.symptomes + "\n---\n" : "") + `[NOTE ${roleLabel}]: ` + note;
-                    
+
                     const { error } = await supabase
                         .from('consultations')
                         .update({ symptomes: newSymptomes })
                         .eq('id', c.id);
 
                     if (error) throw error;
-                    
+
                     window.notifier("Note transmise avec succès au médecin !", "success");
                     document.getElementById('note-to-doc' + suffix).value = '';
                 } else {
@@ -2364,7 +2789,7 @@
                 if (consults) {
                     const uniquePatients = [];
                     const seen = new Set();
-                    
+
                     consults.forEach(c => {
                         if (c.patients && !seen.has(c.patient_id)) {
                             seen.add(c.patient_id);
@@ -2372,9 +2797,9 @@
                         }
                     });
 
-                    const optionsHtml = '<option value="">Sélectionner un patient...</option>' + 
+                    const optionsHtml = '<option value="">Sélectionner un patient...</option>' +
                         uniquePatients.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-                    
+
                     if (selectRecep) selectRecep.innerHTML = optionsHtml;
                     if (selectNurse) selectNurse.innerHTML = optionsHtml;
                 }
@@ -2389,4 +2814,5 @@
         }
     </script>
 </body>
+
 </html>

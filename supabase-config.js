@@ -40,6 +40,7 @@ const SUPABASE_CONFIG = {
  * Initialise la connexion à Supabase
  */
 let cachedSupabase = null;
+let realSupabaseClient = null;
 async function initSupabase() {
     try {
         if (cachedSupabase) return cachedSupabase;
@@ -61,8 +62,22 @@ async function initSupabase() {
 
         if (!supabaseLib) return null;
 
-        cachedSupabase = supabaseLib.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
-        console.log('✅ Supabase connecté (Client mis en cache)');
+        // Initialisation de la base de données locale IndexedDB
+        try {
+            await ClinicOfflineDB.init();
+        } catch (e) {
+            console.warn('[Offline Engine] Impossible d\'initialiser IndexedDB, fonctionnement dégradé en ligne uniquement', e);
+        }
+
+        realSupabaseClient = supabaseLib.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+        cachedSupabase = createSupabaseProxy(realSupabaseClient);
+        console.log('✅ Supabase Proxy et moteur Hors-Connexion initialisés avec succès');
+        
+        // Lancer la synchronisation initiale si connecté
+        setTimeout(() => {
+            syncOfflineQueue();
+        }, 1000);
+
         return cachedSupabase;
     } catch (error) {
         console.error('❌ Erreur initialisation Supabase:', error.message);
@@ -1037,4 +1052,747 @@ window.notifier = function(message, type = 'success', duration = 4000) {
         toast.style.transform = "translateX(20px)";
         setTimeout(() => toast.remove(), 500);
     }, duration);
-};
+};
+
+// =========================================================================
+//  MOTEUR PWA HORS-CONNEXION (IndexedDB local, Proxy Supabase & Sync Queue)
+// =========================================================================
+
+const ClinicOfflineDB = {
+    db: null,
+    
+    init() {
+        return new Promise((resolve, reject) => {
+            if (this.db) return resolve(this.db);
+            
+            const request = indexedDB.open('clinique-refontiq-db', 2);
+            
+            request.onerror = (e) => {
+                console.error('[IndexedDB] Échec d\'ouverture :', e);
+                reject(e);
+            };
+            
+            request.onsuccess = (e) => {
+                this.db = e.target.result;
+                console.log('[IndexedDB] Base de données ouverte avec succès');
+                resolve(this.db);
+            };
+            
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                console.log('[IndexedDB] Création/Mise à jour du schéma...');
+                
+                // Object stores pour nos tables
+                const tables = ['users', 'patients', 'consultations', 'rendez_vous', 'transactions', 'stocks', 'alertes', 'messages', 'constantes', 'soins', 'stock_mouvements', 'paiements', 'invitations'];
+                tables.forEach(table => {
+                    if (!db.objectStoreNames.contains(table)) {
+                        db.createObjectStore(table, { keyPath: 'id' });
+                    }
+                });
+                
+                // Offline Action Queue
+                if (!db.objectStoreNames.contains('offline_queue')) {
+                    db.createObjectStore('offline_queue', { keyPath: 'queue_id', autoIncrement: true });
+                }
+            };
+        });
+    },
+
+    async getAll(storeName) {
+        await this.init();
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction(storeName, 'readonly');
+            const store = transaction.objectStore(storeName);
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => resolve([]);
+        });
+    },
+
+    async put(storeName, data) {
+        await this.init();
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction(storeName, 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.put(data);
+            request.onsuccess = () => resolve(true);
+            request.onerror = () => resolve(false);
+        });
+    },
+
+    async delete(storeName, key) {
+        await this.init();
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction(storeName, 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.delete(key);
+            request.onsuccess = () => resolve(true);
+            request.onerror = () => resolve(false);
+        });
+    },
+
+    async clear(storeName) {
+        await this.init();
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction(storeName, 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.clear();
+            request.onsuccess = () => resolve(true);
+            request.onerror = () => resolve(false);
+        });
+    },
+
+    async saveLocalCache(storeName, dataList) {
+        if (!dataList || !Array.isArray(dataList)) return;
+        await this.clear(storeName);
+        for (const item of dataList) {
+            if (item && item.id !== undefined) {
+                await this.put(storeName, item);
+            }
+        }
+    },
+
+    async syncTableFromSupabase(realClient, tableName) {
+        try {
+            const { data, error } = await realClient
+                .from(tableName)
+                .select('*')
+                .limit(1000);
+            if (!error && data) {
+                await this.saveLocalCache(tableName, data);
+            }
+        } catch (err) {
+            console.warn(`[Sync] Échec du rafraîchissement local pour la table ${tableName}:`, err);
+        }
+    }
+};
+
+function createSupabaseProxy(realClient) {
+    return {
+        from(tableName) {
+            return new SupabaseQueryBuilderProxy(realClient, tableName);
+        },
+        auth: realClient ? realClient.auth : null,
+        channel(name) {
+            if (!realClient || !navigator.onLine) {
+                return {
+                    on() { return this; },
+                    subscribe() { return this; }
+                };
+            }
+            return realClient.channel(name);
+        }
+    };
+}
+
+class SupabaseQueryBuilderProxy {
+    constructor(realClient, tableName) {
+        this.realClient = realClient;
+        this.tableName = tableName;
+        this.method = 'select'; // default
+        this.methodArgs = [];
+        this.filters = [];
+        this.ordering = null;
+        this.limiting = null;
+        this.isSingle = false;
+        this.selectFields = '*';
+        this.isCountOnly = false;
+    }
+
+    select(fields = '*', options = {}) {
+        this.method = 'select';
+        this.selectFields = fields;
+        this.countOption = options.count || null;
+        this.isHeadOption = options.head || false;
+        return this;
+    }
+
+    insert(records) {
+        this.method = 'insert';
+        this.methodArgs = [records];
+        return this;
+    }
+
+    update(fields) {
+        this.method = 'update';
+        this.methodArgs = [fields];
+        return this;
+    }
+
+    delete() {
+        this.method = 'delete';
+        return this;
+    }
+
+    eq(column, value) {
+        this.filters.push({ type: 'eq', column, value });
+        return this;
+    }
+
+    neq(column, value) {
+        this.filters.push({ type: 'neq', column, value });
+        return this;
+    }
+
+    gt(column, value) {
+        this.filters.push({ type: 'gt', column, value });
+        return this;
+    }
+
+    gte(column, value) {
+        this.filters.push({ type: 'gte', column, value });
+        return this;
+    }
+
+    lt(column, value) {
+        this.filters.push({ type: 'lt', column, value });
+        return this;
+    }
+
+    lte(column, value) {
+        this.filters.push({ type: 'lte', column, value });
+        return this;
+    }
+
+    or(filterString) {
+        this.filters.push({ type: 'or', value: filterString });
+        return this;
+    }
+
+    in(column, values) {
+        this.filters.push({ type: 'in', column, values });
+        return this;
+    }
+
+    not(column, operator, value) {
+        this.filters.push({ type: 'not', column, operator, value });
+        return this;
+    }
+
+    order(column, options = {}) {
+        this.ordering = { column, ascending: options.ascending !== false };
+        return this;
+    }
+
+    limit(count) {
+        this.limiting = count;
+        return this;
+    }
+
+    single() {
+        this.isSingle = true;
+        return this;
+    }
+
+    range(from, to) {
+        this.ranging = { from, to };
+        return this;
+    }
+
+    async then(resolve, reject) {
+        try {
+            const result = await this.execute();
+            resolve(result);
+        } catch (err) {
+            reject(err);
+        }
+    }
+
+    async execute() {
+        const isOnline = navigator.onLine && this.realClient;
+        if (isOnline) {
+            try {
+                let query = this.realClient.from(this.tableName);
+                if (this.method === 'select') {
+                    let countOption = undefined;
+                    if (this.countOption) {
+                        countOption = { count: this.countOption, head: this.isHeadOption };
+                    }
+                    query = query.select(this.selectFields, countOption);
+                } else if (this.method === 'insert') {
+                    query = query.insert(this.methodArgs[0]);
+                } else if (this.method === 'update') {
+                    query = query.update(this.methodArgs[0]);
+                } else if (this.method === 'delete') {
+                    query = query.delete();
+                }
+
+                for (const filter of this.filters) {
+                    if (filter.type === 'eq') query = query.eq(filter.column, filter.value);
+                    else if (filter.type === 'neq') query = query.neq(filter.column, filter.value);
+                    else if (filter.type === 'gt') query = query.gt(filter.column, filter.value);
+                    else if (filter.type === 'gte') query = query.gte(filter.column, filter.value);
+                    else if (filter.type === 'lt') query = query.lt(filter.column, filter.value);
+                    else if (filter.type === 'lte') query = query.lte(filter.column, filter.value);
+                    else if (filter.type === 'in') query = query.in(filter.column, filter.values);
+                    else if (filter.type === 'or') query = query.or(filter.value);
+                    else if (filter.type === 'not') query = query.not(filter.column, filter.operator, filter.value);
+                }
+
+                if (this.ordering) {
+                    query = query.order(this.ordering.column, { ascending: this.ordering.ascending });
+                }
+                if (this.limiting !== null) {
+                    query = query.limit(this.limiting);
+                }
+                if (this.ranging) {
+                    query = query.range(this.ranging.from, this.ranging.to);
+                }
+                if (this.isSingle) {
+                    query = query.single();
+                }
+
+                const res = await query;
+                if (res.error) throw res.error;
+
+                if (this.method === 'select' && !(this.countOption && this.isHeadOption) && res.data) {
+                    const tables = ['users', 'patients', 'consultations', 'rendez_vous', 'transactions', 'stocks', 'alertes', 'messages', 'constantes', 'soins', 'stock_mouvements', 'paiements', 'invitations'];
+                    if (tables.includes(this.tableName)) {
+                        ClinicOfflineDB.saveLocalCache(this.tableName, Array.isArray(res.data) ? res.data : [res.data]);
+                    }
+                } else if (this.method !== 'select') {
+                    const tables = ['users', 'patients', 'consultations', 'rendez_vous', 'transactions', 'stocks', 'alertes', 'messages', 'constantes', 'soins', 'stock_mouvements', 'paiements', 'invitations'];
+                    if (tables.includes(this.tableName)) {
+                        ClinicOfflineDB.syncTableFromSupabase(this.realClient, this.tableName);
+                    }
+                }
+
+                return res;
+            } catch (err) {
+                console.warn(`[Supabase Proxy] Erreur réseau, bascule sur les données locales (${this.tableName}) :`, err);
+                return await this.executeLocal();
+            }
+        } else {
+            return await this.executeLocal();
+        }
+    }
+
+    async executeLocal() {
+        console.log(`[Offline Engine] Traitement local de ${this.method} sur ${this.tableName}`);
+        return await processLocalQuery(this);
+    }
+}
+
+async function processLocalQuery(proxy) {
+    try {
+        if (proxy.method === 'select') {
+            let data = await ClinicOfflineDB.getAll(proxy.tableName);
+            
+            for (const filter of proxy.filters) {
+                if (filter.type === 'eq') {
+                    data = data.filter(r => String(r[filter.column]) === String(filter.value));
+                } else if (filter.type === 'neq') {
+                    data = data.filter(r => String(r[filter.column]) !== String(filter.value));
+                } else if (filter.type === 'gt') {
+                    data = data.filter(r => r[filter.column] > filter.value);
+                } else if (filter.type === 'gte') {
+                    data = data.filter(r => r[filter.column] >= filter.value);
+                } else if (filter.type === 'lt') {
+                    data = data.filter(r => r[filter.column] < filter.value);
+                } else if (filter.type === 'lte') {
+                    data = data.filter(r => r[filter.column] <= filter.value);
+                } else if (filter.type === 'in') {
+                    data = data.filter(r => filter.values.includes(r[filter.column]));
+                } else if (filter.type === 'or') {
+                    const parts = filter.value.split(',');
+                    data = data.filter(r => {
+                        return parts.some(part => {
+                            const subParts = part.split('.');
+                            if (subParts.length >= 2) {
+                                const col = subParts[0];
+                                const operator = subParts[1];
+                                if (operator.startsWith('ilike.')) {
+                                    const val = operator.replace('ilike.%', '').replace('%', '').toLowerCase();
+                                    return String(r[col] || '').toLowerCase().includes(val);
+                                }
+                            }
+                            return false;
+                        });
+                    });
+                } else if (filter.type === 'not') {
+                    const op = filter.operator;
+                    const val = filter.value;
+                    const col = filter.column;
+                    if (op === 'eq') {
+                        data = data.filter(r => String(r[col]) !== String(val));
+                    } else if (op === 'in') {
+                        const parsedValues = val
+                            .replace(/[()]/g, '')
+                            .split(',')
+                            .map(v => v.replace(/["']/g, '').trim());
+                        data = data.filter(r => !parsedValues.includes(String(r[col])));
+                    }
+                }
+            }
+
+            if (proxy.ordering) {
+                    const col = proxy.ordering.column;
+                    const ascending = proxy.ordering.ascending;
+                    data.sort((a, b) => {
+                        const valA = a[col] === undefined ? '' : a[col];
+                        const valB = b[col] === undefined ? '' : b[col];
+                        if (valA < valB) return ascending ? -1 : 1;
+                        if (valA > valB) return ascending ? 1 : -1;
+                        return 0;
+                    });
+                }
+
+                let totalCount = data.length;
+
+                if (proxy.ranging) {
+                    data = data.slice(proxy.ranging.from, proxy.ranging.to + 1);
+                } else if (proxy.limiting !== null) {
+                    data = data.slice(0, proxy.limiting);
+                }
+
+            if (proxy.selectFields.includes('patients')) {
+                const patients = await ClinicOfflineDB.getAll('patients');
+                const patientMap = new Map(patients.map(p => [String(p.id), p]));
+                if (Array.isArray(data)) {
+                    data.forEach(r => {
+                        if (r.patient_id) {
+                            r.patients = patientMap.get(String(r.patient_id)) || { nom: 'Patient', prenom: 'Inconnu' };
+                        }
+                    });
+                } else if (data && data.patient_id) {
+                    data.patients = patientMap.get(String(data.patient_id)) || { nom: 'Patient', prenom: 'Inconnu' };
+                }
+            }
+
+            if (proxy.isSingle) {
+                return { data: data.length > 0 ? data[0] : null, error: null };
+            }
+
+            if (proxy.countOption && proxy.isHeadOption) {
+                return { count: totalCount, data: null, error: null };
+            }
+
+            if (proxy.countOption) {
+                return { data, count: totalCount, error: null };
+            }
+
+            return { data, error: null };
+        }
+        
+        if (proxy.method === 'insert') {
+            const records = Array.isArray(proxy.methodArgs[0]) ? proxy.methodArgs[0] : [proxy.methodArgs[0]];
+            const insertedRecords = [];
+            
+            for (const rec of records) {
+                if (rec.id === undefined) {
+                    rec.id = 'temp_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+                }
+                if (rec.created_at === undefined) {
+                    rec.created_at = new Date().toISOString();
+                }
+                
+                await ClinicOfflineDB.put(proxy.tableName, rec);
+                insertedRecords.push(rec);
+                
+                await ClinicOfflineDB.put('offline_queue', {
+                    action: 'INSERT',
+                    table: proxy.tableName,
+                    data: rec,
+                    timestamp: Date.now()
+                });
+            }
+            
+            updateSyncIndicator();
+            return { data: proxy.isSingle ? insertedRecords[0] : insertedRecords, error: null };
+        }
+        
+        if (proxy.method === 'update') {
+            const updates = proxy.methodArgs[0];
+            let localData = await ClinicOfflineDB.getAll(proxy.tableName);
+            
+            for (const filter of proxy.filters) {
+                if (filter.type === 'eq') {
+                    localData = localData.filter(r => String(r[filter.column]) === String(filter.value));
+                }
+            }
+            
+            for (const rec of localData) {
+                const updatedRec = { ...rec, ...updates };
+                await ClinicOfflineDB.put(proxy.tableName, updatedRec);
+                
+                await ClinicOfflineDB.put('offline_queue', {
+                    action: 'UPDATE',
+                    table: proxy.tableName,
+                    data: updates,
+                    filters: proxy.filters,
+                    timestamp: Date.now()
+                });
+            }
+            
+            updateSyncIndicator();
+            return { data: localData, error: null };
+        }
+        
+        if (proxy.method === 'delete') {
+            let localData = await ClinicOfflineDB.getAll(proxy.tableName);
+            
+            for (const filter of proxy.filters) {
+                if (filter.type === 'eq') {
+                    localData = localData.filter(r => String(r[filter.column]) === String(filter.value));
+                }
+            }
+            
+            for (const rec of localData) {
+                await ClinicOfflineDB.delete(proxy.tableName, rec.id);
+                
+                await ClinicOfflineDB.put('offline_queue', {
+                    action: 'DELETE',
+                    table: proxy.tableName,
+                    filters: proxy.filters,
+                    timestamp: Date.now()
+                });
+            }
+            
+            updateSyncIndicator();
+            return { data: localData, error: null };
+        }
+    } catch (e) {
+        console.error('[Offline Engine] Erreur traitement local :', e);
+        return { data: null, error: e };
+    }
+}
+
+let isSyncing = false;
+async function syncOfflineQueue() {
+    if (isSyncing || !navigator.onLine) return;
+    
+    try {
+        const queue = await ClinicOfflineDB.getAll('offline_queue');
+        if (queue.length === 0) {
+            updateSyncIndicator();
+            return;
+        }
+        
+        isSyncing = true;
+        console.log(`[Sync Engine] Début de la synchronisation de ${queue.length} requêtes en attente...`);
+        updateSyncIndicator(true, queue.length);
+        
+        if (!realSupabaseClient) {
+            let supabaseLib = window.supabase;
+            if (supabaseLib) {
+                realSupabaseClient = supabaseLib.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+            }
+        }
+        
+        if (!realSupabaseClient) {
+            console.error('[Sync Engine] Impossible d\'initialiser le client Supabase réel pour la synchronisation');
+            isSyncing = false;
+            return;
+        }
+        
+        queue.sort((a, b) => a.queue_id - b.queue_id);
+        
+        for (const action of queue) {
+            let error = null;
+            
+            if (action.action === 'INSERT') {
+                const { error: err } = await realSupabaseClient.from(action.table).insert([action.data]);
+                error = err;
+            } else if (action.action === 'UPDATE') {
+                let query = realSupabaseClient.from(action.table).update(action.data);
+                for (const filter of action.filters) {
+                    if (filter.type === 'eq') query = query.eq(filter.column, filter.value);
+                }
+                const { error: err } = await query;
+                error = err;
+            } else if (action.action === 'DELETE') {
+                let query = realSupabaseClient.from(action.table).delete();
+                for (const filter of action.filters) {
+                    if (filter.type === 'eq') query = query.eq(filter.column, filter.value);
+                }
+                const { error: err } = await query;
+                error = err;
+            }
+            
+            if (error) {
+                console.error(`[Sync Engine] Erreur lors de la synchronisation de l'action ${action.queue_id} sur ${action.table} :`, error);
+                if (error.code) {
+                    console.error(`[Sync Engine] Requête rejetée par la base de données (Code: ${error.code}). Passage à la suite pour ne pas bloquer la file.`);
+                } else {
+                    throw error;
+                }
+            }
+            
+            await ClinicOfflineDB.delete('offline_queue', action.queue_id);
+        }
+        
+        console.log('[Sync Engine] Synchronisation terminée avec succès !');
+        
+        const tables = ['users', 'patients', 'consultations', 'rendez_vous', 'transactions', 'stocks', 'alertes', 'messages', 'constantes', 'soins', 'stock_mouvements', 'paiements', 'invitations'];
+        for (const table of tables) {
+            await ClinicOfflineDB.syncTableFromSupabase(realSupabaseClient, table);
+        }
+        
+        if (window.notifier) {
+            window.notifier("Toutes les données hors-ligne ont été synchronisées avec Supabase !", "success");
+        }
+        
+        setTimeout(() => {
+            if (typeof refreshDashboard === 'function') refreshDashboard();
+            else if (typeof loadPatients === 'function') loadPatients();
+            else window.location.reload();
+        }, 1500);
+        
+    } catch (err) {
+        console.error('[Sync Engine] Erreur de synchronisation, tentative suspendue :', err);
+    } finally {
+        isSyncing = false;
+        updateSyncIndicator();
+    }
+}
+
+function updateSyncIndicator(syncing = false, pendingCount = 0) {
+    const indicator = document.getElementById('realtime-status');
+    if (indicator) {
+        if (!navigator.onLine) {
+            indicator.style.color = '#f59e0b';
+            indicator.innerHTML = '<span class="online-indicator" style="background:#f59e0b; box-shadow: 0 0 8px #f59e0b;"></span> Mode Hors-Ligne';
+        } else if (syncing) {
+            indicator.style.color = '#3b82f6';
+            indicator.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 6px;"></i> Synchro...';
+        } else {
+            indicator.style.color = '#10b981';
+            indicator.innerHTML = '<span class="online-indicator" style="background:#10b981; box-shadow: 0 0 8px #10b981;"></span> Flux Actif';
+        }
+    }
+
+    let pill = document.getElementById('premium-offline-pill');
+    
+    if (!syncing && navigator.onLine) {
+        ClinicOfflineDB.getAll('offline_queue').then(queue => {
+            if (queue.length > 0) {
+                updateSyncIndicator(false, queue.length);
+            } else if (pill) {
+                pill.style.opacity = '0';
+                pill.style.transform = 'translateX(-50%) translateY(20px) scale(0.9)';
+                setTimeout(() => { if (pill) pill.remove(); }, 400);
+            }
+        });
+        return;
+    }
+
+    const showPill = !navigator.onLine || syncing || pendingCount > 0;
+    
+    if (showPill) {
+        if (!pill) {
+            pill = document.createElement('div');
+            pill.id = 'premium-offline-pill';
+            document.body.appendChild(pill);
+            
+            const style = document.createElement('style');
+            style.id = 'premium-offline-style';
+            style.textContent = `
+                #premium-offline-pill {
+                    position: fixed;
+                    bottom: 24px;
+                    left: 50%;
+                    transform: translateX(-50%) translateY(100px);
+                    z-index: 10000;
+                    padding: 12px 24px;
+                    border-radius: 50px;
+                    font-family: 'Space Grotesk', sans-serif;
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                    backdrop-filter: blur(15px);
+                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    opacity: 0;
+                }
+                .pill-pulse {
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 50%;
+                    display: inline-block;
+                }
+                @keyframes pulseAmber {
+                    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+                    70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+                    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+                }
+                @keyframes pulseBlue {
+                    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+                    70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
+                    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        if (!navigator.onLine) {
+            pill.style.background = 'linear-gradient(135deg, rgba(217, 119, 6, 0.95), rgba(245, 158, 11, 0.9))';
+            pill.style.color = '#ffffff';
+            pill.style.border = '1px solid rgba(245, 158, 11, 0.4)';
+            pill.innerHTML = `
+                <span class="pill-pulse" style="background:#fff; animation: pulseAmber 2s infinite;"></span>
+                <span>⚠️ Mode Hors-Connexion — Accès local actif</span>
+            `;
+        } else if (syncing) {
+            pill.style.background = 'linear-gradient(135deg, rgba(30, 64, 175, 0.95), rgba(59, 130, 246, 0.9))';
+            pill.style.color = '#ffffff';
+            pill.style.border = '1px solid rgba(59, 130, 246, 0.4)';
+            pill.innerHTML = `
+                <i class="fa-solid fa-arrows-rotate fa-spin" style="font-size:1rem;"></i>
+                <span>🔄 Synchronisation de ${pendingCount} modification(s)...</span>
+            `;
+        } else if (pendingCount > 0) {
+            pill.style.background = 'linear-gradient(135deg, rgba(30, 64, 175, 0.95), rgba(59, 130, 246, 0.9))';
+            pill.style.color = '#ffffff';
+            pill.style.border = '1px solid rgba(59, 130, 246, 0.4)';
+            pill.innerHTML = `
+                <span class="pill-pulse" style="background:#fff; animation: pulseBlue 2s infinite;"></span>
+                <span>🔄 ${pendingCount} modification(s) en attente de réseau</span>
+            `;
+        }
+
+        setTimeout(() => {
+            if (pill) {
+                pill.style.opacity = '1';
+                pill.style.transform = 'translateX(-50%) translateY(0)';
+            }
+        }, 50);
+    } else if (pill) {
+        pill.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(52, 211, 153, 0.9))';
+        pill.style.color = '#ffffff';
+        pill.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+        pill.innerHTML = `
+            <i class="fa-solid fa-circle-check" style="font-size:1.1rem;"></i>
+            <span>✅ Données synchronisées et sécurisées !</span>
+        `;
+        
+        setTimeout(() => {
+            const currentPill = document.getElementById('premium-offline-pill');
+            if (currentPill) {
+                currentPill.style.opacity = '0';
+                currentPill.style.transform = 'translateX(-50%) translateY(20px) scale(0.9)';
+                setTimeout(() => currentPill.remove(), 400);
+            }
+        }, 3000);
+    }
+}
+
+window.addEventListener('online', () => {
+    console.log('[Connection] Retour en ligne détecté');
+    updateSyncIndicator();
+    syncOfflineQueue();
+});
+
+window.addEventListener('offline', () => {
+    console.log('[Connection] Passage hors-ligne détecté');
+    updateSyncIndicator();
+});
+
+// Lancer le heartbeat et l'initialisation de l'indicateur
+document.addEventListener('DOMContentLoaded', () => {
+    ClinicOfflineDB.init().then(() => {
+        updateSyncIndicator();
+        syncOfflineQueue();
+    });
+});
